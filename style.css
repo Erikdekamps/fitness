@@ -41,6 +41,11 @@ main {
   margin: 1rem 0 2rem;
 }
 
+.header-right {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .btn-icon-header {
   width: 2.5rem;
   height: 2.5rem;
@@ -70,7 +75,9 @@ main {
 }
 
 #machineScreen,
-#settingsScreen {
+#settingsScreen,
+#plansScreen,
+#editPlanScreen {
   max-width: 480px;
   margin: 0 auto;
   padding: 1rem;
@@ -484,6 +491,311 @@ select:focus {
 .btn-cancel:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
+}
+
+/* Plan Selector */
+.plan-selector {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.plan-selector label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.plan-select-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.plan-select-group select {
+  flex: 1;
+  font-size: 1rem;
+  padding: 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0a0a0' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.plan-select-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn-start-plan {
+  padding: 0.875rem 1.5rem;
+  background: var(--success);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-start-plan:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-start-plan:active {
+  transform: translateY(0);
+}
+
+.btn-start-plan:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Plan List */
+.plan-item {
+  background: var(--bg-tertiary);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+  transition: all 0.15s ease;
+}
+
+.plan-item:hover {
+  border-color: var(--text-secondary);
+}
+
+.plan-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.plan-item-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.plan-item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.plan-item-exercises {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.plan-item-exercise {
+  margin: 0.25rem 0;
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--border);
+}
+
+/* Exercise Editor */
+.exercise-item {
+  background: var(--bg-primary);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+  transition: all 0.15s ease;
+}
+
+.exercise-item:hover {
+  border-color: var(--text-secondary);
+}
+
+.exercise-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.exercise-item-header:only-child {
+  margin-bottom: 0;
+}
+
+.exercise-collapsed-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.exercise-summary {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.exercise-number {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.exercise-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group-inline label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-group-inline select {
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0a0a0' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.form-group-inline select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-group-inline .spinner-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.form-group-inline .spinner-input input {
+  flex: 1;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.form-group-inline .spinner-input input::-webkit-outer-spin-button,
+.form-group-inline .spinner-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.form-group-inline .spinner-input input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.exercise-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.exercise-row select,
+.exercise-row input {
+  flex: 1;
+  font-size: 0.875rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.exercise-row select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0a0a0' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+.exercise-row select:focus,
+.exercise-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.exercise-row input::-webkit-outer-spin-button,
+.exercise-row input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.exercise-row input {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.btn-secondary {
+  width: 100%;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-primary);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
 }
 
 @media (max-width: 500px) {

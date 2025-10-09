@@ -9,15 +9,36 @@ const historyList = document.getElementById('historyList');
 const trackerScreen = document.getElementById('trackerScreen');
 const machineScreen = document.getElementById('machineScreen');
 const settingsScreen = document.getElementById('settingsScreen');
+const plansScreen = document.getElementById('plansScreen');
+const editPlanScreen = document.getElementById('editPlanScreen');
 
 // Buttons
 const manageMachinesBtn = document.getElementById('manageMachinesBtn');
 const settingsBtn = document.getElementById('settingsBtn');
+const plansBtn = document.getElementById('plansBtn');
 const backBtn = document.getElementById('backBtn');
 const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
+const backFromPlansBtn = document.getElementById('backFromPlansBtn');
+const backFromEditPlanBtn = document.getElementById('backFromEditPlanBtn');
 const addMachineForm = document.getElementById('addMachineForm');
 const newMachineNameInput = document.getElementById('newMachineName');
 const machineListDiv = document.getElementById('machineList');
+
+// Plan elements
+const planSelector = document.getElementById('planSelector');
+const activePlanSelect = document.getElementById('activePlan');
+const startPlanBtn = document.getElementById('startPlanBtn');
+const createPlanBtn = document.getElementById('createPlanBtn');
+const plansListDiv = document.getElementById('plansList');
+const editPlanForm = document.getElementById('editPlanForm');
+const editPlanTitle = document.getElementById('editPlanTitle');
+const planNameInput = document.getElementById('planName');
+const planExercisesDiv = document.getElementById('planExercises');
+const addExerciseBtn = document.getElementById('addExerciseBtn');
+
+let currentEditingPlanId = null;
+let currentPlanExercises = [];
+let expandedExerciseIndex = null; // Track which exercise is expanded
 
 // Settings inputs
 const weightIncrementInput = document.getElementById('weightIncrement');
@@ -169,6 +190,8 @@ function showScreen(screen) {
   trackerScreen.classList.toggle('screen-hidden', screen !== 'tracker');
   machineScreen.classList.toggle('screen-hidden', screen !== 'machines');
   settingsScreen.classList.toggle('screen-hidden', screen !== 'settings');
+  plansScreen.classList.toggle('screen-hidden', screen !== 'plans');
+  editPlanScreen.classList.toggle('screen-hidden', screen !== 'editPlan');
 }
 
 manageMachinesBtn.addEventListener('click', () => {
@@ -181,7 +204,19 @@ settingsBtn.addEventListener('click', () => {
   applySettings();
 });
 
+plansBtn.addEventListener('click', () => {
+  showScreen('plans');
+  renderPlansList();
+});
+
 backBtn.addEventListener('click', () => showScreen('tracker'));
+
+backFromPlansBtn.addEventListener('click', () => showScreen('tracker'));
+
+backFromEditPlanBtn.addEventListener('click', () => {
+  showScreen('plans');
+  renderPlansList();
+});
 
 backFromSettingsBtn.addEventListener('click', () => {
   // Save settings when going back
@@ -242,6 +277,442 @@ defaultRepsInput.addEventListener('change', () => {
   };
   saveSettings(settings);
 });
+
+// ===== WORKOUT PLANS =====
+
+// Get plans from localStorage
+function getPlans() {
+  const saved = localStorage.getItem('fitnessPlans');
+  return saved ? JSON.parse(saved) : [];
+}
+
+// Save plans to localStorage
+function savePlans(plans) {
+  localStorage.setItem('fitnessPlans', JSON.stringify(plans));
+}
+
+// Create or update a plan
+function savePlan(plan) {
+  const plans = getPlans();
+  
+  if (plan.id) {
+    // Update existing plan
+    const index = plans.findIndex(p => p.id === plan.id);
+    if (index !== -1) {
+      plans[index] = plan;
+    }
+  } else {
+    // Create new plan
+    plan.id = Date.now().toString();
+    plans.push(plan);
+  }
+  
+  savePlans(plans);
+  renderPlansList();
+  renderActivePlanSelect();
+}
+
+// Delete a plan
+function deletePlan(planId) {
+  const plans = getPlans();
+  const filtered = plans.filter(p => p.id !== planId);
+  savePlans(filtered);
+  renderPlansList();
+  renderActivePlanSelect();
+}
+
+// Render plans list
+function renderPlansList() {
+  const plans = getPlans();
+  plansListDiv.innerHTML = '';
+  
+  if (plans.length === 0) {
+    plansListDiv.innerHTML = '<div class="empty-state">No workout plans yet. Create your first plan!</div>';
+    return;
+  }
+  
+  plans.forEach(plan => {
+    const planItem = document.createElement('div');
+    planItem.className = 'plan-item';
+    
+    const header = document.createElement('div');
+    header.className = 'plan-item-header';
+    
+    const name = document.createElement('div');
+    name.className = 'plan-item-name';
+    name.textContent = plan.name;
+    
+    const actions = document.createElement('div');
+    actions.className = 'plan-item-actions';
+    
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn-icon edit';
+    editBtn.innerHTML = '✏️';
+    editBtn.title = 'Edit';
+    editBtn.addEventListener('click', () => editPlan(plan.id));
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-icon delete';
+    deleteBtn.innerHTML = '🗑️';
+    deleteBtn.title = 'Delete';
+    deleteBtn.addEventListener('click', () => {
+      if (confirm(`Delete plan "${plan.name}"?`)) {
+        deletePlan(plan.id);
+      }
+    });
+    
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+    header.appendChild(name);
+    header.appendChild(actions);
+    
+    const exercises = document.createElement('div');
+    exercises.className = 'plan-item-exercises';
+    plan.exercises.forEach(ex => {
+      const exDiv = document.createElement('div');
+      exDiv.className = 'plan-item-exercise';
+      exDiv.textContent = `${ex.machine} - ${ex.weight}kg × ${ex.reps} reps`;
+      exercises.appendChild(exDiv);
+    });
+    
+    planItem.appendChild(header);
+    planItem.appendChild(exercises);
+    plansListDiv.appendChild(planItem);
+  });
+}
+
+// Render active plan selector
+function renderActivePlanSelect() {
+  const plans = getPlans();
+  activePlanSelect.innerHTML = '<option value="">No plan selected</option>';
+  
+  plans.forEach(plan => {
+    const option = document.createElement('option');
+    option.value = plan.id;
+    option.textContent = plan.name;
+    activePlanSelect.appendChild(option);
+  });
+  
+  // Show/hide plan selector based on whether plans exist
+  planSelector.style.display = plans.length > 0 ? 'block' : 'none';
+}
+
+// Start a workout plan
+function startPlan() {
+  const planId = activePlanSelect.value;
+  if (!planId) return;
+  
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === planId);
+  if (!plan) return;
+  
+  // Add all exercises from the plan to today's history
+  plan.exercises.forEach(exercise => {
+    addEntry({
+      machine: exercise.machine,
+      weight: exercise.weight,
+      reps: exercise.reps
+    });
+  });
+  
+  // Reset selector and refresh history
+  activePlanSelect.value = '';
+  renderHistory();
+  
+  // Scroll to history
+  document.getElementById('history').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Edit a plan
+function editPlan(planId) {
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === planId);
+  
+  if (plan) {
+    currentEditingPlanId = plan.id;
+    planNameInput.value = plan.name;
+    currentPlanExercises = [...plan.exercises];
+    editPlanTitle.textContent = '✏️ Edit Plan';
+  } else {
+    currentEditingPlanId = null;
+    planNameInput.value = '';
+    currentPlanExercises = [];
+    editPlanTitle.textContent = '✏️ Create Plan';
+  }
+  
+  expandedExerciseIndex = null; // Reset expanded state
+  renderPlanExercises();
+  showScreen('editPlan');
+}
+
+// Render exercise editor
+function renderPlanExercises() {
+  planExercisesDiv.innerHTML = '';
+  const machines = getMachines();
+  
+  currentPlanExercises.forEach((exercise, index) => {
+    const exerciseItem = document.createElement('div');
+    const isExpanded = expandedExerciseIndex === index;
+    const isComplete = exercise.machine && exercise.weight && exercise.reps;
+    
+    exerciseItem.className = 'exercise-item';
+    
+    // Collapsed view
+    if (!isExpanded && isComplete) {
+      const header = document.createElement('div');
+      header.className = 'exercise-item-header';
+      
+      const info = document.createElement('div');
+      info.className = 'exercise-collapsed-info';
+      info.innerHTML = `
+        <div class="exercise-number">Exercise ${index + 1}</div>
+        <div class="exercise-summary">${exercise.machine} - ${exercise.weight}kg × ${exercise.reps} reps</div>
+      `;
+      
+      const actions = document.createElement('div');
+      actions.className = 'history-entry-actions';
+      
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn-icon edit';
+      editBtn.innerHTML = '✏️';
+      editBtn.title = 'Edit';
+      editBtn.type = 'button';
+      editBtn.addEventListener('click', () => {
+        expandedExerciseIndex = index;
+        renderPlanExercises();
+      });
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn-icon delete';
+      deleteBtn.innerHTML = '🗑️';
+      deleteBtn.title = 'Remove';
+      deleteBtn.type = 'button';
+      deleteBtn.addEventListener('click', () => {
+        currentPlanExercises.splice(index, 1);
+        if (expandedExerciseIndex === index) {
+          expandedExerciseIndex = null;
+        } else if (expandedExerciseIndex > index) {
+          expandedExerciseIndex--;
+        }
+        renderPlanExercises();
+      });
+      
+      actions.appendChild(editBtn);
+      actions.appendChild(deleteBtn);
+      header.appendChild(info);
+      header.appendChild(actions);
+      exerciseItem.appendChild(header);
+    } else {
+      // Expanded view
+      const header = document.createElement('div');
+      header.className = 'exercise-item-header';
+      
+      const number = document.createElement('div');
+      number.className = 'exercise-number';
+      number.textContent = `Exercise ${index + 1}`;
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn-icon delete';
+      deleteBtn.innerHTML = '🗑️';
+      deleteBtn.title = 'Remove';
+      deleteBtn.type = 'button';
+      deleteBtn.addEventListener('click', () => {
+        currentPlanExercises.splice(index, 1);
+        if (expandedExerciseIndex === index) {
+          expandedExerciseIndex = null;
+        } else if (expandedExerciseIndex > index) {
+          expandedExerciseIndex--;
+        }
+        renderPlanExercises();
+      });
+      
+      header.appendChild(number);
+      header.appendChild(deleteBtn);
+      
+      const fields = document.createElement('div');
+      fields.className = 'exercise-fields';
+      
+      // Machine select
+      const machineGroup = document.createElement('div');
+      machineGroup.className = 'form-group-inline';
+      const machineLabel = document.createElement('label');
+      machineLabel.textContent = 'Machine';
+      const machineSelect = document.createElement('select');
+      machineSelect.innerHTML = '<option value="">Select machine</option>';
+      machines.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        if (m === exercise.machine) opt.selected = true;
+        machineSelect.appendChild(opt);
+      });
+      machineSelect.addEventListener('change', (e) => {
+        currentPlanExercises[index].machine = e.target.value;
+      });
+      machineGroup.appendChild(machineLabel);
+      machineGroup.appendChild(machineSelect);
+      
+      // Weight with spinners
+      const weightGroup = document.createElement('div');
+      weightGroup.className = 'form-group-inline';
+      const weightLabel = document.createElement('label');
+      weightLabel.textContent = 'Weight (kg)';
+      const weightSpinner = document.createElement('div');
+      weightSpinner.className = 'spinner-input';
+      
+      const weightDecrease = document.createElement('button');
+      weightDecrease.type = 'button';
+      weightDecrease.className = 'spinner-btn';
+      weightDecrease.textContent = '−';
+      weightDecrease.addEventListener('click', () => {
+        const settings = getSettings();
+        const step = settings.weightIncrement;
+        const newValue = Math.max(0, exercise.weight - step);
+        currentPlanExercises[index].weight = newValue;
+        renderPlanExercises();
+      });
+      
+      const weightInput = document.createElement('input');
+      weightInput.type = 'number';
+      weightInput.value = exercise.weight;
+      weightInput.min = 0;
+      weightInput.max = 500;
+      weightInput.step = 2.5;
+      weightInput.addEventListener('change', (e) => {
+        currentPlanExercises[index].weight = parseFloat(e.target.value) || 0;
+      });
+      
+      const weightIncrease = document.createElement('button');
+      weightIncrease.type = 'button';
+      weightIncrease.className = 'spinner-btn';
+      weightIncrease.textContent = '+';
+      weightIncrease.addEventListener('click', () => {
+        const settings = getSettings();
+        const step = settings.weightIncrement;
+        const newValue = Math.min(500, exercise.weight + step);
+        currentPlanExercises[index].weight = newValue;
+        renderPlanExercises();
+      });
+      
+      weightSpinner.appendChild(weightDecrease);
+      weightSpinner.appendChild(weightInput);
+      weightSpinner.appendChild(weightIncrease);
+      weightGroup.appendChild(weightLabel);
+      weightGroup.appendChild(weightSpinner);
+      
+      // Reps with spinners
+      const repsGroup = document.createElement('div');
+      repsGroup.className = 'form-group-inline';
+      const repsLabel = document.createElement('label');
+      repsLabel.textContent = 'Reps';
+      const repsSpinner = document.createElement('div');
+      repsSpinner.className = 'spinner-input';
+      
+      const repsDecrease = document.createElement('button');
+      repsDecrease.type = 'button';
+      repsDecrease.className = 'spinner-btn';
+      repsDecrease.textContent = '−';
+      repsDecrease.addEventListener('click', () => {
+        const newValue = Math.max(1, exercise.reps - 1);
+        currentPlanExercises[index].reps = newValue;
+        renderPlanExercises();
+      });
+      
+      const repsInput = document.createElement('input');
+      repsInput.type = 'number';
+      repsInput.value = exercise.reps;
+      repsInput.min = 1;
+      repsInput.max = 100;
+      repsInput.step = 1;
+      repsInput.addEventListener('change', (e) => {
+        currentPlanExercises[index].reps = parseInt(e.target.value) || 1;
+      });
+      
+      const repsIncrease = document.createElement('button');
+      repsIncrease.type = 'button';
+      repsIncrease.className = 'spinner-btn';
+      repsIncrease.textContent = '+';
+      repsIncrease.addEventListener('click', () => {
+        const newValue = Math.min(100, exercise.reps + 1);
+        currentPlanExercises[index].reps = newValue;
+        renderPlanExercises();
+      });
+      
+      repsSpinner.appendChild(repsDecrease);
+      repsSpinner.appendChild(repsInput);
+      repsSpinner.appendChild(repsIncrease);
+      repsGroup.appendChild(repsLabel);
+      repsGroup.appendChild(repsSpinner);
+      
+      fields.appendChild(machineGroup);
+      fields.appendChild(weightGroup);
+      fields.appendChild(repsGroup);
+      
+      exerciseItem.appendChild(header);
+      exerciseItem.appendChild(fields);
+    }
+    
+    planExercisesDiv.appendChild(exerciseItem);
+  });
+}
+
+// Add new exercise to plan
+addExerciseBtn.addEventListener('click', () => {
+  const settings = getSettings();
+  currentPlanExercises.push({
+    machine: '',
+    weight: settings.defaultWeight,
+    reps: settings.defaultReps
+  });
+  // Expand the newly added exercise
+  expandedExerciseIndex = currentPlanExercises.length - 1;
+  renderPlanExercises();
+});
+
+// Create new plan
+createPlanBtn.addEventListener('click', () => {
+  editPlan(null);
+});
+
+// Save plan form
+editPlanForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const name = planNameInput.value.trim();
+  if (!name) {
+    alert('Please enter a plan name');
+    return;
+  }
+  
+  if (currentPlanExercises.length === 0) {
+    alert('Please add at least one exercise');
+    return;
+  }
+  
+  // Validate all exercises have required fields
+  for (let ex of currentPlanExercises) {
+    if (!ex.machine || !ex.weight || !ex.reps) {
+      alert('Please complete all exercise fields');
+      return;
+    }
+  }
+  
+  const plan = {
+    name: name,
+    exercises: currentPlanExercises,
+    updatedAt: new Date().toISOString()
+  };
+  
+  if (currentEditingPlanId) {
+    plan.id = currentEditingPlanId;
+  }
+  
+  savePlan(plan);
+  showScreen('plans');
+});
+
+// Start plan button
+startPlanBtn.addEventListener('click', startPlan);
 
 // ===== HISTORY =====
 
@@ -558,4 +1029,5 @@ window.addEventListener('DOMContentLoaded', () => {
   applySettings();
   renderMachineSelect();
   renderHistory();
+  renderActivePlanSelect();
 });

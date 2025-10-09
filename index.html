@@ -12,7 +12,20 @@
     <div class="header">
       <button type="button" id="settingsBtn" class="btn-icon-header" title="Settings">⚙️</button>
       <h1>💪 Fitness Tracker</h1>
-      <button type="button" id="manageMachinesBtn" class="btn-icon-header" title="Manage Machines">🏋️</button>
+      <div class="header-right">
+        <button type="button" id="plansBtn" class="btn-icon-header" title="Workout Plans">📋</button>
+        <button type="button" id="manageMachinesBtn" class="btn-icon-header" title="Manage Machines">🏋️</button>
+      </div>
+    </div>
+    
+    <div id="planSelector" class="plan-selector" style="display: none;">
+      <label for="activePlan">Quick Start Plan</label>
+      <div class="plan-select-group">
+        <select id="activePlan">
+          <option value="">No plan selected</option>
+        </select>
+        <button type="button" id="startPlanBtn" class="btn-start-plan">Start</button>
+      </div>
     </div>
     
     <form id="entryForm">
@@ -114,6 +127,50 @@
           <button type="button" class="spinner-btn" data-action="increase" data-target="defaultReps">+</button>
         </div>
       </div>
+    </div>
+  </div>
+  
+  <!-- Workout Plans Screen -->
+  <div id="plansScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" id="backFromPlansBtn" class="btn-icon-header" title="Back">←</button>
+      <h1>📋 Workout Plans</h1>
+      <div style="width: 2.5rem;"></div>
+    </div>
+    
+    <div class="machine-container">
+      <button type="button" id="createPlanBtn" class="btn-primary">Create New Plan</button>
+      
+      <div class="machine-list-container">
+        <h2>Your Plans</h2>
+        <div id="plansList"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Create/Edit Plan Screen -->
+  <div id="editPlanScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" id="backFromEditPlanBtn" class="btn-icon-header" title="Back">←</button>
+      <h1 id="editPlanTitle">✏️ Create Plan</h1>
+      <div style="width: 2.5rem;"></div>
+    </div>
+    
+    <div class="machine-container">
+      <form id="editPlanForm">
+        <div class="form-group">
+          <label for="planName">Plan Name</label>
+          <input type="text" id="planName" placeholder="e.g., Upper Body Day" required class="edit-input">
+        </div>
+        
+        <div class="form-group">
+          <label>Exercises</label>
+          <div id="planExercises"></div>
+          <button type="button" id="addExerciseBtn" class="btn-secondary">+ Add Exercise</button>
+        </div>
+        
+        <button type="submit" class="btn-primary">Save Plan</button>
+      </form>
     </div>
   </div>
   
