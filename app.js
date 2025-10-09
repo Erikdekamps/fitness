@@ -22,7 +22,7 @@ const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
 const backFromPlansBtn = document.getElementById('backFromPlansBtn');
 const backFromEditPlanBtn = document.getElementById('backFromEditPlanBtn');
 const cancelWorkoutBtn = document.getElementById('cancelWorkoutBtn');
-const addMachineForm = document.getElementById('addMachineForm');
+const addMachineBtn = document.getElementById('addMachineBtn');
 const newMachineNameInput = document.getElementById('newMachineName');
 const machineListDiv = document.getElementById('machineList');
 
@@ -148,8 +148,11 @@ function renderMachineSelect() {
   const machines = getMachines();
   const currentValue = machineSelect.value;
   
+  // Sort machines alphabetically
+  const sortedMachines = [...machines].sort((a, b) => a.localeCompare(b));
+  
   machineSelect.innerHTML = '<option value="">Select machine</option>';
-  machines.forEach(machine => {
+  sortedMachines.forEach(machine => {
     const option = document.createElement('option');
     option.value = machine;
     option.textContent = machine;
@@ -260,13 +263,25 @@ backFromSettingsBtn.addEventListener('click', () => {
   showScreen('tracker');
 });
 
-// Add machine form
-addMachineForm.addEventListener('submit', (e) => {
-  e.preventDefault();
+// Add machine button
+addMachineBtn.addEventListener('click', () => {
   const name = newMachineNameInput.value.trim();
   if (name) {
     if (addMachine(name)) {
       newMachineNameInput.value = '';
+    }
+  }
+});
+
+// Allow Enter key to add machine
+newMachineNameInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const name = newMachineNameInput.value.trim();
+    if (name) {
+      if (addMachine(name)) {
+        newMachineNameInput.value = '';
+      }
     }
   }
 });

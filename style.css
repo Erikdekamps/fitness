@@ -92,6 +92,18 @@ main {
   border: 1px solid var(--border);
 }
 
+#addMachineForm {
+  margin-bottom: 1.5rem;
+}
+
+.machine-list-container {
+  margin-bottom: 0;
+}
+
+.machine-list-container h2 {
+  margin: 0 0 1rem 0;
+}
+
 .add-machine-group {
   display: flex;
   gap: 0.5rem;
