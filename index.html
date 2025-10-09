@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Main Tracker Screen -->
+  <main id="trackerScreen">
+    <div class="header">
+      <button type="button" id="settingsBtn" class="btn-icon-header" title="Settings">⚙️</button>
+      <h1>💪 Fitness Tracker</h1>
+      <button type="button" id="manageMachinesBtn" class="btn-icon-header" title="Manage Machines">🏋️</button>
+    </div>
+    
+    <form id="entryForm">
+      <div class="form-group">
+        <label for="machine">Machine</label>
+        <select id="machine" required>
+          <option value="">Select machine</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="weight">Weight (kg)</label>
+        <div class="spinner-input">
+          <button type="button" class="spinner-btn" data-action="decrease" data-target="weight">−</button>
+          <input type="number" id="weight" min="0" max="500" step="2.5" value="20" required>
+          <button type="button" class="spinner-btn" data-action="increase" data-target="weight">+</button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="reps">Reps</label>
+        <div class="spinner-input">
+          <button type="button" class="spinner-btn" data-action="decrease" data-target="reps">−</button>
+          <input type="number" id="reps" min="1" max="100" step="1" value="10" required>
+          <button type="button" class="spinner-btn" data-action="increase" data-target="reps">+</button>
+        </div>
+      </div>
+      
+      <button type="submit" class="btn-primary">Add Set</button>
+    </form>
+    
+    <section id="history">
+      <h2>History</h2>
+      <div id="historyList"></div>
+    </section>
+  </main>
+  
+  <!-- Machine Management Screen -->
+  <div id="machineScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" id="backBtn" class="btn-icon-header" title="Back">←</button>
+      <h1>⚙️ Manage Machines</h1>
+      <div style="width: 2.5rem;"></div>
+    </div>
+    
+    <div class="machine-container">
+      <form id="addMachineForm">
+        <div class="form-group">
+          <label for="newMachineName">Add New Machine</label>
+          <div class="add-machine-group">
+            <input type="text" id="newMachineName" placeholder="Enter machine name" required>
+            <button type="submit" class="btn-add">+</button>
+          </div>
+        </div>
+      </form>
+      
+      <div class="machine-list-container">
+        <h2>Your Machines</h2>
+        <div id="machineList"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Settings Screen -->
+  <div id="settingsScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" id="backFromSettingsBtn" class="btn-icon-header" title="Back">←</button>
+      <h1>⚙️ Settings</h1>
+      <div style="width: 2.5rem;"></div>
+    </div>
+    
+    <div class="machine-container">
+      <div class="form-group">
+        <label for="weightIncrement">Weight Increment (kg)</label>
+        <p class="setting-description">How much weight changes with each +/- button press</p>
+        <div class="spinner-input">
+          <button type="button" class="spinner-btn" data-action="decrease" data-target="weightIncrement">−</button>
+          <input type="number" id="weightIncrement" min="0.5" max="10" step="0.5" value="2.5">
+          <button type="button" class="spinner-btn" data-action="increase" data-target="weightIncrement">+</button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="defaultWeight">Default Weight (kg)</label>
+        <p class="setting-description">Starting weight when no history is available</p>
+        <div class="spinner-input">
+          <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultWeight">−</button>
+          <input type="number" id="defaultWeight" min="0" max="500" step="5" value="20">
+          <button type="button" class="spinner-btn" data-action="increase" data-target="defaultWeight">+</button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="defaultReps">Default Reps</label>
+        <p class="setting-description">Starting reps when no history is available</p>
+        <div class="spinner-input">
+          <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultReps">−</button>
+          <input type="number" id="defaultReps" min="1" max="100" step="1" value="10">
+          <button type="button" class="spinner-btn" data-action="increase" data-target="defaultReps">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="app.js"></script>
+</body>
+</html>
