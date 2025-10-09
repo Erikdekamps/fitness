@@ -174,6 +174,30 @@
     </div>
   </div>
   
+  <!-- Active Workout Session Screen -->
+  <div id="activeWorkoutScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" id="cancelWorkoutBtn" class="btn-icon-header" title="Cancel">✕</button>
+      <h1 id="activeWorkoutTitle">🏋️ Workout</h1>
+      <div style="width: 2.5rem;"></div>
+    </div>
+    
+    <div class="workout-container">
+      <div class="workout-progress">
+        <div class="progress-bar">
+          <div id="progressBarFill" class="progress-bar-fill"></div>
+        </div>
+        <div class="progress-text">
+          <span id="progressCurrent">0</span> / <span id="progressTotal">0</span> exercises
+        </div>
+      </div>
+      
+      <div id="workoutExercises"></div>
+      
+      <button type="button" id="finishWorkoutBtn" class="btn-primary" style="display: none;">Finish Workout</button>
+    </div>
+  </div>
+  
   <script src="app.js"></script>
 </body>
 </html>

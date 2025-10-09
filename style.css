@@ -77,7 +77,8 @@ main {
 #machineScreen,
 #settingsScreen,
 #plansScreen,
-#editPlanScreen {
+#editPlanScreen,
+#activeWorkoutScreen {
   max-width: 480px;
   margin: 0 auto;
   padding: 1rem;
@@ -795,6 +796,124 @@ select:focus {
 }
 
 .btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* Active Workout Screen */
+.workout-container {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.workout-progress {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 0.75rem;
+  background: var(--bg-tertiary);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  border-radius: 0.5rem;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.workout-exercise-card {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.workout-exercise-card.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+}
+
+.workout-exercise-card.completed {
+  opacity: 0.6;
+  background: var(--bg-tertiary);
+}
+
+.workout-exercise-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.workout-exercise-number {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.workout-exercise-status {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.workout-exercise-body {
+  margin-bottom: 1rem;
+}
+
+.workout-exercise-machine {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.workout-exercise-details {
+  font-size: 1rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.btn-complete-exercise {
+  width: 100%;
+  background: var(--success);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-complete-exercise:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-complete-exercise:active {
   transform: translateY(0);
 }
 

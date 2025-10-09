@@ -11,6 +11,7 @@ const machineScreen = document.getElementById('machineScreen');
 const settingsScreen = document.getElementById('settingsScreen');
 const plansScreen = document.getElementById('plansScreen');
 const editPlanScreen = document.getElementById('editPlanScreen');
+const activeWorkoutScreen = document.getElementById('activeWorkoutScreen');
 
 // Buttons
 const manageMachinesBtn = document.getElementById('manageMachinesBtn');
@@ -20,6 +21,7 @@ const backBtn = document.getElementById('backBtn');
 const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
 const backFromPlansBtn = document.getElementById('backFromPlansBtn');
 const backFromEditPlanBtn = document.getElementById('backFromEditPlanBtn');
+const cancelWorkoutBtn = document.getElementById('cancelWorkoutBtn');
 const addMachineForm = document.getElementById('addMachineForm');
 const newMachineNameInput = document.getElementById('newMachineName');
 const machineListDiv = document.getElementById('machineList');
@@ -36,8 +38,18 @@ const planNameInput = document.getElementById('planName');
 const planExercisesDiv = document.getElementById('planExercises');
 const addExerciseBtn = document.getElementById('addExerciseBtn');
 
+// Active workout elements
+const activeWorkoutTitle = document.getElementById('activeWorkoutTitle');
+const workoutExercisesDiv = document.getElementById('workoutExercises');
+const finishWorkoutBtn = document.getElementById('finishWorkoutBtn');
+const progressBarFill = document.getElementById('progressBarFill');
+const progressCurrent = document.getElementById('progressCurrent');
+const progressTotal = document.getElementById('progressTotal');
+
 let currentEditingPlanId = null;
 let currentPlanExercises = [];
+let currentWorkoutPlan = null;
+let completedExercises = new Set();
 let expandedExerciseIndex = null; // Track which exercise is expanded
 
 // Settings inputs
@@ -192,6 +204,7 @@ function showScreen(screen) {
   settingsScreen.classList.toggle('screen-hidden', screen !== 'settings');
   plansScreen.classList.toggle('screen-hidden', screen !== 'plans');
   editPlanScreen.classList.toggle('screen-hidden', screen !== 'editPlan');
+  activeWorkoutScreen.classList.toggle('screen-hidden', screen !== 'activeWorkout');
 }
 
 manageMachinesBtn.addEventListener('click', () => {
@@ -216,6 +229,14 @@ backFromPlansBtn.addEventListener('click', () => showScreen('tracker'));
 backFromEditPlanBtn.addEventListener('click', () => {
   showScreen('plans');
   renderPlansList();
+});
+
+cancelWorkoutBtn.addEventListener('click', () => {
+  if (confirm('Are you sure you want to cancel this workout? Progress will not be saved.')) {
+    currentWorkoutPlan = null;
+    completedExercises.clear();
+    showScreen('tracker');
+  }
 });
 
 backFromSettingsBtn.addEventListener('click', () => {
@@ -406,22 +427,128 @@ function startPlan() {
   const plan = plans.find(p => p.id === planId);
   if (!plan) return;
   
-  // Add all exercises from the plan to today's history
-  plan.exercises.forEach(exercise => {
-    addEntry({
-      machine: exercise.machine,
-      weight: exercise.weight,
-      reps: exercise.reps
-    });
+  // Start active workout session
+  currentWorkoutPlan = plan;
+  completedExercises.clear();
+  
+  activeWorkoutTitle.textContent = `🏋️ ${plan.name}`;
+  renderActiveWorkout();
+  showScreen('activeWorkout');
+}
+
+// Render active workout screen
+function renderActiveWorkout() {
+  if (!currentWorkoutPlan) return;
+  
+  const exercises = currentWorkoutPlan.exercises;
+  const completed = completedExercises.size;
+  const total = exercises.length;
+  
+  // Update progress
+  progressCurrent.textContent = completed;
+  progressTotal.textContent = total;
+  const progressPercent = total > 0 ? (completed / total) * 100 : 0;
+  progressBarFill.style.width = `${progressPercent}%`;
+  
+  // Render exercises
+  workoutExercisesDiv.innerHTML = '';
+  
+  exercises.forEach((exercise, index) => {
+    const isCompleted = completedExercises.has(index);
+    const isCurrent = !isCompleted && completedExercises.size === index;
+    
+    const exerciseCard = document.createElement('div');
+    exerciseCard.className = `workout-exercise-card ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`;
+    
+    const cardHeader = document.createElement('div');
+    cardHeader.className = 'workout-exercise-header';
+    
+    const exerciseNumber = document.createElement('div');
+    exerciseNumber.className = 'workout-exercise-number';
+    exerciseNumber.textContent = `Exercise ${index + 1}`;
+    
+    const status = document.createElement('div');
+    status.className = 'workout-exercise-status';
+    if (isCompleted) {
+      status.innerHTML = '✓ Completed';
+      status.style.color = 'var(--success)';
+    } else if (isCurrent) {
+      status.innerHTML = '● In Progress';
+      status.style.color = 'var(--accent)';
+    } else {
+      status.innerHTML = '○ Pending';
+      status.style.color = 'var(--text-secondary)';
+    }
+    
+    cardHeader.appendChild(exerciseNumber);
+    cardHeader.appendChild(status);
+    
+    const cardBody = document.createElement('div');
+    cardBody.className = 'workout-exercise-body';
+    
+    const machineName = document.createElement('div');
+    machineName.className = 'workout-exercise-machine';
+    machineName.textContent = exercise.machine;
+    
+    const details = document.createElement('div');
+    details.className = 'workout-exercise-details';
+    details.textContent = `${exercise.weight}kg × ${exercise.reps} reps`;
+    
+    cardBody.appendChild(machineName);
+    cardBody.appendChild(details);
+    
+    exerciseCard.appendChild(cardHeader);
+    exerciseCard.appendChild(cardBody);
+    
+    // Add complete button for current exercise
+    if (isCurrent) {
+      const completeBtn = document.createElement('button');
+      completeBtn.className = 'btn-complete-exercise';
+      completeBtn.textContent = 'Mark as Complete';
+      completeBtn.addEventListener('click', () => {
+        completedExercises.add(index);
+        
+        // Add to history
+        addEntry({
+          machine: exercise.machine,
+          weight: exercise.weight,
+          reps: exercise.reps
+        });
+        
+        renderActiveWorkout();
+        
+        // Check if all exercises are complete
+        if (completedExercises.size === exercises.length) {
+          finishWorkoutBtn.style.display = 'block';
+        }
+      });
+      exerciseCard.appendChild(completeBtn);
+    }
+    
+    workoutExercisesDiv.appendChild(exerciseCard);
   });
   
-  // Reset selector and refresh history
+  // Show finish button if all complete
+  if (completed === total && total > 0) {
+    finishWorkoutBtn.style.display = 'block';
+  } else {
+    finishWorkoutBtn.style.display = 'none';
+  }
+}
+
+// Finish workout button
+finishWorkoutBtn.addEventListener('click', () => {
+  currentWorkoutPlan = null;
+  completedExercises.clear();
   activePlanSelect.value = '';
   renderHistory();
+  showScreen('tracker');
   
   // Scroll to history
-  document.getElementById('history').scrollIntoView({ behavior: 'smooth' });
-}
+  setTimeout(() => {
+    document.getElementById('history').scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+});
 
 // Edit a plan
 function editPlan(planId) {
