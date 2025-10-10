@@ -10,6 +10,22 @@
   -ms-overflow-style: none; /* IE and Edge */
 }
 
+/* Hide default number input spinners globally */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button,
+input[type="text"][pattern*="\\d"]::-webkit-outer-spin-button,
+input[type="text"][pattern*="\\d"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"],
+input[type="text"][pattern*="\\d"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+
 *::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
@@ -412,10 +428,7 @@ select:focus {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   text-align: center;
-  appearance: textfield;
-  -moz-appearance: textfield;
-  /* Ensure text inputs behave like number inputs */
-  font-variant-numeric: tabular-nums;
+  /* Using global number input styles */
 }
 
 .spinner-input input:focus {
@@ -424,7 +437,7 @@ select:focus {
 }
 
 .spinner-btn {
-  width: 3rem;
+  min-width: 3rem;
   height: 3rem;
   font-size: 1.5rem;
   font-weight: 600;
@@ -474,8 +487,82 @@ select:focus {
   transform: translateY(0);
 }
 
-#history {
-  margin-top: 2rem;
+/* History page sections */
+.history-stats-section {
+  background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
+  border-radius: 0.75rem;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.total-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
+  min-width: 100px;
+  transition: all 0.2s ease;
+  margin-bottom: var(--spacing-sm);
+}
+
+.total-stat-card:hover {
+  transform: translateY(-2px);
+  background-color: rgba(0, 212, 255, 0.1);
+}
+
+.total-stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: var(--spacing-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.total-stat-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.history-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.history-section h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--border);
+}
+
+#historyStatsSummary {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+#lastWorkoutContainer {
+  margin-bottom: var(--spacing-lg);
+}
+
+.last-workout-card {
+  background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
+  border: 1px solid var(--accent);
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.15);
+}
+
+.last-workout-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.2);
 }
 
 #historyList {
@@ -572,6 +659,7 @@ select:focus {
 
 /* Workout Summary Card */
 .workout-summary-card {
+  position: relative; /* For absolute positioning of elements inside */
   background: var(--bg-tertiary);
   border-radius: 0.75rem;
   padding: var(--spacing-lg);
@@ -649,54 +737,71 @@ select:focus {
 .workout-summary-stat {
   display: flex;
   align-items: center;
-  min-width: 120px;
 }
 
-.workout-summary-stat-icon {
-  margin-right: var(--spacing-xs);
-  color: var(--accent);
-  font-size: 1.2rem;
-  flex-shrink: 0;
+/* Removed unused count styles */
+
+.workout-summary-time {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-}
-
-.workout-summary-stat-label {
-  margin-right: var(--spacing-xs);
-  font-size: 0.9rem;
   color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-sm);
 }
 
-.workout-summary-stat-value {
+.workout-summary-time-icon {
+  margin-right: var(--spacing-xs);
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+.workout-summary-time-value {
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
-  color: var(--text-primary);
 }
 
 .workout-summary-exercises {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   font-size: 0.875rem;
   color: var(--text-secondary);
-  margin-bottom: var(--spacing-lg);
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.workout-summary-exercises-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .workout-summary-exercises-icon {
-  margin-right: var(--spacing-sm);
+  margin-right: var(--spacing-xs);
   color: var(--accent);
-  font-size: 1.2rem;
+  font-size: 1rem;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
 }
 
-.workout-summary-exercises-list {
-  flex: 1;
-  line-height: 1.4;
-  padding-top: 2px;
+.workout-summary-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.exercise-badge {
+  background-color: rgba(0, 212, 255, 0.15);
+  color: var(--accent);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .workout-summary-content {
@@ -706,18 +811,32 @@ select:focus {
 }
 
 .view-details-indicator {
+  position: absolute;
+  top: 15px;
+  right: 15px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  margin-top: var(--spacing-md);
+  justify-content: center;
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--accent);
   transition: all 0.2s ease;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
 }
 
 .workout-summary-card:hover .view-details-indicator {
-  transform: translateX(4px);
+  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.view-details-indicator:hover {
+  transform: scale(1.15) !important;
+  background-color: var(--accent) !important;
+  color: var(--bg-primary) !important;
+  cursor: pointer;
 }
 
 /* Keep this for backward compatibility, but it's not used in the new design */
@@ -1210,12 +1329,7 @@ select:focus {
   -moz-appearance: textfield;
 }
 
-.form-group-inline .spinner-input input::-webkit-outer-spin-button,
-.form-group-inline .spinner-input input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
+/* Using global number input styles */
 .form-group-inline .spinner-input input:focus {
   outline: none;
   border-color: var(--accent);
@@ -1252,16 +1366,7 @@ select:focus {
   border-color: var(--accent);
 }
 
-.exercise-row input::-webkit-outer-spin-button,
-.exercise-row input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.exercise-row input {
-  appearance: textfield;
-  -moz-appearance: textfield;
-}
+/* Using global number input styles */
 
 .btn-secondary {
   width: 100%;
