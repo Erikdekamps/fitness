@@ -1026,7 +1026,8 @@ function renderPlanExercises() {
         weightLabel.textContent = 'Weight (kg)';
         weightLabel.className = 'set-input-label';
         const weightInput = document.createElement('input');
-        weightInput.type = 'number';
+        weightInput.type = 'text';
+        weightInput.pattern = '\\d*\\.?\\d*';
         weightInput.value = set.weight;
         weightInput.min = 0;
         weightInput.max = 500;
@@ -1046,7 +1047,8 @@ function renderPlanExercises() {
         repsLabel.textContent = 'Reps';
         repsLabel.className = 'set-input-label';
         const repsInput = document.createElement('input');
-        repsInput.type = 'number';
+        repsInput.type = 'text';
+        repsInput.pattern = '\\d*';
         repsInput.value = set.reps;
         repsInput.min = 1;
         repsInput.max = 100;
@@ -1393,8 +1395,8 @@ function createEditForm(date, entry) {
       ${machineOptions}
     </select>
     <div class="edit-input-group">
-      <input type="number" class="edit-input edit-weight" value="${entry.weight}" min="0" max="500" step="2.5" placeholder="Weight (kg)">
-      <input type="number" class="edit-input edit-reps" value="${entry.reps}" min="1" max="100" step="1" placeholder="Reps">
+      <input type="text" pattern="\d*\.?\d*" class="edit-input edit-weight" value="${entry.weight}" min="0" max="500" step="2.5" placeholder="Weight (kg)">
+      <input type="text" pattern="\d*" class="edit-input edit-reps" value="${entry.reps}" min="1" max="100" step="1" placeholder="Reps">
     </div>
     <div class="edit-actions">
       <button type="button" class="btn-small btn-save">Save</button>
@@ -1457,35 +1459,29 @@ function renderHistory() {
     
     const summaryCard = document.createElement('div');
     summaryCard.className = 'workout-summary-card';
+    summaryCard.tabIndex = 0; // Make the card focusable for accessibility
     
-    const summaryHeader = document.createElement('div');
-    summaryHeader.className = 'workout-summary-header';
+    // Create a container for the card content (separate from the button)
+    const cardContent = document.createElement('div');
+    cardContent.className = 'workout-summary-content';
     
+    // 1. Date with calendar icon
     const dateDiv = document.createElement('div');
     dateDiv.className = 'workout-summary-date';
-    dateDiv.textContent = formatDate(day);
-    
-    summaryHeader.appendChild(dateDiv);
-    
-    const summaryStats = document.createElement('div');
-    summaryStats.className = 'workout-summary-stats';
-    
-    const statsHTML = `
-      <div class="workout-stat">
-        <div class="workout-stat-value">${uniqueExercises}</div>
-        <div class="workout-stat-label">Exercises</div>
-      </div>
-      <div class="workout-stat">
-        <div class="workout-stat-value">${totalSets}</div>
-        <div class="workout-stat-label">Sets</div>
-      </div>
-      <div class="workout-stat">
-        <div class="workout-stat-value">${timeSpent > 0 ? timeSpent + 'm' : '-'}</div>
-        <div class="workout-stat-label">Duration</div>
-      </div>
+    dateDiv.innerHTML = `
+      <div class="workout-summary-date-icon">📅</div>
+      <div>${formatDate(day)}</div>
     `;
-    summaryStats.innerHTML = statsHTML;
     
+    // 2. Duration with clock icon
+    const durationDiv = document.createElement('div');
+    durationDiv.className = 'workout-summary-duration';
+    durationDiv.innerHTML = `
+      <div class="workout-summary-duration-icon">⏱️</div>
+      <div>${timeSpent > 0 ? `Workout time: ${timeSpent} minutes` : 'Single set workout'}</div>
+    `;
+    
+    // 3. Exercises with dumbbell icon
     const exercisesList = document.createElement('div');
     exercisesList.className = 'workout-summary-exercises';
     
@@ -1498,21 +1494,66 @@ function renderHistory() {
       exerciseGroups[entry.machine].push(entry);
     });
     
-    const exerciseNames = Object.keys(exerciseGroups).slice(0, 3);
+    const exerciseNames = Object.keys(exerciseGroups);
     const exercisesText = exerciseNames.join(', ') + (Object.keys(exerciseGroups).length > 3 ? '...' : '');
-    exercisesList.textContent = exercisesText;
     
-    const viewDetailsBtn = document.createElement('button');
-    viewDetailsBtn.className = 'btn-view-details';
-    viewDetailsBtn.textContent = 'View Details →';
-    viewDetailsBtn.addEventListener('click', () => {
+    exercisesList.innerHTML = `
+      <div class="workout-summary-exercises-icon">🏋️</div>
+      <div class="workout-summary-exercises-list">${exercisesText}</div>
+    `;
+    
+    // 4. Stats section with icons
+    const summaryStats = document.createElement('div');
+    summaryStats.className = 'workout-summary-stats';
+    
+    // Exercise count stat
+    const exercisesStatDiv = document.createElement('div');
+    exercisesStatDiv.className = 'workout-summary-stat';
+    exercisesStatDiv.innerHTML = `
+      <div class="workout-summary-stat-icon">🎯</div>
+      <div class="workout-summary-stat-label">Exercises:</div>
+      <div class="workout-summary-stat-value">${uniqueExercises}</div>
+    `;
+    
+    // Sets count stat
+    const setsStatDiv = document.createElement('div');
+    setsStatDiv.className = 'workout-summary-stat';
+    setsStatDiv.innerHTML = `
+      <div class="workout-summary-stat-icon">🔄</div>
+      <div class="workout-summary-stat-label">Sets:</div>
+      <div class="workout-summary-stat-value">${totalSets}</div>
+    `;
+    
+    summaryStats.appendChild(exercisesStatDiv);
+    summaryStats.appendChild(setsStatDiv);
+    
+    // View Details arrow indicator (visual indicator, not a button)
+    const viewDetailsIndicator = document.createElement('div');
+    viewDetailsIndicator.className = 'view-details-indicator';
+    viewDetailsIndicator.textContent = '→';
+    
+    // Add content to card content container
+    cardContent.appendChild(dateDiv);
+    cardContent.appendChild(durationDiv);
+    cardContent.appendChild(exercisesList);
+    cardContent.appendChild(summaryStats);
+    cardContent.appendChild(viewDetailsIndicator);
+    
+    // Add card content to the main card
+    summaryCard.appendChild(cardContent);
+    
+    // Make the entire card clickable
+    summaryCard.addEventListener('click', () => {
       showWorkoutDetail(day, entries);
     });
     
-    summaryCard.appendChild(summaryHeader);
-    summaryCard.appendChild(summaryStats);
-    summaryCard.appendChild(exercisesList);
-    summaryCard.appendChild(viewDetailsBtn);
+    // Add keyboard support for accessibility
+    summaryCard.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        showWorkoutDetail(day, entries);
+      }
+    });
     
     historyList.appendChild(summaryCard);
   });
@@ -1576,7 +1617,7 @@ function showWorkoutDetail(date, entries) {
     
     const exerciseHeader = document.createElement('div');
     exerciseHeader.className = 'workout-detail-exercise-header';
-    exerciseHeader.textContent = machine;
+    exerciseHeader.innerHTML = `${machine} <span style="font-size: 0.8rem; color: var(--text-secondary); margin-left: auto;">${sets.length} sets</span>`;
     
     const setsContainer = document.createElement('div');
     setsContainer.className = 'workout-detail-sets';
@@ -1589,7 +1630,10 @@ function showWorkoutDetail(date, entries) {
       
       setDiv.innerHTML = `
         <div class="workout-detail-set-number">Set ${index + 1}</div>
-        <div class="workout-detail-set-info">${set.weight}kg × ${set.reps} reps</div>
+        <div class="workout-detail-set-info">
+          <span style="font-weight: 700;">${set.weight}</span> kg × 
+          <span style="font-weight: 700;">${set.reps}</span> reps
+        </div>
         <div class="workout-detail-set-time">${time}</div>
       `;
       

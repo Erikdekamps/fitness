@@ -39,7 +39,7 @@
         <label for="weight">Weight (kg)</label>
         <div class="spinner-input">
           <button type="button" class="spinner-btn" data-action="decrease" data-target="weight">−</button>
-          <input type="number" id="weight" min="0" max="500" step="2.5" value="20" required>
+          <input type="text" pattern="\d*\.?\d*" id="weight" min="0" max="500" step="2.5" value="20" required>
           <button type="button" class="spinner-btn" data-action="increase" data-target="weight">+</button>
         </div>
       </div>
@@ -48,7 +48,7 @@
         <label for="reps">Reps</label>
         <div class="spinner-input">
           <button type="button" class="spinner-btn" data-action="decrease" data-target="reps">−</button>
-          <input type="number" id="reps" min="1" max="100" step="1" value="10" required>
+          <input type="text" pattern="\d*" id="reps" min="1" max="100" step="1" value="10" required>
           <button type="button" class="spinner-btn" data-action="increase" data-target="reps">+</button>
         </div>
       </div>
@@ -120,7 +120,7 @@
         <p class="setting-description">How much weight changes with each +/- button press</p>
         <div class="spinner-input">
           <button type="button" class="spinner-btn" data-action="decrease" data-target="weightIncrement">−</button>
-          <input type="number" id="weightIncrement" min="0.5" max="10" step="0.5" value="2.5">
+          <input type="text" pattern="\d*\.?\d*" id="weightIncrement" min="0.5" max="10" step="0.5" value="2.5">
           <button type="button" class="spinner-btn" data-action="increase" data-target="weightIncrement">+</button>
         </div>
       </div>
@@ -130,7 +130,7 @@
         <p class="setting-description">Starting weight when no history is available</p>
         <div class="spinner-input">
           <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultWeight">−</button>
-          <input type="number" id="defaultWeight" min="0" max="500" step="5" value="20">
+          <input type="text" pattern="\d*\.?\d*" id="defaultWeight" min="0" max="500" step="5" value="20">
           <button type="button" class="spinner-btn" data-action="increase" data-target="defaultWeight">+</button>
         </div>
       </div>
@@ -140,7 +140,7 @@
         <p class="setting-description">Starting reps when no history is available</p>
         <div class="spinner-input">
           <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultReps">−</button>
-          <input type="number" id="defaultReps" min="1" max="100" step="1" value="10">
+          <input type="text" pattern="\d*" id="defaultReps" min="1" max="100" step="1" value="10">
           <button type="button" class="spinner-btn" data-action="increase" data-target="defaultReps">+</button>
         </div>
       </div>
@@ -289,12 +289,12 @@
           <div class="timer-setup">
             <div class="timer-inputs">
               <div class="timer-input-group">
-                <input type="number" id="timerMinutes" min="0" max="59" value="0">
+                <input type="text" pattern="\d*" id="timerMinutes" min="0" max="59" value="0">
                 <label>min</label>
               </div>
               <div class="timer-separator">:</div>
               <div class="timer-input-group">
-                <input type="number" id="timerSeconds" min="0" max="59" value="0">
+                <input type="text" pattern="\d*" id="timerSeconds" min="0" max="59" value="0">
                 <label>sec</label>
               </div>
             </div>

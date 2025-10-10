@@ -150,7 +150,8 @@ main {
 #editPlanScreen,
 #activeWorkoutScreen,
 #historyScreen,
-#timerScreen {
+#timerScreen,
+#workoutDetailScreen {
   width: 100%;
   margin: 0 auto;
   padding: 1rem 1.5rem;
@@ -413,12 +414,8 @@ select:focus {
   text-align: center;
   appearance: textfield;
   -moz-appearance: textfield;
-}
-
-.spinner-input input::-webkit-outer-spin-button,
-.spinner-input input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  /* Ensure text inputs behave like number inputs */
+  font-variant-numeric: tabular-nums;
 }
 
 .spinner-input input:focus {
@@ -581,140 +578,307 @@ select:focus {
   margin-bottom: var(--spacing-lg);
   border: 1px solid var(--border);
   transition: all 0.15s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
 .workout-summary-card:hover {
-  border-color: var(--text-secondary);
-  transform: translateY(-1px);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
-.workout-summary-header {
-  margin-bottom: var(--spacing-md);
+.workout-summary-card:active {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.workout-summary-card:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.3);
 }
 
 .workout-summary-date {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
   font-weight: 600;
   font-size: 1rem;
   color: var(--text-primary);
 }
 
+.workout-summary-date-icon {
+  margin-right: var(--spacing-sm);
+  color: var(--accent);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+}
+
+.workout-summary-duration {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.workout-summary-duration-icon {
+  margin-right: var(--spacing-sm);
+  color: var(--accent);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+}
+
 .workout-summary-stats {
   display: flex;
-  gap: var(--spacing-lg);
+  flex-wrap: wrap;
   margin-bottom: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--bg-secondary);
-  border-radius: 0.5rem;
+  gap: var(--spacing-md);
 }
 
-.workout-stat {
-  flex: 1;
-  text-align: center;
+.workout-summary-stat {
+  display: flex;
+  align-items: center;
+  min-width: 120px;
 }
 
-.workout-stat-value {
-  font-size: 1.25rem;
-  font-weight: 700;
+.workout-summary-stat-icon {
+  margin-right: var(--spacing-xs);
   color: var(--accent);
-  margin-bottom: var(--spacing-xs);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
 }
 
-.workout-stat-label {
-  font-size: 0.75rem;
+.workout-summary-stat-label {
+  margin-right: var(--spacing-xs);
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+}
+
+.workout-summary-stat-value {
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .workout-summary-exercises {
+  display: flex;
+  align-items: center;
   font-size: 0.875rem;
   color: var(--text-secondary);
-  margin-bottom: var(--spacing-md);
-  padding-left: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
 }
 
+.workout-summary-exercises-icon {
+  margin-right: var(--spacing-sm);
+  color: var(--accent);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+}
+
+.workout-summary-exercises-list {
+  flex: 1;
+  line-height: 1.4;
+  padding-top: 2px;
+}
+
+.workout-summary-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.view-details-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--accent);
+  transition: all 0.2s ease;
+}
+
+.workout-summary-card:hover .view-details-indicator {
+  transform: translateX(4px);
+}
+
+/* Keep this for backward compatibility, but it's not used in the new design */
 .btn-view-details {
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md);
   background: var(--accent);
-  color: white;
+  color: var(--bg-primary);
   border: none;
   border-radius: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-view-details:hover {
   opacity: 0.9;
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.2);
 }
 
 /* Workout Detail View */
 .workout-detail-container {
   padding: var(--spacing-lg);
   padding-bottom: 100px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .workout-detail-stats {
   display: flex;
+  justify-content: space-around;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
   padding: var(--spacing-lg);
-  background: var(--bg-tertiary);
+  background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
   border-radius: 0.75rem;
   border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced workout stat styles for detail view */
+.workout-detail-stats .workout-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
+  min-width: 80px;
+  transition: all 0.2s ease;
+}
+
+.workout-detail-stats .workout-stat:hover {
+  transform: translateY(-2px);
+  background-color: rgba(0, 212, 255, 0.1);
+}
+
+.workout-detail-stats .workout-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: var(--spacing-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-detail-stats .workout-stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .workout-detail-exercise {
   background: var(--bg-tertiary);
   border-radius: 0.75rem;
   padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
   border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.workout-detail-exercise:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .workout-detail-exercise-header {
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--accent);
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-sm);
   border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+.workout-detail-exercise-header::before {
+  content: '🏋️';
+  margin-right: var(--spacing-sm);
+  font-size: 1.2rem;
 }
 
 .workout-detail-sets {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
 }
 
 .workout-detail-set {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md);
   background: var(--bg-secondary);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--bg-tertiary);
+  transition: all 0.2s ease;
+}
+
+.workout-detail-set:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border);
+  transform: translateX(4px);
 }
 
 .workout-detail-set-number {
   font-size: 0.875rem;
-  color: var(--text-secondary);
-  min-width: 3rem;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 3.5rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: rgba(0, 212, 255, 0.1);
+  border-radius: 4px;
+  text-align: center;
 }
 
 .workout-detail-set-info {
   flex: 1;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-primary);
+  margin: 0 var(--spacing-md);
+  font-variant-numeric: tabular-nums;
 }
 
 .workout-detail-set-time {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 4px;
 }
 
 /* Edit mode styles */
@@ -1196,12 +1360,8 @@ select:focus {
   appearance: textfield;
   -moz-appearance: textfield;
   transition: all 0.2s ease;
-}
-
-.set-number-input::-webkit-outer-spin-button,
-.set-number-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  /* Ensure text inputs behave like number inputs */
+  font-variant-numeric: tabular-nums;
 }
 
 .set-number-input:focus {
@@ -1398,12 +1558,7 @@ select:focus {
   text-align: center;
   appearance: textfield;
   -moz-appearance: textfield;
-}
-
-.timer-input-group input::-webkit-outer-spin-button,
-.timer-input-group input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .timer-input-group input:focus {
@@ -1596,7 +1751,8 @@ main,
 #editPlanScreen,
 #activeWorkoutScreen,
 #historyScreen,
-#timerScreen {
+#timerScreen,
+#workoutDetailScreen {
   padding-bottom: 100px;
 }
 
@@ -1608,7 +1764,8 @@ main,
   #editPlanScreen,
   #activeWorkoutScreen,
   #historyScreen,
-  #timerScreen {
+  #timerScreen,
+  #workoutDetailScreen {
     padding: 0.5rem;
     padding-bottom: 100px;
   }
