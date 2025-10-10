@@ -67,6 +67,7 @@ let expandedExerciseIndex = null; // Track which exercise is expanded
 const weightIncrementInput = document.getElementById('weightIncrement');
 const defaultWeightInput = document.getElementById('defaultWeight');
 const defaultRepsInput = document.getElementById('defaultReps');
+const fontSizeSelect = document.getElementById('fontSize');
 
 // Default machines
 const DEFAULT_MACHINES = [
@@ -90,7 +91,8 @@ function getSettings() {
   const defaultSettings = {
     weightIncrement: 2.5,
     defaultWeight: 20,
-    defaultReps: 10
+    defaultReps: 10,
+    fontSize: 'normal'
   };
   const saved = localStorage.getItem('fitnessSettings');
   return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
@@ -108,9 +110,14 @@ function applySettings() {
   weightIncrementInput.value = settings.weightIncrement;
   defaultWeightInput.value = settings.defaultWeight;
   defaultRepsInput.value = settings.defaultReps;
+  fontSizeSelect.value = settings.fontSize;
   
   // Update weight input step
   weightInput.step = settings.weightIncrement;
+  
+  // Apply font size to html element (for rem units)
+  document.documentElement.classList.remove('font-tiny', 'font-small', 'font-normal', 'font-large', 'font-very-large');
+  document.documentElement.classList.add(`font-${settings.fontSize}`);
 }
 
 // ===== MACHINES =====
@@ -453,7 +460,8 @@ weightIncrementInput.addEventListener('change', () => {
   const settings = {
     weightIncrement: parseFloat(weightIncrementInput.value),
     defaultWeight: parseFloat(defaultWeightInput.value),
-    defaultReps: parseInt(defaultRepsInput.value)
+    defaultReps: parseInt(defaultRepsInput.value),
+    fontSize: fontSizeSelect.value
   };
   saveSettings(settings);
 });
@@ -462,7 +470,8 @@ defaultWeightInput.addEventListener('change', () => {
   const settings = {
     weightIncrement: parseFloat(weightIncrementInput.value),
     defaultWeight: parseFloat(defaultWeightInput.value),
-    defaultReps: parseInt(defaultRepsInput.value)
+    defaultReps: parseInt(defaultRepsInput.value),
+    fontSize: fontSizeSelect.value
   };
   saveSettings(settings);
 });
@@ -471,9 +480,21 @@ defaultRepsInput.addEventListener('change', () => {
   const settings = {
     weightIncrement: parseFloat(weightIncrementInput.value),
     defaultWeight: parseFloat(defaultWeightInput.value),
-    defaultReps: parseInt(defaultRepsInput.value)
+    defaultReps: parseInt(defaultRepsInput.value),
+    fontSize: fontSizeSelect.value
   };
   saveSettings(settings);
+});
+
+fontSizeSelect.addEventListener('change', () => {
+  const settings = {
+    weightIncrement: parseFloat(weightIncrementInput.value),
+    defaultWeight: parseFloat(defaultWeightInput.value),
+    defaultReps: parseInt(defaultRepsInput.value),
+    fontSize: fontSizeSelect.value
+  };
+  saveSettings(settings);
+  // Settings are already applied via saveSettings -> applySettings
 });
 
 // ===== WORKOUT PLANS =====

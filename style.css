@@ -25,6 +25,13 @@
   --border: #333;
   --danger: #ff4444;
   --success: #00ff88;
+  --base-size: 16px;
+  --font-scale: 1; /* Default scale multiplier */
+  --base-font-size: calc(var(--base-size) * var(--font-scale));
+}
+
+html {
+  font-size: var(--base-font-size);
 }
 
 body {
@@ -35,6 +42,27 @@ body {
   padding: 0;
   min-height: 100vh;
   line-height: 1.5;
+}
+
+/* Font size variants - apply to html for rem units to work */
+html.font-tiny {
+  --font-scale: 0.8; /* 80% */
+}
+
+html.font-small {
+  --font-scale: 0.9; /* 90% */
+}
+
+html.font-normal {
+  --font-scale: 1; /* 100% */
+}
+
+html.font-large {
+  --font-scale: 1.1; /* 110% */
+}
+
+html.font-very-large {
+  --font-scale: 1.2; /* 120% */
 }
 
 main {
