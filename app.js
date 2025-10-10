@@ -1010,6 +1010,17 @@ function renderActiveWorkout() {
   const progressPercent = total > 0 ? (completed / total) * 100 : 0;
   progressBarFill.style.width = `${progressPercent}%`;
   
+  // Find the first incomplete bundle (for "In Progress" status)
+  let firstIncompleteBundleIndex = -1;
+  for (let i = 0; i < bundledExercises.length; i++) {
+    const bundle = bundledExercises[i];
+    const allSetsCompleted = bundle.sets.every(s => completedExercises.has(s.globalIndex));
+    if (!allSetsCompleted) {
+      firstIncompleteBundleIndex = i;
+      break;
+    }
+  }
+  
   // Render bundled exercises
   workoutExercisesDiv.innerHTML = '';
   
@@ -1017,7 +1028,8 @@ function renderActiveWorkout() {
     const allSetsCompleted = bundle.sets.every(s => completedExercises.has(s.globalIndex));
     const anySetsCompleted = bundle.sets.some(s => completedExercises.has(s.globalIndex));
     const currentSetIndex = bundle.sets.findIndex(s => !completedExercises.has(s.globalIndex));
-    const isCurrent = currentSetIndex >= 0 && bundle.sets.slice(0, currentSetIndex).every(s => completedExercises.has(s.globalIndex));
+    // Only mark as current if this is the first incomplete bundle
+    const isCurrent = bundleIndex === firstIncompleteBundleIndex && currentSetIndex >= 0;
     
     const exerciseCard = document.createElement('div');
     exerciseCard.className = `workout-exercise-card ${allSetsCompleted ? 'completed' : ''} ${isCurrent && !allSetsCompleted ? 'current' : ''}`;
