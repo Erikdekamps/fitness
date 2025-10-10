@@ -63,6 +63,7 @@ const progressCurrent = document.getElementById('progressCurrent');
 const progressTotal = document.getElementById('progressTotal');
 const workoutTimeDisplay = document.getElementById('workoutTimeDisplay');
 const workoutElapsedTime = document.getElementById('workoutElapsedTime');
+const workoutStartTime = document.getElementById('workoutStartTime');
 
 let currentEditingPlanId = null;
 let currentPlanExercises = [];
@@ -164,6 +165,21 @@ function updateWorkoutTimer() {
   } else {
     workoutElapsedTime.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
   }
+  
+  // Display start time
+  const settings = getSettings();
+  const timeFormat = settings.timeFormat || '24h';
+  let startTimeText = '';
+  
+  if (timeFormat === '12h') {
+    const hours12 = startTime.getHours() % 12 || 12;
+    const ampm = startTime.getHours() >= 12 ? 'PM' : 'AM';
+    startTimeText = `Started at ${hours12}:${String(startTime.getMinutes()).padStart(2, '0')} ${ampm}`;
+  } else {
+    startTimeText = `Started at ${String(startTime.getHours()).padStart(2, '0')}:${String(startTime.getMinutes()).padStart(2, '0')}`;
+  }
+  
+  workoutStartTime.textContent = startTimeText;
 }
 
 // Settings inputs
@@ -1068,19 +1084,73 @@ function renderActiveWorkout() {
     machineName.className = 'workout-exercise-machine';
     machineName.textContent = bundle.machine;
     
-    const details = document.createElement('div');
-    details.className = 'workout-exercise-details';
-    // Show all sets in the bundle
-    const setsText = bundle.sets.map((s, i) => {
+    cardBody.appendChild(machineName);
+    
+    // Render individual sets with edit capability
+    const setsContainer = document.createElement('div');
+    setsContainer.className = 'workout-sets-container';
+    
+    bundle.sets.forEach((s, i) => {
       const isCompleted = completedExercises.has(s.globalIndex);
       const setNum = i + 1;
-      return `${isCompleted ? '✓' : '○'} Set ${setNum}: ${s.weight}kg × ${s.reps} reps`;
-    }).join('\n');
-    details.style.whiteSpace = 'pre-line';
-    details.textContent = setsText;
+      
+      const setItem = document.createElement('div');
+      setItem.className = `workout-set-item ${isCompleted ? 'completed' : ''}`;
+      
+      const setLabel = document.createElement('div');
+      setLabel.className = 'workout-set-label';
+      setLabel.textContent = `${isCompleted ? '✓' : '○'} Set ${setNum}:`;
+      
+      const setDetails = document.createElement('div');
+      setDetails.className = 'workout-set-details';
+      
+      // Weight input (editable if not completed)
+      const weightInput = document.createElement('input');
+      weightInput.type = 'number';
+      weightInput.value = s.weight;
+      weightInput.step = '2.5';
+      weightInput.min = '0';
+      weightInput.className = 'workout-set-input';
+      weightInput.disabled = isCompleted;
+      weightInput.addEventListener('change', (e) => {
+        const newWeight = parseFloat(e.target.value) || 0;
+        // Update the weight in the plan
+        currentWorkoutPlan.exercises[bundle.exerciseIndex].sets[i].weight = newWeight;
+        saveActiveWorkout();
+      });
+      
+      const weightLabel = document.createElement('span');
+      weightLabel.textContent = 'kg × ';
+      
+      // Reps input (editable if not completed)
+      const repsInput = document.createElement('input');
+      repsInput.type = 'number';
+      repsInput.value = s.reps;
+      repsInput.step = '1';
+      repsInput.min = '1';
+      repsInput.className = 'workout-set-input';
+      repsInput.disabled = isCompleted;
+      repsInput.addEventListener('change', (e) => {
+        const newReps = parseInt(e.target.value) || 0;
+        // Update the reps in the plan
+        currentWorkoutPlan.exercises[bundle.exerciseIndex].sets[i].reps = newReps;
+        saveActiveWorkout();
+      });
+      
+      const repsLabel = document.createElement('span');
+      repsLabel.textContent = ' reps';
+      
+      setDetails.appendChild(weightInput);
+      setDetails.appendChild(weightLabel);
+      setDetails.appendChild(repsInput);
+      setDetails.appendChild(repsLabel);
+      
+      setItem.appendChild(setLabel);
+      setItem.appendChild(setDetails);
+      setsContainer.appendChild(setItem);
+    });
     
-    cardBody.appendChild(machineName);
-    cardBody.appendChild(details);
+    cardBody.appendChild(setsContainer);
     
     exerciseCard.appendChild(cardHeader);
     exerciseCard.appendChild(cardBody);
@@ -1097,11 +1167,14 @@ function renderActiveWorkout() {
         // Save to localStorage
         saveActiveWorkout();
         
-        // Add to history
+        // Get the actual weight and reps from the plan (in case they were edited)
+        const actualSet = currentWorkoutPlan.exercises[bundle.exerciseIndex].sets[currentSetIndex];
+        
+        // Add to history with the actual values
         addEntry({
           machine: currentSet.machine,
-          weight: currentSet.weight,
-          reps: currentSet.reps
+          weight: actualSet.weight,
+          reps: actualSet.reps
         });
         
         renderActiveWorkout();

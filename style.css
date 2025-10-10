@@ -1803,12 +1803,29 @@ select:focus {
   border: 1px solid var(--border);
   margin-bottom: 1rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.workout-time-display span {
+.workout-time-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.workout-time-display span#workoutElapsedTime {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-start-time {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1891,7 +1908,75 @@ select:focus {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.workout-sets-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.workout-set-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--bg-tertiary);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.workout-set-item.completed {
+  opacity: 0.7;
+  background: var(--bg-primary);
+}
+
+.workout-set-item.completed .workout-set-label,
+.workout-set-item.completed .workout-set-details {
+  text-decoration: line-through;
+  color: var(--text-secondary);
+}
+
+.workout-set-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 70px;
+}
+
+.workout-set-details {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.workout-set-input {
+  width: 50px;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-set-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.workout-set-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: var(--bg-primary);
 }
 
 .workout-exercise-details {
