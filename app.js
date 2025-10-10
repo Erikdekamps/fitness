@@ -78,6 +78,11 @@ const dateFormatSelect = document.getElementById('dateFormat');
 const timeFormatSelect = document.getElementById('timeFormat');
 const defaultTimerMinutesInput = document.getElementById('defaultTimerMinutes');
 
+// Data management buttons
+const exportDataBtn = document.getElementById('exportDataBtn');
+const importDataBtn = document.getElementById('importDataBtn');
+const importFileInput = document.getElementById('importFileInput');
+
 // Default machines
 const DEFAULT_MACHINES = [
   'Bench Press',
@@ -555,6 +560,104 @@ defaultTimerMinutesInput.addEventListener('change', () => {
   timerSecondsInput.value = 0;
   const defaultDurationMs = settings.defaultTimerMinutes * 60 * 1000;
   timerDisplay.textContent = formatTimerTime(defaultDurationMs);
+});
+
+// ===== DATA EXPORT/IMPORT =====
+
+// Export all data to JSON file
+function exportData() {
+  const data = {
+    version: '1.0',
+    exportDate: new Date().toISOString(),
+    history: JSON.parse(localStorage.getItem('fitnessHistory') || '[]'),
+    machines: JSON.parse(localStorage.getItem('fitnessMachines') || '[]'),
+    plans: JSON.parse(localStorage.getItem('fitnessPlans') || '[]'),
+    settings: JSON.parse(localStorage.getItem('fitnessSettings') || '{}')
+  };
+  
+  const dataStr = JSON.stringify(data, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `fitness-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  
+  alert('Data exported successfully!');
+}
+
+// Import data from JSON file
+function importData(file) {
+  const reader = new FileReader();
+  
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      // Validate data structure
+      if (!data.version || !data.exportDate) {
+        throw new Error('Invalid backup file format');
+      }
+      
+      // Confirm with user before overwriting
+      const confirmed = confirm(
+        `Import data from ${new Date(data.exportDate).toLocaleString()}?\n\n` +
+        `This will replace your current data:\n` +
+        `- ${(data.history || []).length} workout entries\n` +
+        `- ${(data.machines || []).length} machines\n` +
+        `- ${(data.plans || []).length} workout plans\n` +
+        `- Settings\n\n` +
+        `Current data will be overwritten. Continue?`
+      );
+      
+      if (!confirmed) {
+        return;
+      }
+      
+      // Import data
+      if (data.history) localStorage.setItem('fitnessHistory', JSON.stringify(data.history));
+      if (data.machines) localStorage.setItem('fitnessMachines', JSON.stringify(data.machines));
+      if (data.plans) localStorage.setItem('fitnessPlans', JSON.stringify(data.plans));
+      if (data.settings) localStorage.setItem('fitnessSettings', JSON.stringify(data.settings));
+      
+      alert('Data imported successfully! The page will now reload.');
+      
+      // Reload page to apply all changes
+      window.location.reload();
+      
+    } catch (error) {
+      alert(`Error importing data: ${error.message}`);
+      console.error('Import error:', error);
+    }
+  };
+  
+  reader.onerror = () => {
+    alert('Error reading file');
+  };
+  
+  reader.readAsText(file);
+}
+
+// Export button click handler
+exportDataBtn.addEventListener('click', exportData);
+
+// Import button click handler
+importDataBtn.addEventListener('click', () => {
+  importFileInput.click();
+});
+
+// File input change handler
+importFileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    importData(file);
+    // Reset the input so the same file can be selected again
+    e.target.value = '';
+  }
 });
 
 // ===== WORKOUT PLANS =====

@@ -1393,6 +1393,18 @@ select:focus {
   transform: translateY(0);
 }
 
+/* Data management buttons */
+.data-management-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.data-management-buttons .btn-secondary {
+  flex: 1;
+  min-width: 150px;
+}
+
 /* Sets container for multi-set exercises */
 .sets-container {
   display: flex;
