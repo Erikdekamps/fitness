@@ -4,6 +4,16 @@
   padding: 0;
 }
 
+/* Hide scrollbars but keep scrolling functionality */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 :root {
   --bg-primary: #0a0a0a;
   --bg-secondary: #1a1a1a;
@@ -205,6 +215,54 @@ h2 {
   font-weight: 600;
   margin: 2rem 0 1rem;
   color: var(--text-secondary);
+}
+
+/* Today's Workout Section */
+#todaySection {
+  margin-top: 2rem;
+}
+
+.today-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.today-entry {
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.today-entry:hover {
+  border-color: var(--accent);
+}
+
+.today-entry-info {
+  flex: 1;
+}
+
+.today-entry-machine {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.today-entry-details {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.today-entry-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
 }
 
 form {
@@ -1315,14 +1373,23 @@ main,
 #settingsScreen,
 #plansScreen,
 #editPlanScreen,
-#activeWorkoutScreen {
-  padding-bottom: 75px;
+#activeWorkoutScreen,
+#historyScreen,
+#timerScreen {
+  padding-bottom: 100px;
 }
 
 @media (max-width: 500px) {
-  main, #machineScreen {
+  main, 
+  #machineScreen,
+  #settingsScreen,
+  #plansScreen,
+  #editPlanScreen,
+  #activeWorkoutScreen,
+  #historyScreen,
+  #timerScreen {
     padding: 0.5rem;
-    padding-bottom: 75px;
+    padding-bottom: 100px;
   }
   
   .header {

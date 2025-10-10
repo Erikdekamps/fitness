@@ -5,6 +5,10 @@ const weightInput = document.getElementById('weight');
 const repsInput = document.getElementById('reps');
 const historyList = document.getElementById('historyList');
 
+// Today section
+const todaySection = document.getElementById('todaySection');
+const todayList = document.getElementById('todayList');
+
 // Screens
 const trackerScreen = document.getElementById('trackerScreen');
 const machineScreen = document.getElementById('machineScreen');
@@ -1007,6 +1011,55 @@ function addEntry(entry) {
   
   history[today].push(entry);
   saveHistory(history);
+  renderTodaySection(); // Update today section after adding
+}
+
+// Render today's workout section
+function renderTodaySection() {
+  const today = getToday();
+  const history = getHistory();
+  const todayEntries = history[today] || [];
+  
+  if (todayEntries.length === 0) {
+    todaySection.style.display = 'none';
+    return;
+  }
+  
+  todaySection.style.display = 'block';
+  todayList.innerHTML = '';
+  
+  // Show entries in reverse order (newest first)
+  [...todayEntries].reverse().forEach(entry => {
+    const entryDiv = document.createElement('div');
+    entryDiv.className = 'today-entry';
+    
+    const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'today-entry-info';
+    infoDiv.innerHTML = `
+      <div class="today-entry-machine">${entry.machine}</div>
+      <div class="today-entry-details">${entry.reps} reps × ${entry.weight} kg</div>
+      <div class="today-entry-time">${time}</div>
+    `;
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-icon delete';
+    deleteBtn.innerHTML = '🗑️';
+    deleteBtn.title = 'Delete';
+    deleteBtn.addEventListener('click', () => {
+      deleteEntry(today, entry.id);
+      renderTodaySection(); // Refresh today section
+      renderHistory(); // Also refresh history
+    });
+    
+    entryDiv.appendChild(infoDiv);
+    entryDiv.appendChild(deleteBtn);
+    todayList.appendChild(entryDiv);
+  });
 }
 
 // Delete an entry
@@ -1217,15 +1270,18 @@ form.addEventListener('submit', (e) => {
     reps: parseInt(repsInput.value)
   });
   
-  // Reset form but keep the machine selected
+  // Reset form but keep the machine selected for quick consecutive sets
   const currentMachine = machineSelect.value;
-  machineSelect.value = '';
-  const settings = getSettings();
-  weightInput.value = settings.defaultWeight;
-  repsInput.value = settings.defaultReps;
+  // Don't reset machine select - keep it for next set
+  // machineSelect.value = '';
+  // Keep weight and reps for quick repeats
+  // const settings = getSettings();
+  // weightInput.value = settings.defaultWeight;
+  // repsInput.value = settings.defaultReps;
   
   renderHistory();
-  showScreen('history'); // Show history screen after adding a set
+  // Stay on tracker screen to see today's section
+  // showScreen('history'); 
 });
 
 // ===== TIMER/STOPWATCH FUNCTIONALITY =====
@@ -1464,7 +1520,7 @@ window.addEventListener('DOMContentLoaded', () => {
   applySettings();
   renderMachineSelect();
   renderHistory();
+  renderTodaySection(); // Show today's workout on load
   renderActivePlanSelect();
-  showScreen('tracker'); // Ensure we start at the home screen
   showScreen('tracker'); // Start at workout screen (formerly home)
 });
