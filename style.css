@@ -855,7 +855,7 @@ select:focus {
 
 .set-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 0.75rem;
   background: var(--bg-tertiary);
   padding: 0.75rem;
@@ -868,20 +868,33 @@ select:focus {
   font-weight: 600;
   color: var(--accent);
   min-width: 3rem;
+  padding-bottom: 0.75rem;
 }
 
 .set-inputs {
   display: flex;
   gap: 0.5rem;
   flex: 1;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .set-input-group {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-.set-input-group input {
+.set-input-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.set-number-input {
   width: 100%;
   font-size: 0.875rem;
   padding: 0.75rem;
@@ -894,15 +907,20 @@ select:focus {
   -moz-appearance: textfield;
 }
 
-.set-input-group input::-webkit-outer-spin-button,
-.set-input-group input::-webkit-inner-spin-button {
+.set-number-input::-webkit-outer-spin-button,
+.set-number-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.set-input-group input:focus {
+.set-number-input:focus {
   outline: none;
   border-color: var(--accent);
+}
+
+.set-inputs .btn-icon {
+  margin-bottom: 0;
+  align-self: flex-end;
 }
 
 .btn-add-set {

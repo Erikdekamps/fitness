@@ -713,7 +713,7 @@ function renderPlanExercises() {
       
       const number = document.createElement('div');
       number.className = 'exercise-number';
-      number.textContent = `Exercise ${exerciseIndex + 1}`;
+      number.textContent = exercise.machine ? exercise.machine : `Exercise ${exerciseIndex + 1}`;
       
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'btn-icon delete';
@@ -743,7 +743,10 @@ function renderPlanExercises() {
       machineLabel.textContent = 'Machine';
       const machineSelect = document.createElement('select');
       machineSelect.innerHTML = '<option value="">Select machine</option>';
-      machines.forEach(m => {
+      
+      // Sort machines alphabetically
+      const sortedMachines = [...machines].sort((a, b) => a.localeCompare(b));
+      sortedMachines.forEach(m => {
         const opt = document.createElement('option');
         opt.value = m;
         opt.textContent = m;
@@ -752,6 +755,7 @@ function renderPlanExercises() {
       });
       machineSelect.addEventListener('change', (e) => {
         currentPlanExercises[exerciseIndex].machine = e.target.value;
+        renderPlanExercises(); // Re-render to update the title
       });
       machineGroup.appendChild(machineLabel);
       machineGroup.appendChild(machineSelect);
@@ -780,31 +784,41 @@ function renderPlanExercises() {
         // Weight input
         const weightGroup = document.createElement('div');
         weightGroup.className = 'set-input-group';
+        const weightLabel = document.createElement('label');
+        weightLabel.textContent = 'Weight (kg)';
+        weightLabel.className = 'set-input-label';
         const weightInput = document.createElement('input');
         weightInput.type = 'number';
         weightInput.value = set.weight;
         weightInput.min = 0;
         weightInput.max = 500;
         weightInput.step = 2.5;
-        weightInput.placeholder = 'Weight (kg)';
-        weightInput.addEventListener('change', (e) => {
+        weightInput.placeholder = 'kg';
+        weightInput.className = 'set-number-input';
+        weightInput.addEventListener('input', (e) => {
           currentPlanExercises[exerciseIndex].sets[setIndex].weight = parseFloat(e.target.value) || 0;
         });
+        weightGroup.appendChild(weightLabel);
         weightGroup.appendChild(weightInput);
         
         // Reps input
         const repsGroup = document.createElement('div');
         repsGroup.className = 'set-input-group';
+        const repsLabel = document.createElement('label');
+        repsLabel.textContent = 'Reps';
+        repsLabel.className = 'set-input-label';
         const repsInput = document.createElement('input');
         repsInput.type = 'number';
         repsInput.value = set.reps;
         repsInput.min = 1;
         repsInput.max = 100;
         repsInput.step = 1;
-        repsInput.placeholder = 'Reps';
-        repsInput.addEventListener('change', (e) => {
+        repsInput.placeholder = 'reps';
+        repsInput.className = 'set-number-input';
+        repsInput.addEventListener('input', (e) => {
           currentPlanExercises[exerciseIndex].sets[setIndex].reps = parseInt(e.target.value) || 0;
         });
+        repsGroup.appendChild(repsLabel);
         repsGroup.appendChild(repsInput);
         
         // Delete set button
