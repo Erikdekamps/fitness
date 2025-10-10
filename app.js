@@ -154,6 +154,71 @@ function deleteMachine(name) {
   renderMachineSelect();
 }
 
+// Rename a machine
+function renameMachine(oldName, newName) {
+  newName = newName.trim();
+  
+  if (!newName) {
+    alert('Machine name cannot be empty');
+    return false;
+  }
+  
+  const machines = getMachines();
+  
+  if (newName !== oldName && machines.includes(newName)) {
+    alert('A machine with this name already exists');
+    return false;
+  }
+  
+  if (newName === oldName) {
+    return true; // No change needed
+  }
+  
+  // Update machine name in the list
+  const index = machines.indexOf(oldName);
+  if (index !== -1) {
+    machines[index] = newName;
+    saveMachines(machines);
+  }
+  
+  // Update machine name in all history entries
+  const history = getHistory();
+  let historyUpdated = false;
+  Object.keys(history).forEach(date => {
+    history[date].forEach(entry => {
+      if (entry.machine === oldName) {
+        entry.machine = newName;
+        historyUpdated = true;
+      }
+    });
+  });
+  if (historyUpdated) {
+    saveHistory(history);
+  }
+  
+  // Update machine name in all plans
+  const plans = getPlans();
+  let plansUpdated = false;
+  plans.forEach(plan => {
+    plan.exercises.forEach(exercise => {
+      if (exercise.machine === oldName) {
+        exercise.machine = newName;
+        plansUpdated = true;
+      }
+    });
+  });
+  if (plansUpdated) {
+    savePlans(plans);
+  }
+  
+  renderMachineList();
+  renderMachineSelect();
+  renderHistory();
+  renderPlansList();
+  
+  return true;
+}
+
 // Render machine select dropdown
 function renderMachineSelect() {
   const machines = getMachines();
@@ -177,9 +242,12 @@ function renderMachineSelect() {
 }
 
 // Render machine list for management
+let currentEditingMachine = null;
+
 function renderMachineList() {
   const machines = getMachines();
   machineListDiv.innerHTML = '';
+  currentEditingMachine = null; // Reset editing state
   
   if (machines.length === 0) {
     machineListDiv.innerHTML = '<div class="empty-state">No machines added yet.</div>';
@@ -191,8 +259,80 @@ function renderMachineList() {
     machineItem.className = 'machine-item';
     
     const machineName = document.createElement('div');
-    machineName.className = 'machine-name';
+    machineName.className = 'machine-item-name';
     machineName.textContent = machine;
+    
+    const editInput = document.createElement('input');
+    editInput.type = 'text';
+    editInput.className = 'machine-edit-input';
+    editInput.value = machine;
+    editInput.style.display = 'none';
+    
+    const actions = document.createElement('div');
+    actions.className = 'history-entry-actions';
+    
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn-icon edit';
+    editBtn.innerHTML = '✏️';
+    editBtn.title = 'Rename';
+    editBtn.addEventListener('click', () => {
+      // Cancel any existing edit
+      if (currentEditingMachine && currentEditingMachine.cancelBtn) {
+        currentEditingMachine.cancelBtn.click();
+      }
+      
+      // Switch to edit mode
+      machineName.style.display = 'none';
+      editInput.style.display = 'block';
+      editInput.focus();
+      editInput.select();
+      editBtn.style.display = 'none';
+      deleteBtn.style.display = 'none';
+      saveBtn.style.display = 'flex';
+      cancelBtn.style.display = 'flex';
+      
+      // Store current editing state
+      currentEditingMachine = {
+        machineName,
+        editInput,
+        editBtn,
+        deleteBtn,
+        saveBtn,
+        cancelBtn,
+        originalName: machine
+      };
+    });
+    
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-icon edit';
+    saveBtn.innerHTML = '✓';
+    saveBtn.title = 'Save';
+    saveBtn.style.display = 'none';
+    saveBtn.addEventListener('click', () => {
+      const newName = editInput.value.trim();
+      if (newName && renameMachine(machine, newName)) {
+        currentEditingMachine = null;
+        // renderMachineList will be called by renameMachine
+      } else {
+        editInput.value = machine;
+      }
+    });
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-icon';
+    cancelBtn.innerHTML = '✕';
+    cancelBtn.title = 'Cancel';
+    cancelBtn.style.display = 'none';
+    cancelBtn.addEventListener('click', () => {
+      editInput.value = machine;
+      machineName.style.display = 'block';
+      editInput.style.display = 'none';
+      editBtn.style.display = 'flex';
+      deleteBtn.style.display = 'flex';
+      saveBtn.style.display = 'none';
+      cancelBtn.style.display = 'none';
+      currentEditingMachine = null;
+    });
     
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'btn-icon delete';
@@ -204,8 +344,23 @@ function renderMachineList() {
       }
     });
     
+    // Handle Enter key to save
+    editInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        saveBtn.click();
+      } else if (e.key === 'Escape') {
+        cancelBtn.click();
+      }
+    });
+    
+    actions.appendChild(editBtn);
+    actions.appendChild(saveBtn);
+    actions.appendChild(cancelBtn);
+    actions.appendChild(deleteBtn);
+    
     machineItem.appendChild(machineName);
-    machineItem.appendChild(deleteBtn);
+    machineItem.appendChild(editInput);
+    machineItem.appendChild(actions);
     machineListDiv.appendChild(machineItem);
   });
 }
