@@ -24,7 +24,7 @@ const cancelWorkoutBtn = document.getElementById('cancelWorkoutBtn');
 
 // Bottom Navigation
 const bottomNav = document.getElementById('bottomNav');
-const navHome = document.getElementById('navHome');
+// Home tab removed; Workout is default
 const navExercises = document.getElementById('navExercises');
 const navWorkout = document.getElementById('navWorkout');
 const navHistory = document.getElementById('navHistory');
@@ -226,7 +226,7 @@ function showScreen(screen) {
 // Update bottom navigation active state
 function updateNavActiveState(screen) {
   // Remove active class from all nav buttons
-  navHome.classList.remove('active');
+  // Remove active class from all nav buttons
   navExercises.classList.remove('active');
   navWorkout.classList.remove('active');
   navHistory.classList.remove('active');
@@ -236,7 +236,8 @@ function updateNavActiveState(screen) {
   // Set active class based on current screen
   switch(screen) {
     case 'tracker':
-      navHome.classList.add('active');
+    case 'activeWorkout':
+      navWorkout.classList.add('active');
       break;
     case 'machines':
       navExercises.classList.add('active');
@@ -1057,6 +1058,7 @@ function renderHistory() {
   
   if (days.length === 0) {
     historyList.innerHTML = '<div class="empty-state">No workout history yet. Add your first set from the Home tab! 💪</div>';
+  historyList.innerHTML = '<div class="empty-state">No workout history yet. Add your first set from the Workout tab! 💪</div>';
     return;
   }
   
@@ -1400,7 +1402,6 @@ timerResetBtn.addEventListener('click', () => {
 // ===== BOTTOM NAVIGATION =====
 
 // Bottom navigation event listeners
-navHome.addEventListener('click', () => showScreen('tracker'));
 navExercises.addEventListener('click', () => {
   showScreen('machines');
   renderMachineList();
@@ -1434,4 +1435,5 @@ window.addEventListener('DOMContentLoaded', () => {
   renderHistory();
   renderActivePlanSelect();
   showScreen('tracker'); // Ensure we start at the home screen
+  showScreen('tracker'); // Start at workout screen (formerly home)
 });

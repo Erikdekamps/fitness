@@ -46,7 +46,7 @@ A modern, minimal, mobile-first fitness tracking web application with dark mode 
 - **Exercise Status**: Clear indicators for completed, in-progress, and pending exercises
 - **One-at-a-Time**: Complete exercises in order, focusing on current set
 - **Auto-Logging**: Each completed exercise automatically saved to history
-- **Finish Summary**: Complete the workout and return to main screen with updated history
+- **Finish Summary**: Complete the workout and view your updated history
 
 ### 📝 History Management
 - **Editable Entries**: Edit any past workout entry (machine, weight, or reps)
@@ -88,10 +88,11 @@ Then open `http://localhost:8000` in your browser.
 ## 📖 How to Use
 
 ### Basic Workout Logging
-1. **Select a machine** from the dropdown
-2. **Adjust weight and reps** using +/- buttons or type directly
-3. Click **"Add Set"** to save
-4. View your entry in the history below
+1. You're on the **Workout** screen (default)
+2. **Select a machine** from the dropdown
+3. **Adjust weight and reps** using +/- buttons or type directly
+4. Click **"Add Set"** to save
+5. You'll be taken to the History screen automatically
 
 ### Creating a Workout Plan
 1. Click the **📋 button** in the header
@@ -102,7 +103,7 @@ Then open `http://localhost:8000` in your browser.
 6. Click **"Save Plan"**
 
 ### Using a Workout Plan
-1. On the main screen, select a plan from the **Quick Start Plan** dropdown
+1. On the Workout screen, select a plan from the **Quick Start Plan** dropdown
 2. Click **"Start"**
 3. Complete each exercise one by one
 4. Click **"Mark as Complete"** after finishing each set
