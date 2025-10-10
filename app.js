@@ -16,8 +16,6 @@ const timerScreen = document.getElementById('timerScreen');
 const historyScreen = document.getElementById('historyScreen');
 
 // Buttons
-const backBtn = document.getElementById('backBtn');
-const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
 const backFromPlansBtn = document.getElementById('backFromPlansBtn');
 const backFromEditPlanBtn = document.getElementById('backFromEditPlanBtn');
 const cancelWorkoutBtn = document.getElementById('cancelWorkoutBtn');
@@ -253,8 +251,6 @@ function updateNavActiveState(screen) {
   }
 }
 
-backBtn.addEventListener('click', () => showScreen('tracker'));
-
 backFromPlansBtn.addEventListener('click', () => showScreen('tracker'));
 
 backFromEditPlanBtn.addEventListener('click', () => {
@@ -268,27 +264,6 @@ cancelWorkoutBtn.addEventListener('click', () => {
     completedExercises.clear();
     showScreen('tracker');
   }
-});
-
-backFromSettingsBtn.addEventListener('click', () => {
-  // Save settings when going back
-  const settings = {
-    weightIncrement: parseFloat(weightIncrementInput.value),
-    defaultWeight: parseFloat(defaultWeightInput.value),
-    defaultReps: parseInt(defaultRepsInput.value)
-  };
-  saveSettings(settings);
-  
-  // Reload the interface with new settings
-  const currentMachine = machineSelect.value;
-  if (!currentMachine) {
-    // If no machine selected, use defaults
-    weightInput.value = settings.defaultWeight;
-    repsInput.value = settings.defaultReps;
-  }
-  // If machine is selected, values will be correct already
-  
-  showScreen('tracker');
 });
 
 // Add machine button
