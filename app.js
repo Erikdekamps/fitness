@@ -68,6 +68,46 @@ let currentWorkoutPlan = null;
 let completedExercises = new Set();
 let expandedExerciseIndex = null; // Track which exercise is expanded
 
+// ===== ACTIVE WORKOUT PERSISTENCE =====
+
+// Save active workout to localStorage
+function saveActiveWorkout() {
+  if (currentWorkoutPlan) {
+    const workoutState = {
+      plan: currentWorkoutPlan,
+      completedExercises: Array.from(completedExercises)
+    };
+    localStorage.setItem('activeWorkout', JSON.stringify(workoutState));
+  } else {
+    localStorage.removeItem('activeWorkout');
+  }
+}
+
+// Load active workout from localStorage
+function loadActiveWorkout() {
+  const saved = localStorage.getItem('activeWorkout');
+  if (saved) {
+    try {
+      const workoutState = JSON.parse(saved);
+      currentWorkoutPlan = workoutState.plan;
+      completedExercises = new Set(workoutState.completedExercises || []);
+      return true;
+    } catch (e) {
+      console.error('Error loading active workout:', e);
+      localStorage.removeItem('activeWorkout');
+      return false;
+    }
+  }
+  return false;
+}
+
+// Clear active workout from localStorage
+function clearActiveWorkout() {
+  currentWorkoutPlan = null;
+  completedExercises.clear();
+  localStorage.removeItem('activeWorkout');
+}
+
 // Settings inputs
 const weightIncrementInput = document.getElementById('weightIncrement');
 const defaultWeightInput = document.getElementById('defaultWeight');
@@ -484,8 +524,7 @@ backFromEditPlanBtn.addEventListener('click', () => {
 
 cancelWorkoutBtn.addEventListener('click', () => {
   if (confirm('Are you sure you want to cancel this workout? Progress will not be saved.')) {
-    currentWorkoutPlan = null;
-    completedExercises.clear();
+    clearActiveWorkout();
     showScreen('tracker');
   }
 });
@@ -836,6 +875,9 @@ function startPlan() {
   currentWorkoutPlan = plan;
   completedExercises.clear();
   
+  // Save to localStorage
+  saveActiveWorkout();
+  
   activeWorkoutTitle.textContent = `🏋️ ${plan.name}`;
   renderActiveWorkout();
   showScreen('activeWorkout');
@@ -975,6 +1017,9 @@ function renderActiveWorkout() {
       completeBtn.addEventListener('click', () => {
         completedExercises.add(currentSet.globalIndex);
         
+        // Save to localStorage
+        saveActiveWorkout();
+        
         // Add to history
         addEntry({
           machine: currentSet.machine,
@@ -1005,8 +1050,7 @@ function renderActiveWorkout() {
 
 // Finish workout button
 finishWorkoutBtn.addEventListener('click', () => {
-  currentWorkoutPlan = null;
-  completedExercises.clear();
+  clearActiveWorkout();
   activePlanSelect.value = '';
   renderHistory();
   showScreen('history'); // Show history screen instead of home screen
@@ -2305,7 +2349,16 @@ navExercises.addEventListener('click', () => {
   renderMachineList();
 });
 navWorkout.addEventListener('click', () => {
-  showScreen('tracker');
+  // Check if there's an active workout
+  if (currentWorkoutPlan) {
+    // Show the active workout screen
+    activeWorkoutTitle.textContent = `🏋️ ${currentWorkoutPlan.name}`;
+    renderActiveWorkout();
+    showScreen('activeWorkout');
+  } else {
+    // Show the tracker screen
+    showScreen('tracker');
+  }
 });
 navHistory.addEventListener('click', () => {
   showScreen('history');
@@ -2337,7 +2390,18 @@ window.addEventListener('DOMContentLoaded', () => {
   renderHistory();
   renderTodaySection(); // Show today's workout on load
   renderActivePlanSelect();
-  showScreen('tracker'); // Start at workout screen (formerly home)
+  
+  // Restore active workout if one exists
+  const hasActiveWorkout = loadActiveWorkout();
+  if (hasActiveWorkout) {
+    // Show the active workout screen
+    activeWorkoutTitle.textContent = `🏋️ ${currentWorkoutPlan.name}`;
+    renderActiveWorkout();
+    showScreen('activeWorkout');
+  } else {
+    // Start at workout screen (formerly home)
+    showScreen('tracker');
+  }
   
   // Set timer inputs and display to default timer duration
   const settings = getSettings();
