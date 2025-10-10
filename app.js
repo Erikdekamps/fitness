@@ -488,6 +488,38 @@ function renderActiveWorkout() {
     });
   });
   
+  // Bundle consecutive sets of the same exercise
+  const bundledExercises = [];
+  let currentBundle = null;
+  
+  allSets.forEach((set, globalIndex) => {
+    if (!currentBundle || currentBundle.machine !== set.machine) {
+      // Start a new bundle
+      if (currentBundle) {
+        bundledExercises.push(currentBundle);
+      }
+      currentBundle = {
+        machine: set.machine,
+        exerciseIndex: set.exerciseIndex,
+        sets: [{
+          ...set,
+          globalIndex
+        }]
+      };
+    } else {
+      // Add to current bundle
+      currentBundle.sets.push({
+        ...set,
+        globalIndex
+      });
+    }
+  });
+  
+  // Push the last bundle
+  if (currentBundle) {
+    bundledExercises.push(currentBundle);
+  }
+  
   const completed = completedExercises.size;
   const total = allSets.length;
   
@@ -497,35 +529,40 @@ function renderActiveWorkout() {
   const progressPercent = total > 0 ? (completed / total) * 100 : 0;
   progressBarFill.style.width = `${progressPercent}%`;
   
-  // Render sets
+  // Render bundled exercises
   workoutExercisesDiv.innerHTML = '';
   
-  allSets.forEach((set, index) => {
-    const isCompleted = completedExercises.has(index);
-    const isCurrent = !isCompleted && completedExercises.size === index;
+  bundledExercises.forEach((bundle, bundleIndex) => {
+    const allSetsCompleted = bundle.sets.every(s => completedExercises.has(s.globalIndex));
+    const anySetsCompleted = bundle.sets.some(s => completedExercises.has(s.globalIndex));
+    const currentSetIndex = bundle.sets.findIndex(s => !completedExercises.has(s.globalIndex));
+    const isCurrent = currentSetIndex >= 0 && bundle.sets.slice(0, currentSetIndex).every(s => completedExercises.has(s.globalIndex));
     
     const exerciseCard = document.createElement('div');
-    exerciseCard.className = `workout-exercise-card ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`;
+    exerciseCard.className = `workout-exercise-card ${allSetsCompleted ? 'completed' : ''} ${isCurrent && !allSetsCompleted ? 'current' : ''}`;
     
     const cardHeader = document.createElement('div');
     cardHeader.className = 'workout-exercise-header';
     
     const exerciseNumber = document.createElement('div');
     exerciseNumber.className = 'workout-exercise-number';
-    const setLabel = set.totalSets > 1 ? ` - Set ${set.setIndex + 1}/${set.totalSets}` : '';
-    exerciseNumber.textContent = `Exercise ${set.exerciseIndex + 1}${setLabel}`;
+    exerciseNumber.textContent = `Exercise ${bundle.exerciseIndex + 1}`;
     
     const status = document.createElement('div');
     status.className = 'workout-exercise-status';
-    if (isCompleted) {
+    const completedCount = bundle.sets.filter(s => completedExercises.has(s.globalIndex)).length;
+    if (allSetsCompleted) {
       status.innerHTML = '✓ Completed';
       status.style.color = 'var(--success)';
+    } else if (anySetsCompleted) {
+      status.innerHTML = `${completedCount}/${bundle.sets.length} Complete`;
+      status.style.color = 'var(--accent)';
     } else if (isCurrent) {
       status.innerHTML = '● In Progress';
       status.style.color = 'var(--accent)';
     } else {
       status.innerHTML = '○ Pending';
-      status.style.color = 'var(--text-secondary)';
+      status.color = 'var(--text-secondary)';
     }
     
     cardHeader.appendChild(exerciseNumber);
@@ -536,11 +573,18 @@ function renderActiveWorkout() {
     
     const machineName = document.createElement('div');
     machineName.className = 'workout-exercise-machine';
-    machineName.textContent = set.machine;
+    machineName.textContent = bundle.machine;
     
     const details = document.createElement('div');
     details.className = 'workout-exercise-details';
-    details.textContent = `${set.weight}kg × ${set.reps} reps`;
+    // Show all sets in the bundle
+    const setsText = bundle.sets.map((s, i) => {
+      const isCompleted = completedExercises.has(s.globalIndex);
+      const setNum = i + 1;
+      return `${isCompleted ? '✓' : '○'} Set ${setNum}: ${s.weight}kg × ${s.reps} reps`;
+    }).join('\n');
+    details.style.whiteSpace = 'pre-line';
+    details.textContent = setsText;
     
     cardBody.appendChild(machineName);
     cardBody.appendChild(details);
@@ -549,18 +593,19 @@ function renderActiveWorkout() {
     exerciseCard.appendChild(cardBody);
     
     // Add complete button for current set
-    if (isCurrent) {
+    if (isCurrent && currentSetIndex >= 0) {
+      const currentSet = bundle.sets[currentSetIndex];
       const completeBtn = document.createElement('button');
       completeBtn.className = 'btn-complete-exercise';
-      completeBtn.textContent = 'Mark as Complete';
+      completeBtn.textContent = `Complete Set ${currentSetIndex + 1}/${bundle.sets.length}`;
       completeBtn.addEventListener('click', () => {
-        completedExercises.add(index);
+        completedExercises.add(currentSet.globalIndex);
         
         // Add to history
         addEntry({
-          machine: set.machine,
-          weight: set.weight,
-          reps: set.reps
+          machine: currentSet.machine,
+          weight: currentSet.weight,
+          reps: currentSet.reps
         });
         
         renderActiveWorkout();
