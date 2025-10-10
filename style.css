@@ -28,6 +28,15 @@
   --base-size: 16px;
   --font-scale: 1; /* Default scale multiplier */
   --base-font-size: calc(var(--base-size) * var(--font-scale));
+  
+  /* Layout density variables */
+  --density-scale: 1; /* Default density multiplier */
+  --spacing-xs: calc(0.25rem * var(--density-scale));
+  --spacing-sm: calc(0.5rem * var(--density-scale));
+  --spacing-md: calc(0.75rem * var(--density-scale));
+  --spacing-lg: calc(1rem * var(--density-scale));
+  --spacing-xl: calc(1.5rem * var(--density-scale));
+  --spacing-2xl: calc(2rem * var(--density-scale));
 }
 
 html {
@@ -67,10 +76,23 @@ html.font-very-large {
   --font-scale: 1.2; /* 120% */
 }
 
+/* Layout density variants - apply to html for consistent spacing */
+html.density-narrow {
+  --density-scale: 0.75; /* 75% - Compact */
+}
+
+html.density-normal {
+  --density-scale: 1; /* 100% - Normal */
+}
+
+html.density-wide {
+  --density-scale: 1.25; /* 125% - Spacious */
+}
+
 main {
   width: 100%;
   margin: 0 auto;
-  padding: 1rem 1.5rem;
+  padding: var(--spacing-lg) var(--spacing-xl);
   min-height: 100vh;
 }
 
@@ -78,8 +100,8 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 1rem 0 2rem;
-  padding: 0 0.75rem;
+  margin: var(--spacing-lg) 0 var(--spacing-2xl);
+  padding: 0 var(--spacing-md);
 }
 
 .header-spacer {
@@ -90,7 +112,7 @@ main {
 
 .header-right {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .btn-icon-header {
@@ -138,12 +160,12 @@ main {
 .machine-container {
   background: var(--bg-secondary);
   border-radius: 1rem;
-  padding: 1.5rem;
+  padding: var(--spacing-xl);
   border: 1px solid var(--border);
 }
 
 #addMachineForm {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-xl);
 }
 
 .machine-list-container {
@@ -151,7 +173,7 @@ main {
 }
 
 .machine-list-container h2 {
-  margin: 0 0 1rem 0;
+  margin: 0 0 var(--spacing-lg) 0;
 }
 
 .add-machine-group {
@@ -328,18 +350,18 @@ form {
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-xl);
 }
 
 .form-group:last-of-type {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-xl);
 }
 
 label {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-sm);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -348,7 +370,7 @@ label {
 .setting-description {
   font-size: 0.8rem;
   color: var(--text-secondary);
-  margin: -0.25rem 0 0.75rem 0;
+  margin: calc(-1 * var(--spacing-xs)) 0 var(--spacing-md) 0;
   line-height: 1.4;
 }
 
@@ -555,8 +577,8 @@ select:focus {
 .workout-summary-card {
   background: var(--bg-tertiary);
   border-radius: 0.75rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
   border: 1px solid var(--border);
   transition: all 0.15s ease;
 }
@@ -567,7 +589,7 @@ select:focus {
 }
 
 .workout-summary-header {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--spacing-md);
 }
 
 .workout-summary-date {
@@ -578,9 +600,9 @@ select:focus {
 
 .workout-summary-stats {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-  padding: 0.75rem;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: 0.5rem;
 }
@@ -594,7 +616,7 @@ select:focus {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--accent);
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--spacing-xs);
 }
 
 .workout-stat-label {
@@ -607,13 +629,13 @@ select:focus {
 .workout-summary-exercises {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  margin-bottom: 0.75rem;
-  padding-left: 0.5rem;
+  margin-bottom: var(--spacing-md);
+  padding-left: var(--spacing-sm);
 }
 
 .btn-view-details {
   width: 100%;
-  padding: 0.625rem;
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--accent);
   color: white;
   border: none;
@@ -631,15 +653,15 @@ select:focus {
 
 /* Workout Detail View */
 .workout-detail-container {
-  padding: 1rem;
+  padding: var(--spacing-lg);
   padding-bottom: 100px;
 }
 
 .workout-detail-stats {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
   background: var(--bg-tertiary);
   border-radius: 0.75rem;
   border: 1px solid var(--border);
@@ -648,8 +670,8 @@ select:focus {
 .workout-detail-exercise {
   background: var(--bg-tertiary);
   border-radius: 0.75rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
   border: 1px solid var(--border);
 }
 
@@ -657,22 +679,22 @@ select:focus {
   font-weight: 600;
   font-size: 1rem;
   color: var(--text-primary);
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.5rem;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
   border-bottom: 1px solid var(--border);
 }
 
 .workout-detail-sets {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .workout-detail-set {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.625rem;
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: 0.5rem;
 }

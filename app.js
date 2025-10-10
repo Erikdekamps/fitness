@@ -73,6 +73,7 @@ const weightIncrementInput = document.getElementById('weightIncrement');
 const defaultWeightInput = document.getElementById('defaultWeight');
 const defaultRepsInput = document.getElementById('defaultReps');
 const fontSizeSelect = document.getElementById('fontSize');
+const layoutDensitySelect = document.getElementById('layoutDensity');
 const dateFormatSelect = document.getElementById('dateFormat');
 const timeFormatSelect = document.getElementById('timeFormat');
 
@@ -100,6 +101,7 @@ function getSettings() {
     defaultWeight: 20,
     defaultReps: 10,
     fontSize: 'normal',
+    layoutDensity: 'normal',
     dateFormat: 'eu',
     timeFormat: '24h'
   };
@@ -120,6 +122,7 @@ function applySettings() {
   defaultWeightInput.value = settings.defaultWeight;
   defaultRepsInput.value = settings.defaultReps;
   fontSizeSelect.value = settings.fontSize;
+  layoutDensitySelect.value = settings.layoutDensity;
   dateFormatSelect.value = settings.dateFormat;
   timeFormatSelect.value = settings.timeFormat;
   
@@ -129,6 +132,10 @@ function applySettings() {
   // Apply font size to html element (for rem units)
   document.documentElement.classList.remove('font-tiny', 'font-small', 'font-normal', 'font-large', 'font-very-large');
   document.documentElement.classList.add(`font-${settings.fontSize}`);
+  
+  // Apply layout density to html element
+  document.documentElement.classList.remove('density-narrow', 'density-normal', 'density-wide');
+  document.documentElement.classList.add(`density-${settings.layoutDensity}`);
 }
 
 // ===== MACHINES =====
@@ -480,6 +487,7 @@ function getCurrentSettingsFromInputs() {
     defaultWeight: parseFloat(defaultWeightInput.value),
     defaultReps: parseInt(defaultRepsInput.value),
     fontSize: fontSizeSelect.value,
+    layoutDensity: layoutDensitySelect.value,
     dateFormat: dateFormatSelect.value,
     timeFormat: timeFormatSelect.value
   };
@@ -498,6 +506,11 @@ defaultRepsInput.addEventListener('change', () => {
 });
 
 fontSizeSelect.addEventListener('change', () => {
+  saveSettings(getCurrentSettingsFromInputs());
+  // Settings are already applied via saveSettings -> applySettings
+});
+
+layoutDensitySelect.addEventListener('change', () => {
   saveSettings(getCurrentSettingsFromInputs());
   // Settings are already applied via saveSettings -> applySettings
 });
