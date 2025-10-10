@@ -1147,6 +1147,81 @@ function editPlan(planId) {
   showScreen('editPlan');
 }
 
+// ===== DRAG AND DROP HANDLERS =====
+
+let draggedExerciseIndex = null;
+
+function handleDragStart(e) {
+  draggedExerciseIndex = parseInt(e.currentTarget.dataset.exerciseIndex);
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
+}
+
+function handleDragOver(e) {
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+  e.dataTransfer.dropEffect = 'move';
+  return false;
+}
+
+function handleDragEnter(e) {
+  const targetIndex = parseInt(e.currentTarget.dataset.exerciseIndex);
+  if (targetIndex !== draggedExerciseIndex) {
+    e.currentTarget.classList.add('drag-over');
+  }
+}
+
+function handleDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+  
+  e.currentTarget.classList.remove('drag-over');
+  
+  const dropIndex = parseInt(e.currentTarget.dataset.exerciseIndex);
+  
+  if (draggedExerciseIndex !== null && draggedExerciseIndex !== dropIndex) {
+    // Reorder the exercises array
+    const draggedExercise = currentPlanExercises[draggedExerciseIndex];
+    currentPlanExercises.splice(draggedExerciseIndex, 1);
+    currentPlanExercises.splice(dropIndex, 0, draggedExercise);
+    
+    // Update expanded index if needed
+    if (expandedExerciseIndex === draggedExerciseIndex) {
+      expandedExerciseIndex = dropIndex;
+    } else if (expandedExerciseIndex !== null) {
+      if (draggedExerciseIndex < expandedExerciseIndex && dropIndex >= expandedExerciseIndex) {
+        expandedExerciseIndex--;
+      } else if (draggedExerciseIndex > expandedExerciseIndex && dropIndex <= expandedExerciseIndex) {
+        expandedExerciseIndex++;
+      }
+    }
+    
+    renderPlanExercises();
+  }
+  
+  return false;
+}
+
+function handleDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  
+  // Remove all drag-over classes
+  document.querySelectorAll('.exercise-item').forEach(item => {
+    item.classList.remove('drag-over');
+  });
+  
+  draggedExerciseIndex = null;
+}
+
+// ===== END DRAG AND DROP HANDLERS =====
+
 // Render exercise editor
 function renderPlanExercises() {
   planExercisesDiv.innerHTML = '';
@@ -1170,10 +1245,28 @@ function renderPlanExercises() {
     
     exerciseItem.className = 'exercise-item';
     
+    // Make item draggable
+    exerciseItem.draggable = true;
+    exerciseItem.dataset.exerciseIndex = exerciseIndex;
+    
+    // Add drag event listeners
+    exerciseItem.addEventListener('dragstart', handleDragStart);
+    exerciseItem.addEventListener('dragover', handleDragOver);
+    exerciseItem.addEventListener('drop', handleDrop);
+    exerciseItem.addEventListener('dragenter', handleDragEnter);
+    exerciseItem.addEventListener('dragleave', handleDragLeave);
+    exerciseItem.addEventListener('dragend', handleDragEnd);
+    
     // Collapsed view
     if (!isExpanded && isComplete) {
       const header = document.createElement('div');
       header.className = 'exercise-item-header';
+      
+      // Add drag handle
+      const dragHandle = document.createElement('div');
+      dragHandle.className = 'drag-handle';
+      dragHandle.innerHTML = '⋮⋮';
+      dragHandle.title = 'Drag to reorder';
       
       const info = document.createElement('div');
       info.className = 'exercise-collapsed-info';
@@ -1214,6 +1307,7 @@ function renderPlanExercises() {
       
       actions.appendChild(editBtn);
       actions.appendChild(deleteBtn);
+      header.appendChild(dragHandle);
       header.appendChild(info);
       header.appendChild(actions);
       exerciseItem.appendChild(header);
@@ -1221,6 +1315,12 @@ function renderPlanExercises() {
       // Expanded view
       const header = document.createElement('div');
       header.className = 'exercise-item-header';
+      
+      // Add drag handle
+      const dragHandle = document.createElement('div');
+      dragHandle.className = 'drag-handle';
+      dragHandle.innerHTML = '⋮⋮';
+      dragHandle.title = 'Drag to reorder';
       
       const number = document.createElement('div');
       number.className = 'exercise-number';
@@ -1241,6 +1341,7 @@ function renderPlanExercises() {
         renderPlanExercises();
       });
       
+      header.appendChild(dragHandle);
       header.appendChild(number);
       header.appendChild(deleteBtn);
       
@@ -2423,6 +2524,10 @@ navWorkout.addEventListener('click', () => {
     // Show the active workout screen
     activeWorkoutTitle.textContent = `🏋️ ${currentWorkoutPlan.name}`;
     renderActiveWorkout();
+    // Restart timer if it's not running
+    if (!workoutTimerInterval) {
+      startWorkoutTimer();
+    }
     showScreen('activeWorkout');
   } else {
     // Show the tracker screen
