@@ -12,16 +12,24 @@ const settingsScreen = document.getElementById('settingsScreen');
 const plansScreen = document.getElementById('plansScreen');
 const editPlanScreen = document.getElementById('editPlanScreen');
 const activeWorkoutScreen = document.getElementById('activeWorkoutScreen');
+const timerScreen = document.getElementById('timerScreen');
+const historyScreen = document.getElementById('historyScreen');
 
 // Buttons
-const manageMachinesBtn = document.getElementById('manageMachinesBtn');
-const settingsBtn = document.getElementById('settingsBtn');
-const plansBtn = document.getElementById('plansBtn');
 const backBtn = document.getElementById('backBtn');
 const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
 const backFromPlansBtn = document.getElementById('backFromPlansBtn');
 const backFromEditPlanBtn = document.getElementById('backFromEditPlanBtn');
 const cancelWorkoutBtn = document.getElementById('cancelWorkoutBtn');
+
+// Bottom Navigation
+const bottomNav = document.getElementById('bottomNav');
+const navHome = document.getElementById('navHome');
+const navExercises = document.getElementById('navExercises');
+const navWorkout = document.getElementById('navWorkout');
+const navHistory = document.getElementById('navHistory');
+const navTimer = document.getElementById('navTimer');
+const navSettings = document.getElementById('navSettings');
 const addMachineBtn = document.getElementById('addMachineBtn');
 const newMachineNameInput = document.getElementById('newMachineName');
 const machineListDiv = document.getElementById('machineList');
@@ -208,22 +216,45 @@ function showScreen(screen) {
   plansScreen.classList.toggle('screen-hidden', screen !== 'plans');
   editPlanScreen.classList.toggle('screen-hidden', screen !== 'editPlan');
   activeWorkoutScreen.classList.toggle('screen-hidden', screen !== 'activeWorkout');
+  timerScreen.classList.toggle('screen-hidden', screen !== 'timer');
+  historyScreen.classList.toggle('screen-hidden', screen !== 'history');
+  
+  // Update bottom navigation active state
+  updateNavActiveState(screen);
 }
 
-manageMachinesBtn.addEventListener('click', () => {
-  showScreen('machines');
-  renderMachineList();
-});
-
-settingsBtn.addEventListener('click', () => {
-  showScreen('settings');
-  applySettings();
-});
-
-plansBtn.addEventListener('click', () => {
-  showScreen('plans');
-  renderPlansList();
-});
+// Update bottom navigation active state
+function updateNavActiveState(screen) {
+  // Remove active class from all nav buttons
+  navHome.classList.remove('active');
+  navExercises.classList.remove('active');
+  navWorkout.classList.remove('active');
+  navHistory.classList.remove('active');
+  navTimer.classList.remove('active');
+  navSettings.classList.remove('active');
+  
+  // Set active class based on current screen
+  switch(screen) {
+    case 'tracker':
+      navHome.classList.add('active');
+      break;
+    case 'machines':
+      navExercises.classList.add('active');
+      break;
+    case 'activeWorkout':
+      navWorkout.classList.add('active');
+      break;
+    case 'history':
+      navHistory.classList.add('active');
+      break;
+    case 'timer':
+      navTimer.classList.add('active');
+      break;
+    case 'settings':
+      navSettings.classList.add('active');
+      break;
+  }
+}
 
 backBtn.addEventListener('click', () => showScreen('tracker'));
 
@@ -557,12 +588,7 @@ finishWorkoutBtn.addEventListener('click', () => {
   completedExercises.clear();
   activePlanSelect.value = '';
   renderHistory();
-  showScreen('tracker');
-  
-  // Scroll to history
-  setTimeout(() => {
-    document.getElementById('history').scrollIntoView({ behavior: 'smooth' });
-  }, 100);
+  showScreen('history'); // Show history screen instead of home screen
 });
 
 // Edit a plan
@@ -1030,7 +1056,7 @@ function renderHistory() {
   const days = Object.keys(history).sort().reverse();
   
   if (days.length === 0) {
-    historyList.innerHTML = '<div class="empty-state">No workout history yet. Start by adding your first set! 💪</div>';
+    historyList.innerHTML = '<div class="empty-state">No workout history yet. Add your first set from the Home tab! 💪</div>';
     return;
   }
   
@@ -1159,9 +1185,244 @@ form.addEventListener('submit', (e) => {
   repsInput.value = settings.defaultReps;
   
   renderHistory();
+  showScreen('history'); // Show history screen after adding a set
+});
+
+// ===== TIMER/STOPWATCH FUNCTIONALITY =====
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(button => {
+  button.addEventListener('click', () => {
+    const tabId = button.dataset.tab;
+    
+    // Update active tab button
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabId);
+    });
+    
+    // Show active tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.toggle('active', content.id === `${tabId}Tab`);
+    });
+  });
+});
+
+// Stopwatch variables
+let stopwatchInterval;
+let stopwatchRunning = false;
+let stopwatchStartTime;
+let stopwatchElapsedTime = 0;
+let lapCounter = 0;
+
+// Timer variables
+let timerInterval;
+let timerRunning = false;
+let timerDuration = 0;
+let timerEndTime;
+
+// Stopwatch elements
+const stopwatchDisplay = document.querySelector('.stopwatch-display');
+const stopwatchStartBtn = document.getElementById('stopwatchStartBtn');
+const stopwatchResetBtn = document.getElementById('stopwatchResetBtn');
+const lapsContainer = document.getElementById('lapsContainer');
+
+// Timer elements
+const timerDisplay = document.querySelector('.timer-display');
+const timerMinutesInput = document.getElementById('timerMinutes');
+const timerSecondsInput = document.getElementById('timerSeconds');
+const timerStartBtn = document.getElementById('timerStartBtn');
+const timerResetBtn = document.getElementById('timerResetBtn');
+
+// Format time display (HH:MM:SS)
+function formatStopwatchTime(timeInMs) {
+  const totalSeconds = Math.floor(timeInMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const milliseconds = Math.floor((timeInMs % 1000) / 10);
   
-  // Scroll to history
-  document.getElementById('history').scrollIntoView({ behavior: 'smooth' });
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Format timer display (MM:SS)
+function formatTimerTime(timeInMs) {
+  const totalSeconds = Math.ceil(timeInMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Start/stop stopwatch
+stopwatchStartBtn.addEventListener('click', () => {
+  if (stopwatchRunning) {
+    // Stop the stopwatch
+    clearInterval(stopwatchInterval);
+    stopwatchRunning = false;
+    stopwatchStartBtn.textContent = 'Resume';
+    stopwatchStartBtn.classList.remove('active');
+    
+    // Add lap when pausing
+    addLap();
+  } else {
+    // Start or resume the stopwatch
+    const now = Date.now();
+    if (stopwatchElapsedTime === 0) {
+      // First start - clear laps
+      lapsContainer.innerHTML = '';
+      lapCounter = 0;
+    }
+    stopwatchStartTime = now - stopwatchElapsedTime;
+    
+    stopwatchInterval = setInterval(() => {
+      const elapsed = Date.now() - stopwatchStartTime;
+      stopwatchDisplay.textContent = formatStopwatchTime(elapsed);
+      stopwatchElapsedTime = elapsed;
+    }, 100);
+    
+    stopwatchRunning = true;
+    stopwatchStartBtn.textContent = 'Pause';
+    stopwatchStartBtn.classList.add('active');
+  }
+});
+
+// Reset stopwatch
+stopwatchResetBtn.addEventListener('click', () => {
+  clearInterval(stopwatchInterval);
+  stopwatchRunning = false;
+  stopwatchElapsedTime = 0;
+  stopwatchDisplay.textContent = '00:00:00';
+  stopwatchStartBtn.textContent = 'Start';
+  stopwatchStartBtn.classList.remove('active');
+  lapsContainer.innerHTML = '';
+  lapCounter = 0;
+});
+
+// Add lap
+function addLap() {
+  if (stopwatchElapsedTime > 0) {
+    lapCounter++;
+    
+    const lapItem = document.createElement('div');
+    lapItem.className = 'lap-item';
+    
+    const lapNumber = document.createElement('div');
+    lapNumber.className = 'lap-number';
+    lapNumber.textContent = `Lap ${lapCounter}`;
+    
+    const lapTime = document.createElement('div');
+    lapTime.className = 'lap-time';
+    lapTime.textContent = formatStopwatchTime(stopwatchElapsedTime);
+    
+    lapItem.appendChild(lapNumber);
+    lapItem.appendChild(lapTime);
+    
+    lapsContainer.prepend(lapItem);
+  }
+}
+
+// Start/stop timer
+timerStartBtn.addEventListener('click', () => {
+  if (timerRunning) {
+    // Stop the timer
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerStartBtn.textContent = 'Resume';
+    timerStartBtn.classList.remove('active');
+    
+    // Calculate remaining time
+    const remaining = timerEndTime - Date.now();
+    if (remaining > 0) {
+      timerDuration = remaining;
+    }
+  } else {
+    // Get duration from inputs if not running
+    if (!timerDuration) {
+      const minutes = parseInt(timerMinutesInput.value) || 0;
+      const seconds = parseInt(timerSecondsInput.value) || 0;
+      timerDuration = (minutes * 60 + seconds) * 1000;
+    }
+    
+    // Don't start if duration is 0
+    if (timerDuration <= 0) {
+      return;
+    }
+    
+    // Disable inputs while timer is running
+    timerMinutesInput.disabled = true;
+    timerSecondsInput.disabled = true;
+    
+    // Set end time
+    timerEndTime = Date.now() + timerDuration;
+    
+    timerInterval = setInterval(() => {
+      const remaining = timerEndTime - Date.now();
+      
+      if (remaining <= 0) {
+        // Timer finished
+        clearInterval(timerInterval);
+        timerDisplay.textContent = '00:00';
+        timerRunning = false;
+        timerDuration = 0;
+        timerStartBtn.textContent = 'Start';
+        timerStartBtn.classList.remove('active');
+        timerMinutesInput.disabled = false;
+        timerSecondsInput.disabled = false;
+        
+        // Play alarm sound or vibration
+        navigator.vibrate && navigator.vibrate([500, 250, 500]);
+      } else {
+        // Update display
+        timerDisplay.textContent = formatTimerTime(remaining);
+      }
+    }, 100);
+    
+    timerRunning = true;
+    timerStartBtn.textContent = 'Pause';
+    timerStartBtn.classList.add('active');
+  }
+});
+
+// Reset timer
+timerResetBtn.addEventListener('click', () => {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerDuration = 0;
+  timerDisplay.textContent = '00:00';
+  timerStartBtn.textContent = 'Start';
+  timerStartBtn.classList.remove('active');
+  timerMinutesInput.disabled = false;
+  timerSecondsInput.disabled = false;
+  timerMinutesInput.value = 0;
+  timerSecondsInput.value = 0;
+});
+
+// ===== BOTTOM NAVIGATION =====
+
+// Bottom navigation event listeners
+navHome.addEventListener('click', () => showScreen('tracker'));
+navExercises.addEventListener('click', () => {
+  showScreen('machines');
+  renderMachineList();
+});
+navWorkout.addEventListener('click', () => {
+  const plans = getPlans();
+  if (plans.length > 0) {
+    showScreen('tracker');
+    planSelector.style.display = 'block';
+    planSelector.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    showScreen('plans');
+  }
+});
+navHistory.addEventListener('click', () => {
+  showScreen('history');
+  renderHistory(); // Refresh history when switching to history tab
+});
+navTimer.addEventListener('click', () => showScreen('timer'));
+navSettings.addEventListener('click', () => {
+  showScreen('settings');
+  applySettings();
 });
 
 // ===== INITIALIZATION =====
@@ -1172,4 +1433,5 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMachineSelect();
   renderHistory();
   renderActivePlanSelect();
+  showScreen('tracker'); // Ensure we start at the home screen
 });

@@ -10,12 +10,7 @@
   <!-- Main Tracker Screen -->
   <main id="trackerScreen">
     <div class="header">
-      <button type="button" id="settingsBtn" class="btn-icon-header" title="Settings">⚙️</button>
       <h1>💪 Fitness Tracker</h1>
-      <div class="header-right">
-        <button type="button" id="plansBtn" class="btn-icon-header" title="Workout Plans">📋</button>
-        <button type="button" id="manageMachinesBtn" class="btn-icon-header" title="Manage Machines">🏋️</button>
-      </div>
     </div>
     
     <div id="planSelector" class="plan-selector" style="display: none;">
@@ -54,16 +49,22 @@
         </div>
       </div>
       
-      <button type="submit" class="btn-primary">Add Set</button>
-    </form>
-    
-    <section id="history">
-      <h2>History</h2>
-      <div id="historyList"></div>
-    </section>
+    <button type="submit" class="btn-primary">Add Set</button>
+  </form>
   </main>
   
-  <!-- Machine Management Screen -->
+  <!-- History Screen -->
+  <div id="historyScreen" class="screen-hidden">
+    <div class="header">
+      <div style="width: 2.5rem;"></div>
+      <h1>📊 Workout History</h1>
+      <div style="width: 2.5rem;"></div>
+    </div>
+    
+    <section id="history">
+      <div id="historyList"></div>
+    </section>
+  </div>  <!-- Machine Management Screen -->
   <div id="machineScreen" class="screen-hidden">
     <div class="header">
       <button type="button" id="backBtn" class="btn-icon-header" title="Back">←</button>
@@ -194,6 +195,87 @@
       <button type="button" id="finishWorkoutBtn" class="btn-primary" style="display: none;">Finish Workout</button>
     </div>
   </div>
+  
+  <!-- Timer/Stopwatch Screen -->
+  <div id="timerScreen" class="screen-hidden">
+    <div class="header">
+      <div style="width: 2.5rem;"></div>
+      <h1>⏱️ Timer</h1>
+      <div style="width: 2.5rem;"></div>
+    </div>
+    
+    <div class="timer-container">
+      <div class="tabs">
+        <button type="button" class="tab-btn active" data-tab="stopwatch">Stopwatch</button>
+        <button type="button" class="tab-btn" data-tab="timer">Timer</button>
+      </div>
+      
+      <div id="stopwatchTab" class="tab-content active">
+        <div class="stopwatch">
+          <div class="stopwatch-display">00:00:00</div>
+          <div class="stopwatch-controls">
+            <button type="button" id="stopwatchStartBtn" class="btn-timer start">Start</button>
+            <button type="button" id="stopwatchResetBtn" class="btn-timer reset">Reset</button>
+          </div>
+          <div class="stopwatch-laps">
+            <h3>Laps</h3>
+            <div id="lapsContainer" class="laps-list"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="timerTab" class="tab-content">
+        <div class="timer">
+          <div class="timer-setup">
+            <div class="timer-inputs">
+              <div class="timer-input-group">
+                <input type="number" id="timerMinutes" min="0" max="59" value="0">
+                <label>min</label>
+              </div>
+              <div class="timer-separator">:</div>
+              <div class="timer-input-group">
+                <input type="number" id="timerSeconds" min="0" max="59" value="0">
+                <label>sec</label>
+              </div>
+            </div>
+          </div>
+          <div class="timer-display">00:00</div>
+          <div class="timer-controls">
+            <button type="button" id="timerStartBtn" class="btn-timer start">Start</button>
+            <button type="button" id="timerResetBtn" class="btn-timer reset">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bottom Navigation Bar (iOS Style) -->
+  <nav id="bottomNav" class="bottom-nav">
+    <button type="button" id="navHome" class="nav-btn active" title="Home">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </button>
+    <button type="button" id="navExercises" class="nav-btn" title="Exercises">
+      <div class="nav-icon">🏋️</div>
+      <div class="nav-label">Exercises</div>
+    </button>
+    <button type="button" id="navWorkout" class="nav-btn" title="Start Workout">
+      <div class="nav-icon">▶️</div>
+      <div class="nav-label">Workout</div>
+    </button>
+    <button type="button" id="navHistory" class="nav-btn" title="History">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label">History</div>
+    </button>
+    <button type="button" id="navTimer" class="nav-btn" title="Timer">
+      <div class="nav-icon">⏱️</div>
+      <div class="nav-label">Timer</div>
+    </button>
+    <button type="button" id="navSettings" class="nav-btn" title="Settings" style="margin-left:auto;">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-label">Settings</div>
+    </button>
+  </nav>
   
   <script src="app.js"></script>
 </body>
