@@ -29,6 +29,9 @@ const backFromDetailBtn = document.getElementById('backFromDetailBtn');
 // Bottom Navigation
 const bottomNav = document.getElementById('bottomNav');
 // Home tab removed; Workout is default
+
+// Track current workout detail for refreshing when settings change
+let currentWorkoutDetail = null;
 const navExercises = document.getElementById('navExercises');
 const navWorkout = document.getElementById('navWorkout');
 const navHistory = document.getElementById('navHistory');
@@ -70,6 +73,8 @@ const weightIncrementInput = document.getElementById('weightIncrement');
 const defaultWeightInput = document.getElementById('defaultWeight');
 const defaultRepsInput = document.getElementById('defaultReps');
 const fontSizeSelect = document.getElementById('fontSize');
+const dateFormatSelect = document.getElementById('dateFormat');
+const timeFormatSelect = document.getElementById('timeFormat');
 
 // Default machines
 const DEFAULT_MACHINES = [
@@ -94,7 +99,9 @@ function getSettings() {
     weightIncrement: 2.5,
     defaultWeight: 20,
     defaultReps: 10,
-    fontSize: 'normal'
+    fontSize: 'normal',
+    dateFormat: 'eu',
+    timeFormat: '24h'
   };
   const saved = localStorage.getItem('fitnessSettings');
   return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
@@ -113,6 +120,8 @@ function applySettings() {
   defaultWeightInput.value = settings.defaultWeight;
   defaultRepsInput.value = settings.defaultReps;
   fontSizeSelect.value = settings.fontSize;
+  dateFormatSelect.value = settings.dateFormat;
+  timeFormatSelect.value = settings.timeFormat;
   
   // Update weight input step
   weightInput.step = settings.weightIncrement;
@@ -436,7 +445,10 @@ cancelWorkoutBtn.addEventListener('click', () => {
   }
 });
 
-backFromDetailBtn.addEventListener('click', () => showScreen('history'));
+backFromDetailBtn.addEventListener('click', () => {
+  currentWorkoutDetail = null; // Clear tracking when leaving detail view
+  showScreen('history');
+});
 
 // Add machine button
 addMachineBtn.addEventListener('click', () => {
@@ -462,45 +474,52 @@ newMachineNameInput.addEventListener('keypress', (e) => {
 });
 
 // Auto-save settings when inputs change
-weightIncrementInput.addEventListener('change', () => {
-  const settings = {
+function getCurrentSettingsFromInputs() {
+  return {
     weightIncrement: parseFloat(weightIncrementInput.value),
     defaultWeight: parseFloat(defaultWeightInput.value),
     defaultReps: parseInt(defaultRepsInput.value),
-    fontSize: fontSizeSelect.value
+    fontSize: fontSizeSelect.value,
+    dateFormat: dateFormatSelect.value,
+    timeFormat: timeFormatSelect.value
   };
-  saveSettings(settings);
+}
+
+weightIncrementInput.addEventListener('change', () => {
+  saveSettings(getCurrentSettingsFromInputs());
 });
 
 defaultWeightInput.addEventListener('change', () => {
-  const settings = {
-    weightIncrement: parseFloat(weightIncrementInput.value),
-    defaultWeight: parseFloat(defaultWeightInput.value),
-    defaultReps: parseInt(defaultRepsInput.value),
-    fontSize: fontSizeSelect.value
-  };
-  saveSettings(settings);
+  saveSettings(getCurrentSettingsFromInputs());
 });
 
 defaultRepsInput.addEventListener('change', () => {
-  const settings = {
-    weightIncrement: parseFloat(weightIncrementInput.value),
-    defaultWeight: parseFloat(defaultWeightInput.value),
-    defaultReps: parseInt(defaultRepsInput.value),
-    fontSize: fontSizeSelect.value
-  };
-  saveSettings(settings);
+  saveSettings(getCurrentSettingsFromInputs());
 });
 
 fontSizeSelect.addEventListener('change', () => {
-  const settings = {
-    weightIncrement: parseFloat(weightIncrementInput.value),
-    defaultWeight: parseFloat(defaultWeightInput.value),
-    defaultReps: parseInt(defaultRepsInput.value),
-    fontSize: fontSizeSelect.value
-  };
-  saveSettings(settings);
+  saveSettings(getCurrentSettingsFromInputs());
   // Settings are already applied via saveSettings -> applySettings
+});
+
+dateFormatSelect.addEventListener('change', () => {
+  saveSettings(getCurrentSettingsFromInputs());
+  renderHistory(); // Refresh history to apply new date format
+  renderTodaySection(); // Refresh today section
+  // Refresh workout detail if currently viewing one
+  if (currentWorkoutDetail) {
+    showWorkoutDetail(currentWorkoutDetail.date, currentWorkoutDetail.entries);
+  }
+});
+
+timeFormatSelect.addEventListener('change', () => {
+  saveSettings(getCurrentSettingsFromInputs());
+  renderHistory(); // Refresh history (affects workout detail stats)
+  renderTodaySection(); // Refresh today section to apply new time format
+  // Refresh workout detail if currently viewing one
+  if (currentWorkoutDetail) {
+    showWorkoutDetail(currentWorkoutDetail.date, currentWorkoutDetail.entries);
+  }
 });
 
 // ===== WORKOUT PLANS =====
@@ -1162,6 +1181,7 @@ function getToday() {
 
 // Format date for display
 function formatDate(dateString) {
+  const settings = getSettings();
   const date = new Date(dateString + 'T00:00:00');
   const today = new Date();
   const yesterday = new Date(today);
@@ -1173,11 +1193,40 @@ function formatDate(dateString) {
   if (isToday) return 'Today';
   if (isYesterday) return 'Yesterday';
   
-  return date.toLocaleDateString('en-US', { 
-    weekday: 'short', 
-    month: 'short', 
-    day: 'numeric' 
-  });
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+  const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+  
+  // Format based on setting
+  if (settings.dateFormat === 'us') {
+    return `${weekday}, ${monthName} ${day}`;
+  } else if (settings.dateFormat === 'iso') {
+    return `${weekday}, ${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  } else { // eu
+    return `${weekday}, ${day} ${monthName}`;
+  }
+}
+
+// Format time based on user settings
+function formatTime(timestamp) {
+  const settings = getSettings();
+  const date = new Date(timestamp);
+  
+  if (settings.timeFormat === '12h') {
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } else { // 24h
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  }
 }
 
 // Get history from localStorage
@@ -1260,10 +1309,7 @@ function renderTodaySection() {
     const entryDiv = document.createElement('div');
     entryDiv.className = 'today-entry';
     
-    const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const time = formatTime(entry.timestamp);
     
     const infoDiv = document.createElement('div');
     infoDiv.className = 'today-entry-info';
@@ -1461,6 +1507,9 @@ function renderHistory() {
 
 // Show workout detail screen
 function showWorkoutDetail(date, entries) {
+  // Track current detail for refreshing when settings change
+  currentWorkoutDetail = { date, entries };
+  
   const detailContent = document.getElementById('workoutDetailContent');
   const detailTitle = document.getElementById('workoutDetailTitle');
   
@@ -1523,10 +1572,7 @@ function showWorkoutDetail(date, entries) {
       const setDiv = document.createElement('div');
       setDiv.className = 'workout-detail-set';
       
-      const time = new Date(set.timestamp).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      const time = formatTime(set.timestamp);
       
       setDiv.innerHTML = `
         <div class="workout-detail-set-number">Set ${index + 1}</div>
