@@ -582,6 +582,38 @@ select:focus {
   transform: none;
 }
 
+/* Plans action section */
+.plans-action-section {
+  margin-bottom: 1.5rem;
+}
+
+.btn-manage-plans {
+  width: 100%;
+  background: var(--bg-secondary);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-manage-plans:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.btn-manage-plans:active {
+  transform: translateY(0);
+}
+
 /* Plan List */
 .plan-item {
   background: var(--bg-tertiary);
@@ -811,6 +843,72 @@ select:focus {
 
 .btn-secondary:active {
   transform: translateY(0);
+}
+
+/* Sets container for multi-set exercises */
+.sets-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-tertiary);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+.set-number {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 3rem;
+}
+
+.set-inputs {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  align-items: center;
+}
+
+.set-input-group {
+  flex: 1;
+}
+
+.set-input-group input {
+  width: 100%;
+  font-size: 0.875rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.set-input-group input::-webkit-outer-spin-button,
+.set-input-group input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.set-input-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn-add-set {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  font-size: 0.875rem;
 }
 
 /* Timer/Stopwatch Screen */

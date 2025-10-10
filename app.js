@@ -38,6 +38,7 @@ const machineListDiv = document.getElementById('machineList');
 const planSelector = document.getElementById('planSelector');
 const activePlanSelect = document.getElementById('activePlan');
 const startPlanBtn = document.getElementById('startPlanBtn');
+const managePlansBtn = document.getElementById('managePlansBtn');
 const createPlanBtn = document.getElementById('createPlanBtn');
 const plansListDiv = document.getElementById('plansList');
 const editPlanForm = document.getElementById('editPlanForm');
@@ -225,25 +226,20 @@ function showScreen(screen) {
 
 // Update bottom navigation active state
 function updateNavActiveState(screen) {
-  // Remove active class from all nav buttons
-  // Remove active class from all nav buttons
-  navExercises.classList.remove('active');
-  navWorkout.classList.remove('active');
-  navHistory.classList.remove('active');
-  navTimer.classList.remove('active');
-  navSettings.classList.remove('active');
-  
-  // Set active class based on current screen
-  switch(screen) {
-    case 'tracker':
-    case 'activeWorkout':
-      navWorkout.classList.add('active');
-      break;
+  // Clear current active state
+  [navExercises, navTimer, navWorkout, navHistory, navSettings].forEach(btn => btn.classList.remove('active'));
+
+  // Screens that conceptually belong to the workout flow
+  const workoutScreens = new Set(['tracker', 'activeWorkout', 'plans', 'editPlan']);
+
+  if (workoutScreens.has(screen)) {
+    navWorkout.classList.add('active');
+    return;
+  }
+
+  switch (screen) {
     case 'machines':
       navExercises.classList.add('active');
-      break;
-    case 'activeWorkout':
-      navWorkout.classList.add('active');
       break;
     case 'history':
       navHistory.classList.add('active');
@@ -439,7 +435,16 @@ function renderPlansList() {
     plan.exercises.forEach(ex => {
       const exDiv = document.createElement('div');
       exDiv.className = 'plan-item-exercise';
-      exDiv.textContent = `${ex.machine} - ${ex.weight}kg × ${ex.reps} reps`;
+      
+      // Handle both old and new format
+      if (ex.sets && ex.sets.length > 0) {
+        const setsSummary = ex.sets.map(s => `${s.reps}×${s.weight}kg`).join(', ');
+        exDiv.textContent = `${ex.machine} - ${ex.sets.length} set${ex.sets.length > 1 ? 's' : ''}: ${setsSummary}`;
+      } else {
+        // Old format fallback
+        exDiv.textContent = `${ex.machine} - ${ex.weight}kg × ${ex.reps} reps`;
+      }
+      
       exercises.appendChild(exDiv);
     });
     
@@ -487,9 +492,25 @@ function startPlan() {
 function renderActiveWorkout() {
   if (!currentWorkoutPlan) return;
   
-  const exercises = currentWorkoutPlan.exercises;
+  // Flatten exercises into individual sets
+  const allSets = [];
+  currentWorkoutPlan.exercises.forEach((exercise, exIndex) => {
+    // Handle both old and new format
+    const sets = exercise.sets || [{ weight: exercise.weight, reps: exercise.reps }];
+    sets.forEach((set, setIndex) => {
+      allSets.push({
+        exerciseIndex: exIndex,
+        setIndex: setIndex,
+        machine: exercise.machine,
+        weight: set.weight,
+        reps: set.reps,
+        totalSets: sets.length
+      });
+    });
+  });
+  
   const completed = completedExercises.size;
-  const total = exercises.length;
+  const total = allSets.length;
   
   // Update progress
   progressCurrent.textContent = completed;
@@ -497,10 +518,10 @@ function renderActiveWorkout() {
   const progressPercent = total > 0 ? (completed / total) * 100 : 0;
   progressBarFill.style.width = `${progressPercent}%`;
   
-  // Render exercises
+  // Render sets
   workoutExercisesDiv.innerHTML = '';
   
-  exercises.forEach((exercise, index) => {
+  allSets.forEach((set, index) => {
     const isCompleted = completedExercises.has(index);
     const isCurrent = !isCompleted && completedExercises.size === index;
     
@@ -512,7 +533,8 @@ function renderActiveWorkout() {
     
     const exerciseNumber = document.createElement('div');
     exerciseNumber.className = 'workout-exercise-number';
-    exerciseNumber.textContent = `Exercise ${index + 1}`;
+    const setLabel = set.totalSets > 1 ? ` - Set ${set.setIndex + 1}/${set.totalSets}` : '';
+    exerciseNumber.textContent = `Exercise ${set.exerciseIndex + 1}${setLabel}`;
     
     const status = document.createElement('div');
     status.className = 'workout-exercise-status';
@@ -535,11 +557,11 @@ function renderActiveWorkout() {
     
     const machineName = document.createElement('div');
     machineName.className = 'workout-exercise-machine';
-    machineName.textContent = exercise.machine;
+    machineName.textContent = set.machine;
     
     const details = document.createElement('div');
     details.className = 'workout-exercise-details';
-    details.textContent = `${exercise.weight}kg × ${exercise.reps} reps`;
+    details.textContent = `${set.weight}kg × ${set.reps} reps`;
     
     cardBody.appendChild(machineName);
     cardBody.appendChild(details);
@@ -547,7 +569,7 @@ function renderActiveWorkout() {
     exerciseCard.appendChild(cardHeader);
     exerciseCard.appendChild(cardBody);
     
-    // Add complete button for current exercise
+    // Add complete button for current set
     if (isCurrent) {
       const completeBtn = document.createElement('button');
       completeBtn.className = 'btn-complete-exercise';
@@ -557,15 +579,15 @@ function renderActiveWorkout() {
         
         // Add to history
         addEntry({
-          machine: exercise.machine,
-          weight: exercise.weight,
-          reps: exercise.reps
+          machine: set.machine,
+          weight: set.weight,
+          reps: set.reps
         });
         
         renderActiveWorkout();
         
-        // Check if all exercises are complete
-        if (completedExercises.size === exercises.length) {
+        // Check if all sets are complete
+        if (completedExercises.size === allSets.length) {
           finishWorkoutBtn.style.display = 'block';
         }
       });
@@ -619,10 +641,21 @@ function renderPlanExercises() {
   planExercisesDiv.innerHTML = '';
   const machines = getMachines();
   
-  currentPlanExercises.forEach((exercise, index) => {
+  currentPlanExercises.forEach((exercise, exerciseIndex) => {
     const exerciseItem = document.createElement('div');
-    const isExpanded = expandedExerciseIndex === index;
-    const isComplete = exercise.machine && exercise.weight && exercise.reps;
+    const isExpanded = expandedExerciseIndex === exerciseIndex;
+    
+    // Ensure exercise has sets array (migration for old plans)
+    if (!exercise.sets) {
+      exercise.sets = exercise.weight && exercise.reps ? 
+        [{ weight: exercise.weight, reps: exercise.reps }] : 
+        [{ weight: 0, reps: 0 }];
+      delete exercise.weight;
+      delete exercise.reps;
+    }
+    
+    const isComplete = exercise.machine && exercise.sets && exercise.sets.length > 0 && 
+                      exercise.sets.every(s => s.weight && s.reps);
     
     exerciseItem.className = 'exercise-item';
     
@@ -633,9 +666,11 @@ function renderPlanExercises() {
       
       const info = document.createElement('div');
       info.className = 'exercise-collapsed-info';
+      
+      const setsSummary = exercise.sets.map(s => `${s.reps}×${s.weight}kg`).join(', ');
       info.innerHTML = `
-        <div class="exercise-number">Exercise ${index + 1}</div>
-        <div class="exercise-summary">${exercise.machine} - ${exercise.weight}kg × ${exercise.reps} reps</div>
+        <div class="exercise-number">Exercise ${exerciseIndex + 1}</div>
+        <div class="exercise-summary">${exercise.machine} - ${exercise.sets.length} set${exercise.sets.length > 1 ? 's' : ''}: ${setsSummary}</div>
       `;
       
       const actions = document.createElement('div');
@@ -647,7 +682,7 @@ function renderPlanExercises() {
       editBtn.title = 'Edit';
       editBtn.type = 'button';
       editBtn.addEventListener('click', () => {
-        expandedExerciseIndex = index;
+        expandedExerciseIndex = exerciseIndex;
         renderPlanExercises();
       });
       
@@ -657,10 +692,10 @@ function renderPlanExercises() {
       deleteBtn.title = 'Remove';
       deleteBtn.type = 'button';
       deleteBtn.addEventListener('click', () => {
-        currentPlanExercises.splice(index, 1);
-        if (expandedExerciseIndex === index) {
+        currentPlanExercises.splice(exerciseIndex, 1);
+        if (expandedExerciseIndex === exerciseIndex) {
           expandedExerciseIndex = null;
-        } else if (expandedExerciseIndex > index) {
+        } else if (expandedExerciseIndex > exerciseIndex) {
           expandedExerciseIndex--;
         }
         renderPlanExercises();
@@ -678,18 +713,18 @@ function renderPlanExercises() {
       
       const number = document.createElement('div');
       number.className = 'exercise-number';
-      number.textContent = `Exercise ${index + 1}`;
+      number.textContent = `Exercise ${exerciseIndex + 1}`;
       
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'btn-icon delete';
       deleteBtn.innerHTML = '🗑️';
-      deleteBtn.title = 'Remove';
+      deleteBtn.title = 'Remove Exercise';
       deleteBtn.type = 'button';
       deleteBtn.addEventListener('click', () => {
-        currentPlanExercises.splice(index, 1);
-        if (expandedExerciseIndex === index) {
+        currentPlanExercises.splice(exerciseIndex, 1);
+        if (expandedExerciseIndex === exerciseIndex) {
           expandedExerciseIndex = null;
-        } else if (expandedExerciseIndex > index) {
+        } else if (expandedExerciseIndex > exerciseIndex) {
           expandedExerciseIndex--;
         }
         renderPlanExercises();
@@ -716,106 +751,103 @@ function renderPlanExercises() {
         machineSelect.appendChild(opt);
       });
       machineSelect.addEventListener('change', (e) => {
-        currentPlanExercises[index].machine = e.target.value;
+        currentPlanExercises[exerciseIndex].machine = e.target.value;
       });
       machineGroup.appendChild(machineLabel);
       machineGroup.appendChild(machineSelect);
-      
-      // Weight with spinners
-      const weightGroup = document.createElement('div');
-      weightGroup.className = 'form-group-inline';
-      const weightLabel = document.createElement('label');
-      weightLabel.textContent = 'Weight (kg)';
-      const weightSpinner = document.createElement('div');
-      weightSpinner.className = 'spinner-input';
-      
-      const weightDecrease = document.createElement('button');
-      weightDecrease.type = 'button';
-      weightDecrease.className = 'spinner-btn';
-      weightDecrease.textContent = '−';
-      weightDecrease.addEventListener('click', () => {
-        const settings = getSettings();
-        const step = settings.weightIncrement;
-        const newValue = Math.max(0, exercise.weight - step);
-        currentPlanExercises[index].weight = newValue;
-        renderPlanExercises();
-      });
-      
-      const weightInput = document.createElement('input');
-      weightInput.type = 'number';
-      weightInput.value = exercise.weight;
-      weightInput.min = 0;
-      weightInput.max = 500;
-      weightInput.step = 2.5;
-      weightInput.addEventListener('change', (e) => {
-        currentPlanExercises[index].weight = parseFloat(e.target.value) || 0;
-      });
-      
-      const weightIncrease = document.createElement('button');
-      weightIncrease.type = 'button';
-      weightIncrease.className = 'spinner-btn';
-      weightIncrease.textContent = '+';
-      weightIncrease.addEventListener('click', () => {
-        const settings = getSettings();
-        const step = settings.weightIncrement;
-        const newValue = Math.min(500, exercise.weight + step);
-        currentPlanExercises[index].weight = newValue;
-        renderPlanExercises();
-      });
-      
-      weightSpinner.appendChild(weightDecrease);
-      weightSpinner.appendChild(weightInput);
-      weightSpinner.appendChild(weightIncrease);
-      weightGroup.appendChild(weightLabel);
-      weightGroup.appendChild(weightSpinner);
-      
-      // Reps with spinners
-      const repsGroup = document.createElement('div');
-      repsGroup.className = 'form-group-inline';
-      const repsLabel = document.createElement('label');
-      repsLabel.textContent = 'Reps';
-      const repsSpinner = document.createElement('div');
-      repsSpinner.className = 'spinner-input';
-      
-      const repsDecrease = document.createElement('button');
-      repsDecrease.type = 'button';
-      repsDecrease.className = 'spinner-btn';
-      repsDecrease.textContent = '−';
-      repsDecrease.addEventListener('click', () => {
-        const newValue = Math.max(1, exercise.reps - 1);
-        currentPlanExercises[index].reps = newValue;
-        renderPlanExercises();
-      });
-      
-      const repsInput = document.createElement('input');
-      repsInput.type = 'number';
-      repsInput.value = exercise.reps;
-      repsInput.min = 1;
-      repsInput.max = 100;
-      repsInput.step = 1;
-      repsInput.addEventListener('change', (e) => {
-        currentPlanExercises[index].reps = parseInt(e.target.value) || 1;
-      });
-      
-      const repsIncrease = document.createElement('button');
-      repsIncrease.type = 'button';
-      repsIncrease.className = 'spinner-btn';
-      repsIncrease.textContent = '+';
-      repsIncrease.addEventListener('click', () => {
-        const newValue = Math.min(100, exercise.reps + 1);
-        currentPlanExercises[index].reps = newValue;
-        renderPlanExercises();
-      });
-      
-      repsSpinner.appendChild(repsDecrease);
-      repsSpinner.appendChild(repsInput);
-      repsSpinner.appendChild(repsIncrease);
-      repsGroup.appendChild(repsLabel);
-      repsGroup.appendChild(repsSpinner);
-      
       fields.appendChild(machineGroup);
-      fields.appendChild(weightGroup);
-      fields.appendChild(repsGroup);
+      
+      // Sets section
+      const setsLabel = document.createElement('label');
+      setsLabel.textContent = 'Sets';
+      setsLabel.style.marginTop = '1rem';
+      fields.appendChild(setsLabel);
+      
+      const setsContainer = document.createElement('div');
+      setsContainer.className = 'sets-container';
+      
+      exercise.sets.forEach((set, setIndex) => {
+        const setRow = document.createElement('div');
+        setRow.className = 'set-row';
+        
+        const setNumber = document.createElement('div');
+        setNumber.className = 'set-number';
+        setNumber.textContent = `Set ${setIndex + 1}`;
+        
+        const setInputs = document.createElement('div');
+        setInputs.className = 'set-inputs';
+        
+        // Weight input
+        const weightGroup = document.createElement('div');
+        weightGroup.className = 'set-input-group';
+        const weightInput = document.createElement('input');
+        weightInput.type = 'number';
+        weightInput.value = set.weight;
+        weightInput.min = 0;
+        weightInput.max = 500;
+        weightInput.step = 2.5;
+        weightInput.placeholder = 'Weight (kg)';
+        weightInput.addEventListener('change', (e) => {
+          currentPlanExercises[exerciseIndex].sets[setIndex].weight = parseFloat(e.target.value) || 0;
+        });
+        weightGroup.appendChild(weightInput);
+        
+        // Reps input
+        const repsGroup = document.createElement('div');
+        repsGroup.className = 'set-input-group';
+        const repsInput = document.createElement('input');
+        repsInput.type = 'number';
+        repsInput.value = set.reps;
+        repsInput.min = 1;
+        repsInput.max = 100;
+        repsInput.step = 1;
+        repsInput.placeholder = 'Reps';
+        repsInput.addEventListener('change', (e) => {
+          currentPlanExercises[exerciseIndex].sets[setIndex].reps = parseInt(e.target.value) || 0;
+        });
+        repsGroup.appendChild(repsInput);
+        
+        // Delete set button
+        const deleteSetBtn = document.createElement('button');
+        deleteSetBtn.type = 'button';
+        deleteSetBtn.className = 'btn-icon delete';
+        deleteSetBtn.innerHTML = '🗑️';
+        deleteSetBtn.title = 'Remove Set';
+        deleteSetBtn.addEventListener('click', () => {
+          if (exercise.sets.length > 1) {
+            currentPlanExercises[exerciseIndex].sets.splice(setIndex, 1);
+            renderPlanExercises();
+          } else {
+            alert('Each exercise must have at least one set');
+          }
+        });
+        
+        setInputs.appendChild(weightGroup);
+        setInputs.appendChild(repsGroup);
+        setInputs.appendChild(deleteSetBtn);
+        
+        setRow.appendChild(setNumber);
+        setRow.appendChild(setInputs);
+        setsContainer.appendChild(setRow);
+      });
+      
+      fields.appendChild(setsContainer);
+      
+      // Add set button
+      const addSetBtn = document.createElement('button');
+      addSetBtn.type = 'button';
+      addSetBtn.className = 'btn-secondary btn-add-set';
+      addSetBtn.textContent = '+ Add Set';
+      addSetBtn.addEventListener('click', () => {
+        const settings = getSettings();
+        const lastSet = exercise.sets[exercise.sets.length - 1];
+        currentPlanExercises[exerciseIndex].sets.push({
+          weight: lastSet ? lastSet.weight : settings.defaultWeight,
+          reps: lastSet ? lastSet.reps : settings.defaultReps
+        });
+        renderPlanExercises();
+      });
+      fields.appendChild(addSetBtn);
       
       exerciseItem.appendChild(header);
       exerciseItem.appendChild(fields);
@@ -830,12 +862,19 @@ addExerciseBtn.addEventListener('click', () => {
   const settings = getSettings();
   currentPlanExercises.push({
     machine: '',
-    weight: settings.defaultWeight,
-    reps: settings.defaultReps
+    sets: [
+      { weight: settings.defaultWeight, reps: settings.defaultReps }
+    ]
   });
   // Expand the newly added exercise
   expandedExerciseIndex = currentPlanExercises.length - 1;
   renderPlanExercises();
+});
+
+// Manage plans button on workout tab
+managePlansBtn.addEventListener('click', () => {
+  showScreen('plans');
+  renderPlansList();
 });
 
 // Create new plan
@@ -860,9 +899,19 @@ editPlanForm.addEventListener('submit', (e) => {
   
   // Validate all exercises have required fields
   for (let ex of currentPlanExercises) {
-    if (!ex.machine || !ex.weight || !ex.reps) {
-      alert('Please complete all exercise fields');
+    if (!ex.machine) {
+      alert('Please select a machine for all exercises');
       return;
+    }
+    if (!ex.sets || ex.sets.length === 0) {
+      alert('Please add at least one set for each exercise');
+      return;
+    }
+    for (let set of ex.sets) {
+      if (!set.weight || !set.reps) {
+        alert('Please complete all set fields (weight and reps)');
+        return;
+      }
     }
   }
   
@@ -1407,14 +1456,7 @@ navExercises.addEventListener('click', () => {
   renderMachineList();
 });
 navWorkout.addEventListener('click', () => {
-  const plans = getPlans();
-  if (plans.length > 0) {
-    showScreen('tracker');
-    planSelector.style.display = 'block';
-    planSelector.scrollIntoView({ behavior: 'smooth' });
-  } else {
-    showScreen('plans');
-  }
+  showScreen('tracker');
 });
 navHistory.addEventListener('click', () => {
   showScreen('history');
