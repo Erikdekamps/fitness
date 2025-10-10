@@ -1836,6 +1836,8 @@ select:focus {
 
 .nav-btn.active {
   color: var(--accent);
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
 }
 
 .nav-icon {

@@ -198,6 +198,16 @@
           <option value="24h" selected>24-hour</option>
         </select>
       </div>
+      
+      <div class="form-group">
+        <label for="defaultTimerMinutes">Default Timer Duration (minutes)</label>
+        <p class="setting-description">Default rest timer duration between sets</p>
+        <div class="spinner-input">
+          <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultTimerMinutes">−</button>
+          <input type="text" pattern="\d*" id="defaultTimerMinutes" min="0" max="59" step="1" value="3">
+          <button type="button" class="spinner-btn" data-action="increase" data-target="defaultTimerMinutes">+</button>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -279,25 +289,11 @@
     
     <div class="timer-container">
       <div class="tabs">
-        <button type="button" class="tab-btn active" data-tab="stopwatch">Stopwatch</button>
-        <button type="button" class="tab-btn" data-tab="timer">Timer</button>
+        <button type="button" class="tab-btn active" data-tab="timer">Timer</button>
+        <button type="button" class="tab-btn" data-tab="stopwatch">Stopwatch</button>
       </div>
       
-      <div id="stopwatchTab" class="tab-content active">
-        <div class="stopwatch">
-          <div class="stopwatch-display">00:00:00</div>
-          <div class="stopwatch-controls">
-            <button type="button" id="stopwatchStartBtn" class="btn-timer start">Start</button>
-            <button type="button" id="stopwatchResetBtn" class="btn-timer reset">Reset</button>
-          </div>
-          <div class="stopwatch-laps">
-            <h3>Laps</h3>
-            <div id="lapsContainer" class="laps-list"></div>
-          </div>
-        </div>
-      </div>
-      
-      <div id="timerTab" class="tab-content">
+      <div id="timerTab" class="tab-content active">
         <div class="timer">
           <div class="timer-setup">
             <div class="timer-inputs">
@@ -316,6 +312,20 @@
           <div class="timer-controls">
             <button type="button" id="timerStartBtn" class="btn-timer start">Start</button>
             <button type="button" id="timerResetBtn" class="btn-timer reset">Reset</button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="stopwatchTab" class="tab-content">
+        <div class="stopwatch">
+          <div class="stopwatch-display">00:00:00</div>
+          <div class="stopwatch-controls">
+            <button type="button" id="stopwatchStartBtn" class="btn-timer start">Start</button>
+            <button type="button" id="stopwatchResetBtn" class="btn-timer reset">Reset</button>
+          </div>
+          <div class="stopwatch-laps">
+            <h3>Laps</h3>
+            <div id="lapsContainer" class="laps-list"></div>
           </div>
         </div>
       </div>

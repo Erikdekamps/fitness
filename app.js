@@ -76,6 +76,7 @@ const fontSizeSelect = document.getElementById('fontSize');
 const layoutDensitySelect = document.getElementById('layoutDensity');
 const dateFormatSelect = document.getElementById('dateFormat');
 const timeFormatSelect = document.getElementById('timeFormat');
+const defaultTimerMinutesInput = document.getElementById('defaultTimerMinutes');
 
 // Default machines
 const DEFAULT_MACHINES = [
@@ -103,7 +104,8 @@ function getSettings() {
     fontSize: 'normal',
     layoutDensity: 'normal',
     dateFormat: 'eu',
-    timeFormat: '24h'
+    timeFormat: '24h',
+    defaultTimerMinutes: 3
   };
   const saved = localStorage.getItem('fitnessSettings');
   return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
@@ -125,6 +127,7 @@ function applySettings() {
   layoutDensitySelect.value = settings.layoutDensity;
   dateFormatSelect.value = settings.dateFormat;
   timeFormatSelect.value = settings.timeFormat;
+  defaultTimerMinutesInput.value = settings.defaultTimerMinutes;
   
   // Update weight input step
   weightInput.step = settings.weightIncrement;
@@ -403,6 +406,14 @@ function showScreen(screen) {
   historyScreen.classList.toggle('screen-hidden', screen !== 'history');
   workoutDetailScreen.classList.toggle('screen-hidden', screen !== 'workoutDetail');
   
+  // Set default timer value when navigating to timer screen
+  if (screen === 'timer') {
+    const settings = getSettings();
+    if (timerMinutesInput.value === '0' && timerSecondsInput.value === '0') {
+      timerMinutesInput.value = settings.defaultTimerMinutes;
+    }
+  }
+  
   // Update bottom navigation active state
   updateNavActiveState(screen);
 }
@@ -489,7 +500,8 @@ function getCurrentSettingsFromInputs() {
     fontSize: fontSizeSelect.value,
     layoutDensity: layoutDensitySelect.value,
     dateFormat: dateFormatSelect.value,
-    timeFormat: timeFormatSelect.value
+    timeFormat: timeFormatSelect.value,
+    defaultTimerMinutes: parseInt(defaultTimerMinutesInput.value)
   };
 }
 
@@ -533,6 +545,14 @@ timeFormatSelect.addEventListener('change', () => {
   if (currentWorkoutDetail) {
     showWorkoutDetail(currentWorkoutDetail.date, currentWorkoutDetail.entries);
   }
+});
+
+defaultTimerMinutesInput.addEventListener('change', () => {
+  saveSettings(getCurrentSettingsFromInputs());
+  // Apply default timer value to the timer inputs
+  const settings = getSettings();
+  timerMinutesInput.value = settings.defaultTimerMinutes;
+  timerSecondsInput.value = 0;
 });
 
 // ===== WORKOUT PLANS =====
@@ -1877,15 +1897,8 @@ document.addEventListener('click', (e) => {
     
     input.value = value;
     
-    // Auto-save settings when changed
-    if (targetId === 'weightIncrement' || targetId === 'defaultWeight' || targetId === 'defaultReps') {
-      const settings = {
-        weightIncrement: parseFloat(weightIncrementInput.value),
-        defaultWeight: parseFloat(defaultWeightInput.value),
-        defaultReps: parseInt(defaultRepsInput.value)
-      };
-      saveSettings(settings);
-    }
+    // Trigger change event to let the normal save logic handle it
+    input.dispatchEvent(new Event('change'));
   }
 });
 
