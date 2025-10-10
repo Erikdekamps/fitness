@@ -72,11 +72,13 @@ let expandedExerciseIndex = null; // Track which exercise is expanded
 const weightIncrementInput = document.getElementById('weightIncrement');
 const defaultWeightInput = document.getElementById('defaultWeight');
 const defaultRepsInput = document.getElementById('defaultReps');
-const fontSizeSelect = document.getElementById('fontSize');
-const layoutDensitySelect = document.getElementById('layoutDensity');
-const dateFormatSelect = document.getElementById('dateFormat');
-const timeFormatSelect = document.getElementById('timeFormat');
 const defaultTimerMinutesInput = document.getElementById('defaultTimerMinutes');
+
+// Setting badge containers (replacing selects)
+const fontSizeBadges = document.getElementById('fontSizeBadges');
+const layoutDensityBadges = document.getElementById('layoutDensityBadges');
+const dateFormatBadges = document.getElementById('dateFormatBadges');
+const timeFormatBadges = document.getElementById('timeFormatBadges');
 
 // Data management buttons
 const exportDataBtn = document.getElementById('exportDataBtn');
@@ -128,11 +130,13 @@ function applySettings() {
   weightIncrementInput.value = settings.weightIncrement;
   defaultWeightInput.value = settings.defaultWeight;
   defaultRepsInput.value = settings.defaultReps;
-  fontSizeSelect.value = settings.fontSize;
-  layoutDensitySelect.value = settings.layoutDensity;
-  dateFormatSelect.value = settings.dateFormat;
-  timeFormatSelect.value = settings.timeFormat;
   defaultTimerMinutesInput.value = settings.defaultTimerMinutes;
+  
+  // Update badge selections
+  updateBadgeSelection(fontSizeBadges, settings.fontSize);
+  updateBadgeSelection(layoutDensityBadges, settings.layoutDensity);
+  updateBadgeSelection(dateFormatBadges, settings.dateFormat);
+  updateBadgeSelection(timeFormatBadges, settings.timeFormat);
   
   // Update weight input step
   weightInput.step = settings.weightIncrement;
@@ -144,6 +148,24 @@ function applySettings() {
   // Apply layout density to html element
   document.documentElement.classList.remove('density-narrow', 'density-normal', 'density-wide');
   document.documentElement.classList.add(`density-${settings.layoutDensity}`);
+}
+
+// Helper function to update badge selection
+function updateBadgeSelection(container, value) {
+  const badges = container.querySelectorAll('.setting-badge');
+  badges.forEach(badge => {
+    if (badge.dataset.value === value) {
+      badge.classList.add('active');
+    } else {
+      badge.classList.remove('active');
+    }
+  });
+}
+
+// Helper function to get selected badge value
+function getSelectedBadgeValue(container) {
+  const activeBadge = container.querySelector('.setting-badge.active');
+  return activeBadge ? activeBadge.dataset.value : null;
 }
 
 // ===== MACHINES =====
@@ -502,10 +524,10 @@ function getCurrentSettingsFromInputs() {
     weightIncrement: parseFloat(weightIncrementInput.value),
     defaultWeight: parseFloat(defaultWeightInput.value),
     defaultReps: parseInt(defaultRepsInput.value),
-    fontSize: fontSizeSelect.value,
-    layoutDensity: layoutDensitySelect.value,
-    dateFormat: dateFormatSelect.value,
-    timeFormat: timeFormatSelect.value,
+    fontSize: getSelectedBadgeValue(fontSizeBadges),
+    layoutDensity: getSelectedBadgeValue(layoutDensityBadges),
+    dateFormat: getSelectedBadgeValue(dateFormatBadges),
+    timeFormat: getSelectedBadgeValue(timeFormatBadges),
     defaultTimerMinutes: parseInt(defaultTimerMinutesInput.value)
   };
 }
@@ -522,18 +544,31 @@ defaultRepsInput.addEventListener('change', () => {
   saveSettings(getCurrentSettingsFromInputs());
 });
 
-fontSizeSelect.addEventListener('change', () => {
-  saveSettings(getCurrentSettingsFromInputs());
-  // Settings are already applied via saveSettings -> applySettings
-});
+// Setting badge click handlers
+function handleSettingBadgeClick(container, callback) {
+  container.addEventListener('click', (e) => {
+    if (e.target.classList.contains('setting-badge')) {
+      // Remove active from all badges in this container
+      container.querySelectorAll('.setting-badge').forEach(badge => {
+        badge.classList.remove('active');
+      });
+      // Add active to clicked badge
+      e.target.classList.add('active');
+      // Save settings and run callback
+      saveSettings(getCurrentSettingsFromInputs());
+      if (callback) callback();
+    }
+  });
+}
 
-layoutDensitySelect.addEventListener('change', () => {
-  saveSettings(getCurrentSettingsFromInputs());
-  // Settings are already applied via saveSettings -> applySettings
-});
+// Font size badge handler
+handleSettingBadgeClick(fontSizeBadges);
 
-dateFormatSelect.addEventListener('change', () => {
-  saveSettings(getCurrentSettingsFromInputs());
+// Layout density badge handler
+handleSettingBadgeClick(layoutDensityBadges);
+
+// Date format badge handler
+handleSettingBadgeClick(dateFormatBadges, () => {
   renderHistory(); // Refresh history to apply new date format
   renderTodaySection(); // Refresh today section
   // Refresh workout detail if currently viewing one
@@ -542,8 +577,8 @@ dateFormatSelect.addEventListener('change', () => {
   }
 });
 
-timeFormatSelect.addEventListener('change', () => {
-  saveSettings(getCurrentSettingsFromInputs());
+// Time format badge handler
+handleSettingBadgeClick(timeFormatBadges, () => {
   renderHistory(); // Refresh history (affects workout detail stats)
   renderTodaySection(); // Refresh today section to apply new time format
   // Refresh workout detail if currently viewing one

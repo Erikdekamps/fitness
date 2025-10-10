@@ -4,6 +4,18 @@
   padding: 0;
 }
 
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-width: 100vw;
+}
+
 /* Hide scrollbars but keep scrolling functionality */
 * {
   scrollbar-width: none; /* Firefox */
@@ -179,6 +191,9 @@ main {
   border-radius: 1rem;
   padding: var(--spacing-xl);
   border: 1px solid var(--border);
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 #addMachineForm {
@@ -364,6 +379,9 @@ form {
   border-radius: 1rem;
   padding: 1.5rem;
   border: 1px solid var(--border);
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .form-group {
@@ -389,6 +407,44 @@ label {
   color: var(--text-secondary);
   margin: calc(-1 * var(--spacing-xs)) 0 var(--spacing-md) 0;
   line-height: 1.4;
+}
+
+/* Setting badge selectors */
+.setting-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.setting-badge {
+  padding: 0.5rem 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.setting-badge:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.setting-badge.active {
+  background: var(--accent);
+  color: var(--bg-primary);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.setting-badge:active {
+  transform: translateY(0);
 }
 
 select {
@@ -1516,7 +1572,10 @@ select:focus {
 /* Timer/Stopwatch Screen */
 .timer-container {
   width: 100%;
+  max-width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .tabs {
@@ -1698,8 +1757,10 @@ select:focus {
 
 /* Active Workout Screen */
 .workout-container {
-  max-width: 480px;
+  max-width: min(480px, 100%);
   margin: 0 auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .workout-progress {
@@ -1873,6 +1934,10 @@ main,
 #timerScreen,
 #workoutDetailScreen {
   padding-bottom: 100px;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 @media (max-width: 500px) {
