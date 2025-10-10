@@ -61,12 +61,15 @@ const finishWorkoutBtn = document.getElementById('finishWorkoutBtn');
 const progressBarFill = document.getElementById('progressBarFill');
 const progressCurrent = document.getElementById('progressCurrent');
 const progressTotal = document.getElementById('progressTotal');
+const workoutTimeDisplay = document.getElementById('workoutTimeDisplay');
+const workoutElapsedTime = document.getElementById('workoutElapsedTime');
 
 let currentEditingPlanId = null;
 let currentPlanExercises = [];
 let currentWorkoutPlan = null;
 let completedExercises = new Set();
 let expandedExerciseIndex = null; // Track which exercise is expanded
+let workoutTimerInterval = null; // Track workout elapsed time
 
 // ===== ACTIVE WORKOUT PERSISTENCE =====
 
@@ -75,7 +78,9 @@ function saveActiveWorkout() {
   if (currentWorkoutPlan) {
     const workoutState = {
       plan: currentWorkoutPlan,
-      completedExercises: Array.from(completedExercises)
+      completedExercises: Array.from(completedExercises),
+      startTime: currentWorkoutPlan.startTime,
+      endTime: currentWorkoutPlan.endTime
     };
     localStorage.setItem('activeWorkout', JSON.stringify(workoutState));
   } else {
@@ -91,6 +96,13 @@ function loadActiveWorkout() {
       const workoutState = JSON.parse(saved);
       currentWorkoutPlan = workoutState.plan;
       completedExercises = new Set(workoutState.completedExercises || []);
+      // Restore start and end times
+      if (workoutState.startTime) {
+        currentWorkoutPlan.startTime = workoutState.startTime;
+      }
+      if (workoutState.endTime) {
+        currentWorkoutPlan.endTime = workoutState.endTime;
+      }
       return true;
     } catch (e) {
       console.error('Error loading active workout:', e);
@@ -106,6 +118,52 @@ function clearActiveWorkout() {
   currentWorkoutPlan = null;
   completedExercises.clear();
   localStorage.removeItem('activeWorkout');
+  
+  // Stop workout timer
+  if (workoutTimerInterval) {
+    clearInterval(workoutTimerInterval);
+    workoutTimerInterval = null;
+  }
+}
+
+// Start workout timer
+function startWorkoutTimer() {
+  // Clear any existing timer
+  if (workoutTimerInterval) {
+    clearInterval(workoutTimerInterval);
+  }
+  
+  // Update immediately
+  updateWorkoutTimer();
+  
+  // Update every second
+  workoutTimerInterval = setInterval(updateWorkoutTimer, 1000);
+}
+
+// Update workout timer display
+function updateWorkoutTimer() {
+  if (!currentWorkoutPlan || !currentWorkoutPlan.startTime) {
+    workoutTimeDisplay.style.display = 'none';
+    return;
+  }
+  
+  workoutTimeDisplay.style.display = 'block';
+  
+  const startTime = new Date(currentWorkoutPlan.startTime);
+  const now = new Date();
+  const elapsedMs = now - startTime;
+  
+  // Format as HH:MM:SS or MM:SS
+  const totalSeconds = Math.floor(elapsedMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  if (hours > 0) {
+    workoutElapsedTime.textContent = `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  } else {
+    workoutElapsedTime.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+  }
 }
 
 // Settings inputs
@@ -875,8 +933,15 @@ function startPlan() {
   currentWorkoutPlan = plan;
   completedExercises.clear();
   
+  // Set start time
+  currentWorkoutPlan.startTime = new Date().toISOString();
+  currentWorkoutPlan.endTime = null;
+  
   // Save to localStorage
   saveActiveWorkout();
+  
+  // Start workout timer
+  startWorkoutTimer();
   
   activeWorkoutTitle.textContent = `🏋️ ${plan.name}`;
   renderActiveWorkout();
@@ -1050,6 +1115,10 @@ function renderActiveWorkout() {
 
 // Finish workout button
 finishWorkoutBtn.addEventListener('click', () => {
+  // Set end time before clearing
+  if (currentWorkoutPlan) {
+    currentWorkoutPlan.endTime = new Date().toISOString();
+  }
   clearActiveWorkout();
   activePlanSelect.value = '';
   renderHistory();
@@ -2397,6 +2466,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Show the active workout screen
     activeWorkoutTitle.textContent = `🏋️ ${currentWorkoutPlan.name}`;
     renderActiveWorkout();
+    startWorkoutTimer(); // Start the timer for the restored workout
     showScreen('activeWorkout');
   } else {
     // Start at workout screen (formerly home)
