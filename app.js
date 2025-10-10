@@ -549,10 +549,12 @@ timeFormatSelect.addEventListener('change', () => {
 
 defaultTimerMinutesInput.addEventListener('change', () => {
   saveSettings(getCurrentSettingsFromInputs());
-  // Apply default timer value to the timer inputs
+  // Apply default timer value to the timer inputs and display
   const settings = getSettings();
   timerMinutesInput.value = settings.defaultTimerMinutes;
   timerSecondsInput.value = 0;
+  const defaultDurationMs = settings.defaultTimerMinutes * 60 * 1000;
+  timerDisplay.textContent = formatTimerTime(defaultDurationMs);
 });
 
 // ===== WORKOUT PLANS =====
@@ -2142,13 +2144,19 @@ timerResetBtn.addEventListener('click', () => {
   clearInterval(timerInterval);
   timerRunning = false;
   timerDuration = 0;
-  timerDisplay.textContent = '00:00';
   timerStartBtn.textContent = 'Start';
   timerStartBtn.classList.remove('active');
   timerMinutesInput.disabled = false;
   timerSecondsInput.disabled = false;
-  timerMinutesInput.value = 0;
+  
+  // Set to default timer duration from settings
+  const settings = getSettings();
+  timerMinutesInput.value = settings.defaultTimerMinutes;
   timerSecondsInput.value = 0;
+  
+  // Update display to show default duration
+  const defaultDurationMs = settings.defaultTimerMinutes * 60 * 1000;
+  timerDisplay.textContent = formatTimerTime(defaultDurationMs);
 });
 
 // ===== BOTTOM NAVIGATION =====
@@ -2165,7 +2173,18 @@ navHistory.addEventListener('click', () => {
   showScreen('history');
   renderHistory(); // Refresh history when switching to history tab
 });
-navTimer.addEventListener('click', () => showScreen('timer'));
+navTimer.addEventListener('click', () => {
+  showScreen('timer');
+  
+  // If timer is not running and is at 0:00, set to default duration
+  if (!timerRunning && timerMinutesInput.value === '0' && timerSecondsInput.value === '0') {
+    const settings = getSettings();
+    timerMinutesInput.value = settings.defaultTimerMinutes;
+    timerSecondsInput.value = 0;
+    const defaultDurationMs = settings.defaultTimerMinutes * 60 * 1000;
+    timerDisplay.textContent = formatTimerTime(defaultDurationMs);
+  }
+});
 navSettings.addEventListener('click', () => {
   showScreen('settings');
   applySettings();
@@ -2181,4 +2200,11 @@ window.addEventListener('DOMContentLoaded', () => {
   renderTodaySection(); // Show today's workout on load
   renderActivePlanSelect();
   showScreen('tracker'); // Start at workout screen (formerly home)
+  
+  // Set timer inputs and display to default timer duration
+  const settings = getSettings();
+  timerMinutesInput.value = settings.defaultTimerMinutes;
+  timerSecondsInput.value = 0;
+  const defaultDurationMs = settings.defaultTimerMinutes * 60 * 1000;
+  timerDisplay.textContent = formatTimerTime(defaultDurationMs);
 });
