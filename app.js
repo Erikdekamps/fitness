@@ -18,11 +18,13 @@ const editPlanScreen = document.getElementById('editPlanScreen');
 const activeWorkoutScreen = document.getElementById('activeWorkoutScreen');
 const timerScreen = document.getElementById('timerScreen');
 const historyScreen = document.getElementById('historyScreen');
+const workoutDetailScreen = document.getElementById('workoutDetailScreen');
 
 // Buttons
 const backFromPlansBtn = document.getElementById('backFromPlansBtn');
 const backFromEditPlanBtn = document.getElementById('backFromEditPlanBtn');
 const cancelWorkoutBtn = document.getElementById('cancelWorkoutBtn');
+const backFromDetailBtn = document.getElementById('backFromDetailBtn');
 
 // Bottom Navigation
 const bottomNav = document.getElementById('bottomNav');
@@ -383,6 +385,7 @@ function showScreen(screen) {
   activeWorkoutScreen.classList.toggle('screen-hidden', screen !== 'activeWorkout');
   timerScreen.classList.toggle('screen-hidden', screen !== 'timer');
   historyScreen.classList.toggle('screen-hidden', screen !== 'history');
+  workoutDetailScreen.classList.toggle('screen-hidden', screen !== 'workoutDetail');
   
   // Update bottom navigation active state
   updateNavActiveState(screen);
@@ -406,6 +409,7 @@ function updateNavActiveState(screen) {
       navExercises.classList.add('active');
       break;
     case 'history':
+    case 'workoutDetail':
       navHistory.classList.add('active');
       break;
     case 'timer':
@@ -431,6 +435,8 @@ cancelWorkoutBtn.addEventListener('click', () => {
     showScreen('tracker');
   }
 });
+
+backFromDetailBtn.addEventListener('click', () => showScreen('history'));
 
 // Add machine button
 addMachineBtn.addEventListener('click', () => {
@@ -1369,66 +1375,174 @@ function renderHistory() {
   const days = Object.keys(history).sort().reverse();
   
   if (days.length === 0) {
-    historyList.innerHTML = '<div class="empty-state">No workout history yet. Add your first set from the Home tab! 💪</div>';
-  historyList.innerHTML = '<div class="empty-state">No workout history yet. Add your first set from the Workout tab! 💪</div>';
+    historyList.innerHTML = '<div class="empty-state">No workout history yet. Add your first set from the Workout tab! 💪</div>';
     return;
   }
   
   days.forEach(day => {
-    const dayContainer = document.createElement('div');
-    dayContainer.className = 'history-day';
+    const entries = history[day];
+    if (!entries || entries.length === 0) return;
     
-    const dayHeader = document.createElement('div');
-    dayHeader.className = 'history-day-header';
-    dayHeader.textContent = formatDate(day);
-    dayContainer.appendChild(dayHeader);
+    // Calculate workout summary
+    const totalSets = entries.length;
+    const uniqueExercises = [...new Set(entries.map(e => e.machine))].length;
     
-    history[day].forEach(entry => {
-      const entryDiv = document.createElement('div');
-      entryDiv.className = 'history-entry';
-      entryDiv.dataset.entryId = entry.id;
-      
-      const entryInfo = document.createElement('div');
-      entryInfo.className = 'history-entry-info';
-      entryInfo.innerHTML = `
-        <div class="history-entry-machine">${entry.machine}</div>
-        <div class="history-entry-details">${entry.weight}kg × ${entry.reps} reps</div>
-      `;
-      
-      const entryActions = document.createElement('div');
-      entryActions.className = 'history-entry-actions';
-      
-      const editBtn = document.createElement('button');
-      editBtn.className = 'btn-icon edit';
-      editBtn.innerHTML = '✏️';
-      editBtn.title = 'Edit';
-      editBtn.addEventListener('click', () => {
-        entryDiv.classList.add('editing');
-        entryDiv.innerHTML = '';
-        entryDiv.appendChild(createEditForm(day, entry));
-      });
-      
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'btn-icon delete';
-      deleteBtn.innerHTML = '🗑️';
-      deleteBtn.title = 'Delete';
-      deleteBtn.addEventListener('click', () => {
-        if (confirm('Delete this entry?')) {
-          deleteEntry(day, entry.id);
-        }
-      });
-      
-      entryActions.appendChild(editBtn);
-      entryActions.appendChild(deleteBtn);
-      
-      entryDiv.appendChild(entryInfo);
-      entryDiv.appendChild(entryActions);
-      
-      dayContainer.appendChild(entryDiv);
+    // Calculate time span (earliest to latest entry)
+    const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
+    let timeSpent = 0;
+    if (timestamps.length > 1) {
+      const earliest = new Date(Math.min(...timestamps));
+      const latest = new Date(Math.max(...timestamps));
+      timeSpent = Math.round((latest - earliest) / 1000 / 60); // minutes
+    }
+    
+    const summaryCard = document.createElement('div');
+    summaryCard.className = 'workout-summary-card';
+    
+    const summaryHeader = document.createElement('div');
+    summaryHeader.className = 'workout-summary-header';
+    
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'workout-summary-date';
+    dateDiv.textContent = formatDate(day);
+    
+    summaryHeader.appendChild(dateDiv);
+    
+    const summaryStats = document.createElement('div');
+    summaryStats.className = 'workout-summary-stats';
+    
+    const statsHTML = `
+      <div class="workout-stat">
+        <div class="workout-stat-value">${uniqueExercises}</div>
+        <div class="workout-stat-label">Exercises</div>
+      </div>
+      <div class="workout-stat">
+        <div class="workout-stat-value">${totalSets}</div>
+        <div class="workout-stat-label">Sets</div>
+      </div>
+      <div class="workout-stat">
+        <div class="workout-stat-value">${timeSpent > 0 ? timeSpent + 'm' : '-'}</div>
+        <div class="workout-stat-label">Duration</div>
+      </div>
+    `;
+    summaryStats.innerHTML = statsHTML;
+    
+    const exercisesList = document.createElement('div');
+    exercisesList.className = 'workout-summary-exercises';
+    
+    // Group by exercise
+    const exerciseGroups = {};
+    entries.forEach(entry => {
+      if (!exerciseGroups[entry.machine]) {
+        exerciseGroups[entry.machine] = [];
+      }
+      exerciseGroups[entry.machine].push(entry);
     });
     
-    historyList.appendChild(dayContainer);
+    const exerciseNames = Object.keys(exerciseGroups).slice(0, 3);
+    const exercisesText = exerciseNames.join(', ') + (Object.keys(exerciseGroups).length > 3 ? '...' : '');
+    exercisesList.textContent = exercisesText;
+    
+    const viewDetailsBtn = document.createElement('button');
+    viewDetailsBtn.className = 'btn-view-details';
+    viewDetailsBtn.textContent = 'View Details →';
+    viewDetailsBtn.addEventListener('click', () => {
+      showWorkoutDetail(day, entries);
+    });
+    
+    summaryCard.appendChild(summaryHeader);
+    summaryCard.appendChild(summaryStats);
+    summaryCard.appendChild(exercisesList);
+    summaryCard.appendChild(viewDetailsBtn);
+    
+    historyList.appendChild(summaryCard);
   });
+}
+
+// Show workout detail screen
+function showWorkoutDetail(date, entries) {
+  const detailContent = document.getElementById('workoutDetailContent');
+  const detailTitle = document.getElementById('workoutDetailTitle');
+  
+  detailTitle.textContent = formatDate(date);
+  detailContent.innerHTML = '';
+  
+  // Summary stats at top
+  const totalSets = entries.length;
+  const uniqueExercises = [...new Set(entries.map(e => e.machine))].length;
+  const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
+  let timeSpent = 0;
+  if (timestamps.length > 1) {
+    const earliest = new Date(Math.min(...timestamps));
+    const latest = new Date(Math.max(...timestamps));
+    timeSpent = Math.round((latest - earliest) / 1000 / 60);
+  }
+  
+  const statsCard = document.createElement('div');
+  statsCard.className = 'workout-detail-stats';
+  statsCard.innerHTML = `
+    <div class="workout-stat">
+      <div class="workout-stat-value">${uniqueExercises}</div>
+      <div class="workout-stat-label">Exercises</div>
+    </div>
+    <div class="workout-stat">
+      <div class="workout-stat-value">${totalSets}</div>
+      <div class="workout-stat-label">Total Sets</div>
+    </div>
+    <div class="workout-stat">
+      <div class="workout-stat-value">${timeSpent > 0 ? timeSpent + 'm' : '-'}</div>
+      <div class="workout-stat-label">Duration</div>
+    </div>
+  `;
+  detailContent.appendChild(statsCard);
+  
+  // Group entries by exercise
+  const exerciseGroups = {};
+  entries.forEach(entry => {
+    if (!exerciseGroups[entry.machine]) {
+      exerciseGroups[entry.machine] = [];
+    }
+    exerciseGroups[entry.machine].push(entry);
+  });
+  
+  // Render each exercise group
+  Object.keys(exerciseGroups).forEach(machine => {
+    const sets = exerciseGroups[machine];
+    
+    const exerciseCard = document.createElement('div');
+    exerciseCard.className = 'workout-detail-exercise';
+    
+    const exerciseHeader = document.createElement('div');
+    exerciseHeader.className = 'workout-detail-exercise-header';
+    exerciseHeader.textContent = machine;
+    
+    const setsContainer = document.createElement('div');
+    setsContainer.className = 'workout-detail-sets';
+    
+    sets.forEach((set, index) => {
+      const setDiv = document.createElement('div');
+      setDiv.className = 'workout-detail-set';
+      
+      const time = new Date(set.timestamp).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      setDiv.innerHTML = `
+        <div class="workout-detail-set-number">Set ${index + 1}</div>
+        <div class="workout-detail-set-info">${set.weight}kg × ${set.reps} reps</div>
+        <div class="workout-detail-set-time">${time}</div>
+      `;
+      
+      setsContainer.appendChild(setDiv);
+    });
+    
+    exerciseCard.appendChild(exerciseHeader);
+    exerciseCard.appendChild(setsContainer);
+    detailContent.appendChild(exerciseCard);
+  });
+  
+  showScreen('workoutDetail');
 }
 
 // ===== SPINNER CONTROLS =====
