@@ -92,6 +92,18 @@ const planExercisesDiv = document.getElementById('planExercises');
 const addExerciseBtn = document.getElementById('addExerciseBtn');
 const addCardioExerciseBtn = document.getElementById('addCardioExerciseBtn');
 
+// Program elements
+const createProgramBtn = document.getElementById('createProgramBtn');
+const programsListDiv = document.getElementById('programsList');
+const editProgramForm = document.getElementById('editProgramForm');
+const editProgramTitle = document.getElementById('editProgramTitle');
+const programNameInput = document.getElementById('programName');
+const programDurationInput = document.getElementById('programDuration');
+const programScheduleDiv = document.getElementById('programSchedule');
+const backFromEditProgramBtn = document.getElementById('backFromEditProgramBtn');
+const saveProgramBtnTop = document.getElementById('saveProgramBtnTop');
+const settingsProgramsScreen = document.getElementById('settingsProgramsScreen');
+
 // Active workout elements
 const activeWorkoutTitle = document.getElementById('activeWorkoutTitle');
 const workoutExercisesDiv = document.getElementById('workoutExercises');
@@ -1621,12 +1633,14 @@ function showScreen(screen) {
   trackerScreen.classList.toggle('screen-hidden', screen !== 'tracker');
   machineScreen.classList.toggle('screen-hidden', screen !== 'machines');
   settingsScreen.classList.toggle('screen-hidden', screen !== 'settings');
+  settingsProgramsScreen.classList.toggle('screen-hidden', screen !== 'settingsPrograms');
   settingsPlansScreen.classList.toggle('screen-hidden', screen !== 'settingsPlans');
   settingsExercisesScreen.classList.toggle('screen-hidden', screen !== 'settingsExercises');
   settingsCardioScreen.classList.toggle('screen-hidden', screen !== 'settingsCardio');
   settingsDefaultsScreen.classList.toggle('screen-hidden', screen !== 'settingsDefaults');
   settingsAppearanceScreen.classList.toggle('screen-hidden', screen !== 'settingsAppearance');
   settingsDataScreen.classList.toggle('screen-hidden', screen !== 'settingsData');
+  editProgramScreen.classList.toggle('screen-hidden', screen !== 'editProgram');
   editPlanScreen.classList.toggle('screen-hidden', screen !== 'editPlan');
   activeWorkoutScreen.classList.toggle('screen-hidden', screen !== 'activeWorkout');
   timerScreen.classList.toggle('screen-hidden', screen !== 'timer');
@@ -1668,7 +1682,7 @@ function updateNavActiveState(screen) {
   const historyScreens = new Set(['history', 'workoutDetail']);
   
   // Screens that belong to settings
-  const settingsScreens = new Set(['settings', 'settingsPlans', 'settingsExercises', 'settingsCardio', 'settingsDefaults', 'settingsAppearance', 'settingsData', 'machines']);
+  const settingsScreens = new Set(['settings', 'settingsPrograms', 'settingsPlans', 'settingsExercises', 'settingsCardio', 'settingsDefaults', 'settingsAppearance', 'settingsData', 'editProgram', 'machines']);
   
   // Profile screen - just stats dashboard
   const profileScreens = new Set(['profile']);
@@ -5013,7 +5027,9 @@ document.querySelectorAll('.settings-menu-item').forEach(item => {
       showScreen(screenName);
       
       // Render content for specific screens
-      if (page === 'plans') {
+      if (page === 'programs') {
+        renderProgramsList();
+      } else if (page === 'plans') {
         renderPlansList();
       } else if (page === 'exercises') {
         renderMachineList(machineListDivExercises);
@@ -5841,41 +5857,89 @@ function renderProgramsList() {
   
   programs.forEach(program => {
     const programCard = document.createElement('div');
-    programCard.className = 'plan-card';
+    programCard.className = 'program-card';
+    
+    // Ensure weeks array exists
+    if (!program.weeks || !Array.isArray(program.weeks)) {
+      program.weeks = [];
+    }
     
     // Count total workouts in program
     let totalWorkouts = 0;
+    let totalRestDays = 0;
     program.weeks.forEach(week => {
-      week.days.forEach(day => {
-        if (day.workoutPlanId || day.customWorkout) totalWorkouts++;
-      });
+      if (week.days && Array.isArray(week.days)) {
+        week.days.forEach(day => {
+          if (day.workoutPlanId || day.customWorkout) {
+            totalWorkouts++;
+          } else {
+            totalRestDays++;
+          }
+        });
+      }
     });
     
+    const totalDays = program.weeks.length * 7;
+    const workoutPercentage = totalDays > 0 ? Math.round((totalWorkouts / totalDays) * 100) : 0;
+    
     programCard.innerHTML = `
-      <div class="plan-card-header">
-        <div class="plan-card-title">
-          <span class="plan-icon">📚</span>
-          <span>${program.name}</span>
-        </div>
-        <div class="plan-card-actions">
-          <button type="button" class="btn-icon edit" data-program-id="${program.id}" title="Edit">✏️</button>
-          <button type="button" class="btn-icon delete" data-program-id="${program.id}" title="Delete">🗑️</button>
+      <div class="program-card-header">
+        <div class="program-card-icon">📚</div>
+        <div class="program-card-title-section">
+          <h3 class="program-card-title">${program.name || 'Untitled Program'}</h3>
+          <div class="program-card-subtitle">${program.weeks.length} ${program.weeks.length === 1 ? 'Week' : 'Weeks'} • ${totalDays} Days</div>
         </div>
       </div>
-      <div class="plan-card-info">
-        <span>${program.weeks.length} weeks</span>
-        <span>•</span>
-        <span>${totalWorkouts} workouts</span>
+      
+      <div class="program-card-stats">
+        <div class="program-stat-item">
+          <div class="program-stat-icon">🏋️</div>
+          <div class="program-stat-content">
+            <div class="program-stat-value">${totalWorkouts}</div>
+            <div class="program-stat-label">Workouts</div>
+          </div>
+        </div>
+        <div class="program-stat-item">
+          <div class="program-stat-icon">😴</div>
+          <div class="program-stat-content">
+            <div class="program-stat-value">${totalRestDays}</div>
+            <div class="program-stat-label">Rest Days</div>
+          </div>
+        </div>
+        <div class="program-stat-item">
+          <div class="program-stat-icon">📊</div>
+          <div class="program-stat-content">
+            <div class="program-stat-value">${workoutPercentage}%</div>
+            <div class="program-stat-label">Activity</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="program-card-progress">
+        <div class="program-progress-bar">
+          <div class="program-progress-fill" style="width: ${workoutPercentage}%"></div>
+        </div>
+      </div>
+      
+      <div class="program-card-actions">
+        <button type="button" class="program-btn program-btn-edit" data-program-id="${program.id}">
+          <span class="program-btn-icon">✏️</span>
+          <span class="program-btn-text">Edit</span>
+        </button>
+        <button type="button" class="program-btn program-btn-delete" data-program-id="${program.id}">
+          <span class="program-btn-icon">🗑️</span>
+          <span class="program-btn-text">Delete</span>
+        </button>
       </div>
     `;
     
     // Edit button
-    programCard.querySelector('.edit').addEventListener('click', () => {
+    programCard.querySelector('.program-btn-edit').addEventListener('click', () => {
       editProgram(program.id);
     });
     
     // Delete button
-    programCard.querySelector('.delete').addEventListener('click', () => {
+    programCard.querySelector('.program-btn-delete').addEventListener('click', () => {
       if (confirm(`Delete program "${program.name}"?`)) {
         deleteProgram(program.id);
         renderProgramsList();
@@ -5896,8 +5960,14 @@ function editProgram(programId) {
   
   if (program) {
     currentEditingProgramId = program.id;
-    document.getElementById('programName').value = program.name;
-    document.getElementById('programDuration').value = program.weeks.length;
+    document.getElementById('programName').value = program.name || '';
+    
+    // Ensure weeks array exists
+    if (!program.weeks || !Array.isArray(program.weeks)) {
+      program.weeks = [];
+    }
+    
+    document.getElementById('programDuration').value = program.weeks.length || 4;
     currentProgramWeeks = JSON.parse(JSON.stringify(program.weeks)); // Deep copy
     document.getElementById('editProgramTitle').textContent = '✏️ Edit Program';
   } else {
@@ -5915,7 +5985,12 @@ function editProgram(programId) {
 // Render program schedule
 function renderProgramSchedule() {
   const scheduleDiv = document.getElementById('programSchedule');
-  const duration = parseInt(document.getElementById('programDuration').value) || 4;
+  if (!scheduleDiv) return;
+  
+  const durationInput = document.getElementById('programDuration');
+  if (!durationInput) return;
+  
+  const duration = parseInt(durationInput.value) || 4;
   
   // Initialize weeks if needed
   while (currentProgramWeeks.length < duration) {
@@ -5934,12 +6009,17 @@ function renderProgramSchedule() {
   const plans = getPlans();
   
   currentProgramWeeks.forEach((week, weekIndex) => {
+    // Ensure week has proper structure
+    if (!week.days || !Array.isArray(week.days)) {
+      week.days = Array(7).fill(null).map((_, i) => ({ dayOfWeek: i, workoutPlanId: null, customWorkout: null }));
+    }
+    
     const weekCard = document.createElement('div');
     weekCard.className = 'program-week-card';
     
     const weekHeader = document.createElement('div');
     weekHeader.className = 'program-week-header';
-    weekHeader.innerHTML = `<h3>Week ${week.weekNumber}</h3>`;
+    weekHeader.innerHTML = `<h3>Week ${week.weekNumber || (weekIndex + 1)}</h3>`;
     weekCard.appendChild(weekHeader);
     
     const daysGrid = document.createElement('div');
@@ -5951,7 +6031,7 @@ function renderProgramSchedule() {
       
       const dayName = document.createElement('div');
       dayName.className = 'program-day-name';
-      dayName.textContent = dayNames[dayIndex];
+      dayName.textContent = dayNames[dayIndex] || `Day ${dayIndex + 1}`;
       
       const workoutSelect = document.createElement('select');
       workoutSelect.className = 'program-day-select';
@@ -5960,7 +6040,7 @@ function renderProgramSchedule() {
       plans.forEach(plan => {
         const option = document.createElement('option');
         option.value = plan.id;
-        option.textContent = plan.name;
+        option.textContent = plan.name || 'Untitled Plan';
         if (day.workoutPlanId === plan.id) option.selected = true;
         workoutSelect.appendChild(option);
       });
@@ -5985,7 +6065,6 @@ document.getElementById('programDuration').addEventListener('change', () => {
 });
 
 // Create program button
-const createProgramBtn = document.getElementById('createProgramBtn');
 if (createProgramBtn) {
   createProgramBtn.addEventListener('click', () => {
     editProgram(null);
@@ -5993,7 +6072,6 @@ if (createProgramBtn) {
 }
 
 // Back button
-const backFromEditProgramBtn = document.getElementById('backFromEditProgramBtn');
 if (backFromEditProgramBtn) {
   backFromEditProgramBtn.addEventListener('click', () => {
     showScreen('settingsPrograms');
@@ -6001,7 +6079,6 @@ if (backFromEditProgramBtn) {
 }
 
 // Save program form
-const editProgramForm = document.getElementById('editProgramForm');
 if (editProgramForm) {
   editProgramForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -6010,7 +6087,6 @@ if (editProgramForm) {
 }
 
 // Top save button
-const saveProgramBtnTop = document.getElementById('saveProgramBtnTop');
 if (saveProgramBtnTop) {
   saveProgramBtnTop.addEventListener('click', () => {
     saveProgramData();
@@ -6052,4 +6128,170 @@ showScreen = function(screenName) {
   if (screenName === 'settingsPrograms') {
     renderProgramsList();
   }
+  
+  if (screenName === 'profile') {
+    renderPersonalRecords();
+  }
 };
+
+// ==========================================
+// Personal Records
+// ==========================================
+
+// Get personal records from localStorage
+function getPersonalRecords() {
+  return JSON.parse(localStorage.getItem('fitnessPersonalRecords') || '{}');
+}
+
+// Save personal records to localStorage
+function savePersonalRecords(records) {
+  localStorage.setItem('fitnessPersonalRecords', JSON.stringify(records));
+}
+
+// Calculate personal records from workout history
+function calculatePersonalRecords() {
+  const entries = getEntries();
+  const records = {};
+  
+  entries.forEach(entry => {
+    if (entry.type === 'strength' && entry.machine && entry.weight && entry.reps) {
+      const machine = entry.machine;
+      const oneRepMax = entry.weight * (1 + entry.reps / 30); // Epley formula
+      
+      if (!records[machine]) {
+        records[machine] = {
+          maxWeight: entry.weight,
+          maxReps: entry.reps,
+          oneRepMax: oneRepMax,
+          date: entry.date
+        };
+      } else {
+        // Update if we found a new max weight
+        if (entry.weight > records[machine].maxWeight) {
+          records[machine].maxWeight = entry.weight;
+          records[machine].date = entry.date;
+        }
+        // Update if we found more reps at same or higher weight
+        if (entry.reps > records[machine].maxReps) {
+          records[machine].maxReps = entry.reps;
+        }
+        // Update one rep max
+        if (oneRepMax > records[machine].oneRepMax) {
+          records[machine].oneRepMax = oneRepMax;
+          records[machine].date = entry.date;
+        }
+      }
+    }
+  });
+  
+  return records;
+}
+
+// Render personal records list
+function renderPersonalRecords() {
+  const container = document.getElementById('personalRecordsList');
+  if (!container) return;
+  
+  const calculatedRecords = calculatePersonalRecords();
+  const savedRecords = getPersonalRecords();
+  
+  // Merge calculated with saved (saved takes priority if manually set)
+  const allMachines = new Set([...Object.keys(calculatedRecords), ...Object.keys(savedRecords)]);
+  
+  if (allMachines.size === 0) {
+    container.innerHTML = '<div class="empty-state">No personal records yet. Start logging workouts to track your progress!</div>';
+    return;
+  }
+  
+  const sortedMachines = Array.from(allMachines).sort();
+  
+  container.innerHTML = '';
+  
+  sortedMachines.forEach(machine => {
+    const calculated = calculatedRecords[machine];
+    const saved = savedRecords[machine];
+    const record = saved || calculated;
+    
+    if (!record) return;
+    
+    const recordCard = document.createElement('div');
+    recordCard.className = 'pr-card';
+    
+    const isManual = !!saved;
+    
+    recordCard.innerHTML = `
+      <div class="pr-card-header">
+        <div class="pr-card-title">${machine}</div>
+        <div class="pr-card-actions">
+          <button type="button" class="btn-icon-sm edit-pr" data-machine="${machine}" title="Edit">✏️</button>
+          ${isManual ? `<button type="button" class="btn-icon-sm delete-pr" data-machine="${machine}" title="Delete">🗑️</button>` : ''}
+        </div>
+      </div>
+      <div class="pr-card-stats">
+        <div class="pr-stat">
+          <div class="pr-stat-label">Max Weight</div>
+          <div class="pr-stat-value">${record.maxWeight} kg</div>
+        </div>
+        <div class="pr-stat">
+          <div class="pr-stat-label">Max Reps</div>
+          <div class="pr-stat-value">${record.maxReps}</div>
+        </div>
+        <div class="pr-stat">
+          <div class="pr-stat-label">Est. 1RM</div>
+          <div class="pr-stat-value">${record.oneRepMax.toFixed(1)} kg</div>
+        </div>
+      </div>
+      ${record.date ? `<div class="pr-card-date">${formatDate(new Date(record.date))}</div>` : ''}
+    `;
+    
+    // Edit button
+    recordCard.querySelector('.edit-pr').addEventListener('click', () => {
+      editPersonalRecord(machine, record);
+    });
+    
+    // Delete button (only for manual entries)
+    const deleteBtn = recordCard.querySelector('.delete-pr');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => {
+        if (confirm(`Delete personal record for ${machine}?`)) {
+          const records = getPersonalRecords();
+          delete records[machine];
+          savePersonalRecords(records);
+          renderPersonalRecords();
+        }
+      });
+    }
+    
+    container.appendChild(recordCard);
+  });
+}
+
+// Edit personal record
+function editPersonalRecord(machine, currentRecord) {
+  const maxWeight = prompt(`Enter max weight for ${machine} (kg):`, currentRecord.maxWeight || '');
+  if (maxWeight === null) return;
+  
+  const maxReps = prompt(`Enter max reps for ${machine}:`, currentRecord.maxReps || '');
+  if (maxReps === null) return;
+  
+  const weight = parseFloat(maxWeight);
+  const reps = parseInt(maxReps);
+  
+  if (isNaN(weight) || isNaN(reps) || weight <= 0 || reps <= 0) {
+    alert('Please enter valid numbers');
+    return;
+  }
+  
+  const oneRepMax = weight * (1 + reps / 30);
+  
+  const records = getPersonalRecords();
+  records[machine] = {
+    maxWeight: weight,
+    maxReps: reps,
+    oneRepMax: oneRepMax,
+    date: new Date().toISOString()
+  };
+  
+  savePersonalRecords(records);
+  renderPersonalRecords();
+}

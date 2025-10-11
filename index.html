@@ -281,43 +281,18 @@
         </div>
       </div>
       
-      <!-- Period Statistics Section - Collapsible -->
+      <!-- Personal Records Section - Collapsible -->
       <div class="stats-collapsible-section">
         <button type="button" class="stats-section-header">
           <div class="stats-section-title">
-            <span class="stats-section-icon">📈</span>
-            <span>Period Analysis</span>
+            <span class="stats-section-icon">🏆</span>
+            <span>Personal Records</span>
           </div>
           <span class="stats-section-toggle">▼</span>
         </button>
         <div class="stats-section-content">
-          <div class="period-stats">
-            <div class="period-tabs">
-              <button type="button" class="period-tab active" data-period="week">Week</button>
-              <button type="button" class="period-tab" data-period="month">Month</button>
-              <button type="button" class="period-tab" data-period="year">Year</button>
-            </div>
-            
-            <div class="period-content">
-              <div class="period-stat-row">
-                <span class="period-stat-label">Workouts:</span>
-                <span class="period-stat-value" id="periodWorkouts">0</span>
-              </div>
-              <div class="period-stat-row">
-                <span class="period-stat-label">Total Time:</span>
-                <span class="period-stat-value" id="periodTime">0h 0m</span>
-              </div>
-              <div class="period-stat-row">
-                <span class="period-stat-label">Avg per Workout:</span>
-                <span class="period-stat-value" id="periodAvgTime">0m</span>
-              </div>
-              <div class="period-stat-row">
-                <span class="period-stat-label">Weight Change:</span>
-                <span class="period-stat-value" id="periodWeightChange">--</span>
-              </div>
-            </div>
-            
-            <canvas id="periodChart" class="stat-chart"></canvas>
+          <div id="personalRecordsList" class="personal-records-list">
+            <!-- Personal records will be rendered here -->
           </div>
         </div>
       </div>
@@ -439,9 +414,17 @@
     <div class="machine-container">
       <button type="button" id="createProgramBtn" class="btn-primary">Create New Program</button>
       
-      <div class="machine-list-container">
-        <h2>Your Programs</h2>
-        <div id="programsList"></div>
+      <div class="machine-list-container stats-collapsible-section">
+        <button type="button" class="stats-section-header">
+          <div class="stats-section-title">
+            <span class="stats-section-icon">📚</span>
+            <span>Your Programs</span>
+          </div>
+          <span class="stats-section-toggle">▼</span>
+        </button>
+        <div class="stats-section-content">
+          <div id="programsList"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -457,18 +440,34 @@
     <div class="machine-container">
       <button type="button" id="createPlanBtn" class="btn-primary">Create New Plan</button>
       
-      <div class="machine-list-container">
-        <h2>Your Plans</h2>
-        <div id="plansList"></div>
+      <div class="machine-list-container stats-collapsible-section">
+        <button type="button" class="stats-section-header">
+          <div class="stats-section-title">
+            <span class="stats-section-icon">📋</span>
+            <span>Your Plans</span>
+          </div>
+          <span class="stats-section-toggle">▼</span>
+        </button>
+        <div class="stats-section-content">
+          <div id="plansList"></div>
+        </div>
       </div>
       
       <!-- Example Plans Section -->
-      <div class="machine-list-container" style="margin-top: var(--spacing-xl);">
-        <h2>Example Plans</h2>
-        <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md); font-size: 0.9rem;">
-          Browse and import pre-made workout plans
-        </p>
-        <div id="examplePlansList"></div>
+      <div class="machine-list-container stats-collapsible-section collapsed" style="margin-top: var(--spacing-xl);">
+        <button type="button" class="stats-section-header">
+          <div class="stats-section-title">
+            <span class="stats-section-icon">💡</span>
+            <span>Example Plans</span>
+          </div>
+          <span class="stats-section-toggle">▼</span>
+        </button>
+        <div class="stats-section-content">
+          <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md); font-size: 0.9rem;">
+            Browse and import pre-made workout plans
+          </p>
+          <div id="examplePlansList"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -751,7 +750,7 @@
         
         <div class="form-group">
           <label for="programDuration">Duration (weeks)</label>
-          <div class="spinner-input-group">
+          <div class="spinner-input">
             <button type="button" class="spinner-btn" data-action="decrease" data-target="programDuration">−</button>
             <input type="text" pattern="\d*" inputmode="numeric" id="programDuration" value="4" min="1" max="52" step="1" required>
             <button type="button" class="spinner-btn" data-action="increase" data-target="programDuration">+</button>
