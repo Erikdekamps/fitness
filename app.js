@@ -13,7 +13,11 @@ const todayList = document.getElementById('todayList');
 const trackerScreen = document.getElementById('trackerScreen');
 const machineScreen = document.getElementById('machineScreen');
 const settingsScreen = document.getElementById('settingsScreen');
-const plansScreen = document.getElementById('plansScreen');
+const settingsPlansScreen = document.getElementById('settingsPlansScreen');
+const settingsExercisesScreen = document.getElementById('settingsExercisesScreen');
+const settingsDefaultsScreen = document.getElementById('settingsDefaultsScreen');
+const settingsAppearanceScreen = document.getElementById('settingsAppearanceScreen');
+const settingsDataScreen = document.getElementById('settingsDataScreen');
 const editPlanScreen = document.getElementById('editPlanScreen');
 const activeWorkoutScreen = document.getElementById('activeWorkoutScreen');
 const timerScreen = document.getElementById('timerScreen');
@@ -21,8 +25,8 @@ const historyScreen = document.getElementById('historyScreen');
 const workoutDetailScreen = document.getElementById('workoutDetailScreen');
 
 // Buttons
-const backFromPlansBtn = document.getElementById('backFromPlansBtn');
 const backFromEditPlanBtn = document.getElementById('backFromEditPlanBtn');
+const backFromMachinesBtn = document.getElementById('backFromMachinesBtn');
 const cancelWorkoutBtn = document.getElementById('cancelWorkoutBtn');
 const backFromDetailBtn = document.getElementById('backFromDetailBtn');
 
@@ -44,7 +48,6 @@ const machineListDiv = document.getElementById('machineList');
 const planSelector = document.getElementById('planSelector');
 const activePlanSelect = document.getElementById('activePlan');
 const startPlanBtn = document.getElementById('startPlanBtn');
-const managePlansBtn = document.getElementById('managePlansBtn');
 const manageExercisesBtn = document.getElementById('manageExercisesBtn');
 const createPlanBtn = document.getElementById('createPlanBtn');
 const plansListDiv = document.getElementById('plansList');
@@ -71,6 +74,9 @@ let currentWorkoutPlan = null;
 let completedExercises = new Set();
 let expandedExerciseIndex = null; // Track which exercise is expanded
 let workoutTimerInterval = null; // Track workout elapsed time
+
+// Track navigation context for proper back navigation
+let machinesScreenContext = 'settings'; // Can be 'settings' or 'settingsExercises'
 
 // ===== ACTIVE WORKOUT PERSISTENCE =====
 
@@ -540,7 +546,11 @@ function showScreen(screen) {
   trackerScreen.classList.toggle('screen-hidden', screen !== 'tracker');
   machineScreen.classList.toggle('screen-hidden', screen !== 'machines');
   settingsScreen.classList.toggle('screen-hidden', screen !== 'settings');
-  plansScreen.classList.toggle('screen-hidden', screen !== 'plans');
+  settingsPlansScreen.classList.toggle('screen-hidden', screen !== 'settingsPlans');
+  settingsExercisesScreen.classList.toggle('screen-hidden', screen !== 'settingsExercises');
+  settingsDefaultsScreen.classList.toggle('screen-hidden', screen !== 'settingsDefaults');
+  settingsAppearanceScreen.classList.toggle('screen-hidden', screen !== 'settingsAppearance');
+  settingsDataScreen.classList.toggle('screen-hidden', screen !== 'settingsData');
   editPlanScreen.classList.toggle('screen-hidden', screen !== 'editPlan');
   activeWorkoutScreen.classList.toggle('screen-hidden', screen !== 'activeWorkout');
   timerScreen.classList.toggle('screen-hidden', screen !== 'timer');
@@ -565,18 +575,22 @@ function updateNavActiveState(screen) {
   [navTimer, navWorkout, navHistory, navSettings].forEach(btn => btn.classList.remove('active'));
 
   // Screens that conceptually belong to the workout flow
-  const workoutScreens = new Set(['tracker', 'activeWorkout', 'plans', 'editPlan']);
+  const workoutScreens = new Set(['tracker', 'activeWorkout', 'editPlan']);
+  
+  // Screens that belong to settings
+  const settingsScreens = new Set(['settings', 'settingsPlans', 'settingsExercises', 'settingsDefaults', 'settingsAppearance', 'settingsData', 'machines']);
 
   if (workoutScreens.has(screen)) {
     navWorkout.classList.add('active');
     return;
   }
+  
+  if (settingsScreens.has(screen)) {
+    navSettings.classList.add('active');
+    return;
+  }
 
   switch (screen) {
-    case 'machines':
-      // Machines screen now accessed via settings
-      navSettings.classList.add('active');
-      break;
     case 'history':
     case 'workoutDetail':
       navHistory.classList.add('active');
@@ -584,17 +598,17 @@ function updateNavActiveState(screen) {
     case 'timer':
       navTimer.classList.add('active');
       break;
-    case 'settings':
-      navSettings.classList.add('active');
-      break;
   }
 }
 
-backFromPlansBtn.addEventListener('click', () => showScreen('tracker'));
-
 backFromEditPlanBtn.addEventListener('click', () => {
-  showScreen('plans');
+  showScreen('settingsPlans');
   renderPlansList();
+});
+
+backFromMachinesBtn.addEventListener('click', () => {
+  showScreen(machinesScreenContext); // Navigate back to the context we came from
+  machinesScreenContext = 'settings'; // Reset to default
 });
 
 cancelWorkoutBtn.addEventListener('click', () => {
@@ -1585,14 +1599,9 @@ addExerciseBtn.addEventListener('click', () => {
   renderPlanExercises();
 });
 
-// Manage plans button on workout tab
-managePlansBtn.addEventListener('click', () => {
-  showScreen('plans');
-  renderPlansList();
-});
-
 // Manage exercises button in settings
 manageExercisesBtn.addEventListener('click', () => {
+  machinesScreenContext = 'settingsExercises'; // Set context from settings
   showScreen('machines');
   renderMachineList();
 });
@@ -2641,6 +2650,33 @@ navTimer.addEventListener('click', () => {
 navSettings.addEventListener('click', () => {
   showScreen('settings');
   applySettings();
+});
+
+// ===== SETTINGS NAVIGATION =====
+
+// Settings menu navigation
+document.querySelectorAll('.settings-menu-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const page = item.dataset.settingPage;
+    if (page) {
+      const screenName = `settings${page.charAt(0).toUpperCase() + page.slice(1)}`;
+      showScreen(screenName);
+      
+      // Render content for specific screens
+      if (page === 'plans') {
+        renderPlansList();
+      } else if (page === 'exercises') {
+        renderMachineList();
+      }
+    }
+  });
+});
+
+// Back to settings buttons
+document.querySelectorAll('.back-to-settings').forEach(btn => {
+  btn.addEventListener('click', () => {
+    showScreen('settings');
+  });
 });
 
 // ===== INITIALIZATION =====

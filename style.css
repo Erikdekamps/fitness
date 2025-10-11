@@ -2079,7 +2079,11 @@ select:focus {
 main, 
 #machineScreen,
 #settingsScreen,
-#plansScreen,
+#settingsPlansScreen,
+#settingsExercisesScreen,
+#settingsDefaultsScreen,
+#settingsAppearanceScreen,
+#settingsDataScreen,
 #editPlanScreen,
 #activeWorkoutScreen,
 #historyScreen,
@@ -2096,7 +2100,11 @@ main,
   main, 
   #machineScreen,
   #settingsScreen,
-  #plansScreen,
+  #settingsPlansScreen,
+  #settingsExercisesScreen,
+  #settingsDefaultsScreen,
+  #settingsAppearanceScreen,
+  #settingsDataScreen,
   #editPlanScreen,
   #activeWorkoutScreen,
   #historyScreen,
@@ -2131,11 +2139,11 @@ main,
 
 /* Settings Sections */
 .settings-section {
-  margin-bottom: var(--spacing-3xl);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  border: 1px solid var(--border);
+  margin-bottom: 0; /* Removed margin since tabs handle spacing */
+  background: transparent; /* Transparent background for cleaner tab content */
+  border-radius: 0;
+  padding: 0;
+  border: none;
 }
 
 .settings-section-title {
@@ -2147,6 +2155,96 @@ main,
   border-bottom: 2px solid var(--border);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  display: none; /* Hidden when using tabs */
+}
+
+/* Settings Menu List */
+.settings-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.settings-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.settings-menu-item:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent);
+  transform: translateX(4px);
+}
+
+.settings-menu-item:active {
+  transform: translateX(2px);
+}
+
+.settings-menu-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 2rem;
+  text-align: center;
+}
+
+.settings-menu-text {
+  flex: 1;
+  font-weight: 600;
+}
+
+.settings-menu-arrow {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.settings-menu-item:hover .settings-menu-arrow {
+  transform: translateX(4px);
+  color: var(--accent);
+}
+
+/* Settings Info Cards */
+.settings-info-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3xl);
+  border: 1px solid var(--border);
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.settings-info-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-lg);
+  line-height: 1;
+}
+
+.settings-info-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.settings-info-description {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0 var(--spacing-lg);
 }
 
 .settings-action-buttons {
@@ -2211,4 +2309,22 @@ main,
 
 .settings-section .spinner-input input {
   text-align: center;
+}
+
+/* Settings-specific tab styling */
+#settingsScreen .tab-content {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--border);
+  min-height: 300px;
+}
+
+#settingsScreen .tabs {
+  margin-bottom: var(--spacing-lg);
+}
+
+#settingsScreen .tab-btn {
+  font-size: 0.9rem;
+  padding: var(--spacing-md) var(--spacing-sm);
 }

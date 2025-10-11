@@ -99,7 +99,9 @@
   <!-- Machine Management Screen -->
   <div id="machineScreen" class="screen-hidden">
     <div class="header">
+      <button type="button" id="backFromMachinesBtn" class="btn-icon-header" title="Back">←</button>
       <h1>⚙️ Manage Machines</h1>
+      <div class="header-spacer"></div>
     </div>
     
     <div class="machine-container">
@@ -124,141 +126,49 @@
     </div>
     
     <div class="machine-container">
-      <!-- Management Section -->
-      <div class="settings-section">
-        <h2 class="settings-section-title">Management</h2>
+      <!-- Settings Menu List -->
+      <div class="settings-menu">
+        <button type="button" class="settings-menu-item" data-setting-page="plans">
+          <span class="settings-menu-icon">📋</span>
+          <span class="settings-menu-text">Workout Plans</span>
+          <span class="settings-menu-arrow">›</span>
+        </button>
         
-        <div class="settings-action-buttons">
-          <button type="button" id="managePlansBtn" class="btn-secondary settings-action-btn">
-            <span class="btn-icon">📋</span>
-            <span class="btn-text">Manage Workout Plans</span>
-          </button>
-          <button type="button" id="manageExercisesBtn" class="btn-secondary settings-action-btn">
-            <span class="btn-icon">🏋️</span>
-            <span class="btn-text">Manage Exercises</span>
-          </button>
-        </div>
-      </div>
-      
-      <!-- Default Values Section -->
-      <div class="settings-section">
-        <h2 class="settings-section-title">Default Values</h2>
+        <button type="button" class="settings-menu-item" data-setting-page="exercises">
+          <span class="settings-menu-icon">🏋️</span>
+          <span class="settings-menu-text">Exercises</span>
+          <span class="settings-menu-arrow">›</span>
+        </button>
         
-      <div class="form-group">
-        <label for="weightIncrement">Weight Increment (kg)</label>
-        <p class="setting-description">How much weight changes with each +/- button press</p>
-        <div class="spinner-input">
-          <button type="button" class="spinner-btn" data-action="decrease" data-target="weightIncrement">−</button>
-          <input type="text" pattern="\d*\.?\d*" id="weightIncrement" min="0.5" max="10" step="0.5" value="2.5">
-          <button type="button" class="spinner-btn" data-action="increase" data-target="weightIncrement">+</button>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="defaultWeight">Default Weight (kg)</label>
-        <p class="setting-description">Starting weight when no history is available</p>
-        <div class="spinner-input">
-          <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultWeight">−</button>
-          <input type="text" pattern="\d*\.?\d*" id="defaultWeight" min="0" max="500" step="5" value="20">
-          <button type="button" class="spinner-btn" data-action="increase" data-target="defaultWeight">+</button>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="defaultReps">Default Reps</label>
-        <p class="setting-description">Starting reps when no history is available</p>
-        <div class="spinner-input">
-          <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultReps">−</button>
-          <input type="text" pattern="\d*" id="defaultReps" min="1" max="100" step="1" value="10">
-          <button type="button" class="spinner-btn" data-action="increase" data-target="defaultReps">+</button>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="defaultTimerMinutes">Default Timer Duration (minutes)</label>
-        <p class="setting-description">Default rest timer duration between sets</p>
-        <div class="spinner-input">
-          <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultTimerMinutes">−</button>
-          <input type="text" pattern="\d*" id="defaultTimerMinutes" min="0" max="59" step="1" value="3">
-          <button type="button" class="spinner-btn" data-action="increase" data-target="defaultTimerMinutes">+</button>
-        </div>
-      </div>
-      </div>
-      
-      <!-- Appearance Section -->
-      <div class="settings-section">
-        <h2 class="settings-section-title">Appearance</h2>
+        <button type="button" class="settings-menu-item" data-setting-page="defaults">
+          <span class="settings-menu-icon">🎯</span>
+          <span class="settings-menu-text">Default Values</span>
+          <span class="settings-menu-arrow">›</span>
+        </button>
         
-      <div class="form-group">
-        <label>Font Size</label>
-        <p class="setting-description">Adjust the overall text size in the app</p>
-        <div class="setting-badges" id="fontSizeBadges">
-          <button type="button" class="setting-badge" data-value="tiny">Tiny</button>
-          <button type="button" class="setting-badge" data-value="small">Small</button>
-          <button type="button" class="setting-badge active" data-value="normal">Normal</button>
-          <button type="button" class="setting-badge" data-value="large">Large</button>
-          <button type="button" class="setting-badge" data-value="very-large">XL</button>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label>Layout Density</label>
-        <p class="setting-description">Adjust spacing and gaps between elements</p>
-        <div class="setting-badges" id="layoutDensityBadges">
-          <button type="button" class="setting-badge" data-value="narrow">Compact</button>
-          <button type="button" class="setting-badge active" data-value="normal">Normal</button>
-          <button type="button" class="setting-badge" data-value="wide">Spacious</button>
-        </div>
-      </div>
-      </div>
-      
-      <!-- Format Section -->
-      <div class="settings-section">
-        <h2 class="settings-section-title">Formats</h2>
+        <button type="button" class="settings-menu-item" data-setting-page="appearance">
+          <span class="settings-menu-icon">🎨</span>
+          <span class="settings-menu-text">Appearance</span>
+          <span class="settings-menu-arrow">›</span>
+        </button>
         
-      <div class="form-group">
-        <label>Date Format</label>
-        <p class="setting-description">How dates are displayed throughout the app</p>
-        <div class="setting-badges" id="dateFormatBadges">
-          <button type="button" class="setting-badge" data-value="us">MM/DD/YYYY</button>
-          <button type="button" class="setting-badge active" data-value="eu">DD/MM/YYYY</button>
-          <button type="button" class="setting-badge" data-value="iso">YYYY-MM-DD</button>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label>Time Format</label>
-        <p class="setting-description">12-hour or 24-hour time display</p>
-        <div class="setting-badges" id="timeFormatBadges">
-          <button type="button" class="setting-badge" data-value="12h">12-hour</button>
-          <button type="button" class="setting-badge active" data-value="24h">24-hour</button>
-        </div>
-      </div>
-      </div>
-      
-      <!-- Data Management Section -->
-      <div class="settings-section">
-        <h2 class="settings-section-title">Data Management</h2>
-        
-      <div class="form-group">
-        <label>Backup & Restore</label>
-        <p class="setting-description">Export your data for backup or import from a previous export</p>
-        <div class="data-management-buttons">
-          <button type="button" id="exportDataBtn" class="btn-secondary">📤 Export Data</button>
-          <button type="button" id="importDataBtn" class="btn-secondary">📥 Import Data</button>
-          <input type="file" id="importFileInput" accept=".json" style="display: none;">
-        </div>
-      </div>
+        <button type="button" class="settings-menu-item" data-setting-page="data">
+          <span class="settings-menu-icon">💾</span>
+          <span class="settings-menu-text">Data Management</span>
+          <span class="settings-menu-arrow">›</span>
+        </button>
       </div>
     </div>
   </div>
   
-  <!-- Workout Plans Screen -->
-  <div id="plansScreen" class="screen-hidden">
+  <!-- Settings Sub-Pages -->
+  
+  <!-- Workout Plans Settings Page -->
+  <div id="settingsPlansScreen" class="screen-hidden">
     <div class="header">
-      <button type="button" id="backFromPlansBtn" class="btn-icon-header" title="Back">←</button>
+      <button type="button" class="btn-icon-header back-to-settings" title="Back">←</button>
       <h1>📋 Workout Plans</h1>
-      <div style="width: 2.5rem;"></div>
+      <div class="header-spacer"></div>
     </div>
     
     <div class="machine-container">
@@ -267,6 +177,160 @@
       <div class="machine-list-container">
         <h2>Your Plans</h2>
         <div id="plansList"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Exercises Settings Page -->
+  <div id="settingsExercisesScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" class="btn-icon-header back-to-settings" title="Back">←</button>
+      <h1>Exercises</h1>
+      <div class="header-spacer"></div>
+    </div>
+    
+    <div class="machine-container">
+      <div class="settings-section">
+        <div class="settings-info-card">
+          <div class="settings-info-icon">🏋️</div>
+          <h2 class="settings-info-title">Manage Exercises</h2>
+          <p class="settings-info-description">
+            Add, edit, and remove exercise machines from your list. Customize your exercise database to match the equipment available at your gym.
+          </p>
+          <button type="button" id="manageExercisesBtn" class="btn-primary" style="margin-top: var(--spacing-lg);">
+            Open Exercises Manager
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Defaults Settings Page -->
+  <div id="settingsDefaultsScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" class="btn-icon-header back-to-settings" title="Back">←</button>
+      <h1>Default Values</h1>
+      <div class="header-spacer"></div>
+    </div>
+    
+    <div class="machine-container">
+      <div class="settings-section">
+        <div class="form-group">
+          <label for="weightIncrement">Weight Increment (kg)</label>
+          <p class="setting-description">How much weight changes with each +/- button press</p>
+          <div class="spinner-input">
+            <button type="button" class="spinner-btn" data-action="decrease" data-target="weightIncrement">−</button>
+            <input type="text" pattern="\d*\.?\d*" id="weightIncrement" min="0.5" max="10" step="0.5" value="2.5">
+            <button type="button" class="spinner-btn" data-action="increase" data-target="weightIncrement">+</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="defaultWeight">Default Weight (kg)</label>
+          <p class="setting-description">Starting weight when no history is available</p>
+          <div class="spinner-input">
+            <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultWeight">−</button>
+            <input type="text" pattern="\d*\.?\d*" id="defaultWeight" min="0" max="500" step="5" value="20">
+            <button type="button" class="spinner-btn" data-action="increase" data-target="defaultWeight">+</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="defaultReps">Default Reps</label>
+          <p class="setting-description">Starting reps when no history is available</p>
+          <div class="spinner-input">
+            <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultReps">−</button>
+            <input type="text" pattern="\d*" id="defaultReps" min="1" max="100" step="1" value="10">
+            <button type="button" class="spinner-btn" data-action="increase" data-target="defaultReps">+</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="defaultTimerMinutes">Default Timer Duration (minutes)</label>
+          <p class="setting-description">Default rest timer duration between sets</p>
+          <div class="spinner-input">
+            <button type="button" class="spinner-btn" data-action="decrease" data-target="defaultTimerMinutes">−</button>
+            <input type="text" pattern="\d*" id="defaultTimerMinutes" min="0" max="59" step="1" value="3">
+            <button type="button" class="spinner-btn" data-action="increase" data-target="defaultTimerMinutes">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Appearance Settings Page -->
+  <div id="settingsAppearanceScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" class="btn-icon-header back-to-settings" title="Back">←</button>
+      <h1>Appearance</h1>
+      <div class="header-spacer"></div>
+    </div>
+    
+    <div class="machine-container">
+      <div class="settings-section">
+        <div class="form-group">
+          <label>Font Size</label>
+          <p class="setting-description">Adjust the overall text size in the app</p>
+          <div class="setting-badges" id="fontSizeBadges">
+            <button type="button" class="setting-badge" data-value="tiny">Tiny</button>
+            <button type="button" class="setting-badge" data-value="small">Small</button>
+            <button type="button" class="setting-badge active" data-value="normal">Normal</button>
+            <button type="button" class="setting-badge" data-value="large">Large</button>
+            <button type="button" class="setting-badge" data-value="very-large">XL</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Layout Density</label>
+          <p class="setting-description">Adjust spacing and gaps between elements</p>
+          <div class="setting-badges" id="layoutDensityBadges">
+            <button type="button" class="setting-badge" data-value="narrow">Compact</button>
+            <button type="button" class="setting-badge active" data-value="normal">Normal</button>
+            <button type="button" class="setting-badge" data-value="wide">Spacious</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Date Format</label>
+          <p class="setting-description">How dates are displayed throughout the app</p>
+          <div class="setting-badges" id="dateFormatBadges">
+            <button type="button" class="setting-badge" data-value="us">MM/DD/YYYY</button>
+            <button type="button" class="setting-badge active" data-value="eu">DD/MM/YYYY</button>
+            <button type="button" class="setting-badge" data-value="iso">YYYY-MM-DD</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Time Format</label>
+          <p class="setting-description">12-hour or 24-hour time display</p>
+          <div class="setting-badges" id="timeFormatBadges">
+            <button type="button" class="setting-badge" data-value="12h">12-hour</button>
+            <button type="button" class="setting-badge active" data-value="24h">24-hour</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Data Management Settings Page -->
+  <div id="settingsDataScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" class="btn-icon-header back-to-settings" title="Back">←</button>
+      <h1>Data Management</h1>
+      <div class="header-spacer"></div>
+    </div>
+    
+    <div class="machine-container">
+      <div class="settings-section">
+        <div class="form-group">
+          <label>Backup & Restore</label>
+          <p class="setting-description">Export your data for backup or import from a previous export</p>
+          <div class="data-management-buttons">
+            <button type="button" id="exportDataBtn" class="btn-secondary">📤 Export Data</button>
+            <button type="button" id="importDataBtn" class="btn-secondary">📥 Import Data</button>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;">
+          </div>
+        </div>
       </div>
     </div>
   </div>

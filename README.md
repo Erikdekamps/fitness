@@ -58,9 +58,21 @@
 - Add/delete custom machines with confirmation
 - Alphabetically sorted for easy browsing
 - Comes pre-loaded with 11 common exercises
-- Accessible from dedicated Exercises tab
+- Accessible from Settings → Exercises
 
 ### ⚙️ Comprehensive Settings
+
+#### Multi-Page Settings Navigation
+- **iOS-style menu interface** with dedicated pages for each category
+- Main settings screen with 5 organized categories:
+  - 📋 **Workout Plans** - Manage training routines
+  - 🏋️ **Exercises** - Manage exercise machines
+  - 🎯 **Default Values** - Workout preferences
+  - 🎨 **Appearance** - Display and format settings
+  - 💾 **Data Management** - Backup and restore
+- Each category has its own dedicated page with back navigation
+- Clean separation of concerns for better organization
+- Smooth drill-down navigation with visual feedback
 
 #### Workout Preferences
 - **Weight Increment**: Adjust how much weight changes with +/- buttons (default: 2.5kg)
@@ -112,9 +124,10 @@
 - **Dark mode optimized** for gym lighting conditions
 - **Mobile-first responsive design** fits all screen sizes
 - **Smooth animations** and intuitive controls throughout
-- **iOS-style bottom navigation** with 5 tabs:
-  - Exercises, Timer, Workout (default), History, Settings
+- **iOS-style bottom navigation** with 4 tabs:
+  - Timer, Workout (default), History, Settings
   - **Active tab highlighting** with background accent
+- **Multi-page settings** with drill-down navigation
 - **Consistent layout** with full-width design
 - **Touch-optimized** with appropriate tap targets
 - Clean card-based design with hover effects
@@ -142,16 +155,19 @@
 6. Delete individual sets if needed
 
 ### Create a Training Plan
-1. Click **"📋 Manage Workout Plans"** on the Workout tab
-2. Click **"Create New Plan"**
-3. Name your plan (e.g., "Upper Body A", "Leg Day")
-4. Add exercises:
+1. Go to **Settings** tab (⚙️ icon in bottom nav)
+2. Tap **"📋 Workout Plans"** from the settings menu
+3. Click **"📋 Manage Workout Plans"** button
+4. Click **"Create New Plan"**
+5. Name your plan (e.g., "Upper Body A", "Leg Day")
+6. Add exercises:
    - Select a machine from dropdown
    - Click **"+ Add Set"** to add multiple sets
    - Enter different weight/reps for each set
    - Consecutive same-exercise sets will be bundled together
-5. Click **"Save Plan"**
-6. Plan appears in your plans list
+7. Click **"Save Plan"**
+8. Plan appears in your plans list
+9. Navigate back to Workout tab to use the plan
 
 ### Execute a Training Plan
 1. Select your plan from the **Quick Start Plan** dropdown
@@ -179,15 +195,17 @@
 7. Detail view shows complete workout breakdown
 
 ### Manage Machines/Exercises
-1. Go to **Exercises** tab (🏋️ icon in bottom nav)
-2. **Add new machine**:
+1. Go to **Settings** tab (⚙️ icon in bottom nav)
+2. Tap **"🏋️ Exercises"** from the settings menu
+3. Click **"🏋️ Manage Exercises"** button to access the machine list
+4. **Add new machine**:
    - Type name in input field
    - Click **"+"** button
-3. **Rename machine**:
+5. **Rename machine**:
    - Click on machine name
    - Edit inline
    - Press Enter or click away to save
-4. **Delete machine**:
+6. **Delete machine**:
    - Click trash icon (⚠️)
    - Confirm deletion
    - Machine removed from all history and plans
@@ -207,19 +225,33 @@
 
 ### Customize Settings
 1. Go to **Settings** tab (⚙️ icon in bottom nav)
-2. **Workout Defaults**:
+2. Main settings menu shows 5 categories - tap any to open:
+
+**Workout Plans**:
+   - Access workout plan management
+   - Create, edit, and organize training routines
+
+**Exercises**:
+   - Access exercise/machine management
+   - Add, edit, and delete machines
+
+**Default Values**:
    - Adjust weight increment (spinner controls)
    - Set default weight and reps
    - Set default timer duration
-3. **Display Settings** (click badges to select):
-   - Choose font size
-   - Select layout density
-   - Pick date format
-   - Choose time format
-4. **Data Management**:
+
+**Appearance** (click badges to select):
+   - Choose font size (5 options)
+   - Select layout density (3 options)
+   - Pick date format (3 options)
+   - Choose time format (2 options)
+
+**Data Management**:
    - Click **"📤 Export Data"** to download backup
    - Click **"📥 Import Data"** to restore from file
-5. All changes save automatically
+
+3. Use back arrow (←) to return to main settings menu
+4. All changes save automatically
 
 ### Backup and Restore
 1. **Create Backup**:
@@ -338,6 +370,13 @@ Open source – feel free to use, modify, and distribute!
 ## 🎯 Version History
 
 ### Latest Version
+- ✨ Multi-page settings navigation with iOS-style menu
+- 📋 Separate settings pages for Workout Plans and Exercises
+- 🎨 Reorganized settings into 5 clear categories
+- 🏋️ Moved Exercises from bottom nav to Settings menu
+- 📱 Streamlined bottom navigation (4 tabs instead of 5)
+- 🎯 Improved settings discoverability and organization
+- 🔧 Fixed spinner button alignment with text fields
 - ✨ Badge-style setting selectors for better UX
 - 📤 Data export/import functionality
 - ⏱️ Default timer duration setting
