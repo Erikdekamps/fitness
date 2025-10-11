@@ -4369,8 +4369,8 @@ function showDayDetails(dateStr, entries) {
         const setItem = document.createElement('div');
         setItem.className = 'detail-set-item';
         setItem.innerHTML = `
-          <span class="detail-set-number">Set ${index + 1}</span>
-          <span class="detail-set-details">${entry.weight} kg × ${entry.reps} reps</span>
+          <span class="detail-set-number">Set ${index + 1}:</span>
+          <span class="detail-set-details"><strong>${entry.weight}kg</strong> × <strong>${entry.reps}</strong> reps</span>
         `;
         setsContainer.appendChild(setItem);
       });
@@ -4479,7 +4479,7 @@ function showWorkoutDetail(date, entries) {
     
     const exerciseHeader = document.createElement('div');
     exerciseHeader.className = 'workout-detail-exercise-header';
-    exerciseHeader.innerHTML = `${machine} <span style="font-size: 0.8rem; color: var(--text-secondary); margin-left: auto;">${sets.length} sets</span>`;
+    exerciseHeader.innerHTML = `${machine} <span style="font-size: 0.8rem; color: var(--text-secondary); margin-left: auto;">${sets.length} set${sets.length !== 1 ? 's' : ''}</span>`;
     
     const setsContainer = document.createElement('div');
     setsContainer.className = 'workout-detail-sets';
@@ -4491,12 +4491,9 @@ function showWorkoutDetail(date, entries) {
       const time = formatTime(set.timestamp);
       
       setDiv.innerHTML = `
-        <div class="workout-detail-set-number">Set ${index + 1}</div>
-        <div class="workout-detail-set-info">
-          <span style="font-weight: 700;">${set.weight}</span> kg × 
-          <span style="font-weight: 700;">${set.reps}</span> reps
-        </div>
-        <div class="workout-detail-set-time">${time}</div>
+        <span class="workout-detail-set-number">Set ${index + 1}:</span>
+        <span class="workout-detail-set-info"><strong>${set.weight}kg</strong> × <strong>${set.reps}</strong> reps</span>
+        <span class="workout-detail-set-time">${time}</span>
       `;
       
       setsContainer.appendChild(setDiv);
@@ -5651,17 +5648,35 @@ window.addSampleStatsData = function() {
     history[dateKey] = [
       {
         machine: 'Bench Press',
-        sets: [{weight: 80, reps: 10}, {weight: 85, reps: 8}],
+        weight: 80,
+        reps: 10,
+        id: `${timestamp}-1`,
         timestamp: new Date(timestamp).toISOString(),
-        workoutId: `workout-${dateKey}`,
-        duration: 45 * 60 * 1000 // 45 minutes
+        workoutId: `workout-${dateKey}`
+      },
+      {
+        machine: 'Bench Press',
+        weight: 85,
+        reps: 8,
+        id: `${timestamp}-2`,
+        timestamp: new Date(timestamp + 60000).toISOString(),
+        workoutId: `workout-${dateKey}`
       },
       {
         machine: 'Squat',
-        sets: [{weight: 100, reps: 10}, {weight: 110, reps: 8}],
-        timestamp: new Date(timestamp + 10000).toISOString(),
-        workoutId: `workout-${dateKey}`,
-        duration: 45 * 60 * 1000
+        weight: 100,
+        reps: 10,
+        id: `${timestamp}-3`,
+        timestamp: new Date(timestamp + 120000).toISOString(),
+        workoutId: `workout-${dateKey}`
+      },
+      {
+        machine: 'Squat',
+        weight: 110,
+        reps: 8,
+        id: `${timestamp}-4`,
+        timestamp: new Date(timestamp + 180000).toISOString(),
+        workoutId: `workout-${dateKey}`
       }
     ];
   }
