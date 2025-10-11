@@ -204,6 +204,7 @@ const timeFormatBadges = document.getElementById('timeFormatBadges');
 const exportDataBtn = document.getElementById('exportDataBtn');
 const importDataBtn = document.getElementById('importDataBtn');
 const importFileInput = document.getElementById('importFileInput');
+const resetEverythingBtn = document.getElementById('resetEverythingBtn');
 
 // Default machines
 const DEFAULT_MACHINES = [
@@ -818,6 +819,39 @@ importFileInput.addEventListener('change', (e) => {
     importData(file);
     // Reset the input so the same file can be selected again
     e.target.value = '';
+  }
+});
+
+// Reset everything button
+resetEverythingBtn.addEventListener('click', () => {
+  const confirmation = confirm(
+    '⚠️ WARNING: This will permanently delete ALL your data including:\n\n' +
+    '• All workout history\n' +
+    '• All workout plans\n' +
+    '• All custom exercises\n' +
+    '• All settings\n\n' +
+    'This action CANNOT be undone!\n\n' +
+    'Are you absolutely sure you want to reset everything?'
+  );
+  
+  if (confirmation) {
+    // Double confirmation for safety
+    const doubleConfirm = confirm(
+      'Last chance! Are you 100% sure you want to delete everything?\n\n' +
+      'Click OK to permanently delete all data.\n' +
+      'Click Cancel to keep your data.'
+    );
+    
+    if (doubleConfirm) {
+      // Clear all localStorage
+      localStorage.clear();
+      
+      // Show success message
+      alert('✅ All data has been reset. The app will now reload with default settings.');
+      
+      // Reload the page to reinitialize with defaults
+      window.location.reload();
+    }
   }
 });
 
