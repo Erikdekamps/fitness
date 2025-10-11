@@ -477,7 +477,7 @@ select:focus {
 .spinner-input {
   display: flex;
   gap: var(--spacing-sm);
-  align-items: center;
+  align-items: stretch; /* Changed from center to stretch */
 }
 
 .spinner-input input {
@@ -490,6 +490,9 @@ select:focus {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   text-align: center;
+  min-height: 3rem; /* Match spinner button height */
+  display: flex;
+  align-items: center;
   /* Using global number input styles */
 }
 
@@ -2115,4 +2118,59 @@ main,
     height: 2.5rem;
     font-size: 1.25rem;
   }
+}
+
+/* Settings Sections */
+.settings-section {
+  margin-bottom: var(--spacing-3xl);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--border);
+}
+
+.settings-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.settings-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.settings-action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  text-align: left;
+  width: 100%;
+  justify-content: flex-start;
+  font-size: 1rem;
+}
+
+.settings-action-btn .btn-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.settings-action-btn .btn-text {
+  flex: 1;
+  font-weight: 600;
+}
+
+.settings-section .form-group {
+  margin-bottom: var(--spacing-xl);
+}
+
+.settings-section .form-group:last-child {
+  margin-bottom: 0;
 }

@@ -32,7 +32,6 @@ const bottomNav = document.getElementById('bottomNav');
 
 // Track current workout detail for refreshing when settings change
 let currentWorkoutDetail = null;
-const navExercises = document.getElementById('navExercises');
 const navWorkout = document.getElementById('navWorkout');
 const navHistory = document.getElementById('navHistory');
 const navTimer = document.getElementById('navTimer');
@@ -46,6 +45,7 @@ const planSelector = document.getElementById('planSelector');
 const activePlanSelect = document.getElementById('activePlan');
 const startPlanBtn = document.getElementById('startPlanBtn');
 const managePlansBtn = document.getElementById('managePlansBtn');
+const manageExercisesBtn = document.getElementById('manageExercisesBtn');
 const createPlanBtn = document.getElementById('createPlanBtn');
 const plansListDiv = document.getElementById('plansList');
 const editPlanForm = document.getElementById('editPlanForm');
@@ -562,7 +562,7 @@ function showScreen(screen) {
 // Update bottom navigation active state
 function updateNavActiveState(screen) {
   // Clear current active state
-  [navExercises, navTimer, navWorkout, navHistory, navSettings].forEach(btn => btn.classList.remove('active'));
+  [navTimer, navWorkout, navHistory, navSettings].forEach(btn => btn.classList.remove('active'));
 
   // Screens that conceptually belong to the workout flow
   const workoutScreens = new Set(['tracker', 'activeWorkout', 'plans', 'editPlan']);
@@ -574,7 +574,8 @@ function updateNavActiveState(screen) {
 
   switch (screen) {
     case 'machines':
-      navExercises.classList.add('active');
+      // Machines screen now accessed via settings
+      navSettings.classList.add('active');
       break;
     case 'history':
     case 'workoutDetail':
@@ -1590,6 +1591,12 @@ managePlansBtn.addEventListener('click', () => {
   renderPlansList();
 });
 
+// Manage exercises button in settings
+manageExercisesBtn.addEventListener('click', () => {
+  showScreen('machines');
+  renderMachineList();
+});
+
 // Create new plan
 createPlanBtn.addEventListener('click', () => {
   editPlan(null);
@@ -2599,10 +2606,6 @@ timerResetBtn.addEventListener('click', () => {
 // ===== BOTTOM NAVIGATION =====
 
 // Bottom navigation event listeners
-navExercises.addEventListener('click', () => {
-  showScreen('machines');
-  renderMachineList();
-});
 navWorkout.addEventListener('click', () => {
   // Check if there's an active workout
   if (currentWorkoutPlan) {

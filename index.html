@@ -23,10 +23,6 @@
       </div>
     </div>
     
-    <div class="plans-action-section">
-      <button type="button" id="managePlansBtn" class="btn-secondary btn-manage-plans">📋 Manage Workout Plans</button>
-    </div>
-    
     <form id="entryForm">
       <div class="form-group">
         <label for="machine">Machine</label>
@@ -128,6 +124,26 @@
     </div>
     
     <div class="machine-container">
+      <!-- Management Section -->
+      <div class="settings-section">
+        <h2 class="settings-section-title">Management</h2>
+        
+        <div class="settings-action-buttons">
+          <button type="button" id="managePlansBtn" class="btn-secondary settings-action-btn">
+            <span class="btn-icon">📋</span>
+            <span class="btn-text">Manage Workout Plans</span>
+          </button>
+          <button type="button" id="manageExercisesBtn" class="btn-secondary settings-action-btn">
+            <span class="btn-icon">🏋️</span>
+            <span class="btn-text">Manage Exercises</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Default Values Section -->
+      <div class="settings-section">
+        <h2 class="settings-section-title">Default Values</h2>
+        
       <div class="form-group">
         <label for="weightIncrement">Weight Increment (kg)</label>
         <p class="setting-description">How much weight changes with each +/- button press</p>
@@ -167,7 +183,12 @@
           <button type="button" class="spinner-btn" data-action="increase" data-target="defaultTimerMinutes">+</button>
         </div>
       </div>
+      </div>
       
+      <!-- Appearance Section -->
+      <div class="settings-section">
+        <h2 class="settings-section-title">Appearance</h2>
+        
       <div class="form-group">
         <label>Font Size</label>
         <p class="setting-description">Adjust the overall text size in the app</p>
@@ -189,7 +210,12 @@
           <button type="button" class="setting-badge" data-value="wide">Spacious</button>
         </div>
       </div>
+      </div>
       
+      <!-- Format Section -->
+      <div class="settings-section">
+        <h2 class="settings-section-title">Formats</h2>
+        
       <div class="form-group">
         <label>Date Format</label>
         <p class="setting-description">How dates are displayed throughout the app</p>
@@ -208,15 +234,21 @@
           <button type="button" class="setting-badge active" data-value="24h">24-hour</button>
         </div>
       </div>
+      </div>
       
+      <!-- Data Management Section -->
+      <div class="settings-section">
+        <h2 class="settings-section-title">Data Management</h2>
+        
       <div class="form-group">
-        <label>Data Management</label>
+        <label>Backup & Restore</label>
         <p class="setting-description">Export your data for backup or import from a previous export</p>
         <div class="data-management-buttons">
           <button type="button" id="exportDataBtn" class="btn-secondary">📤 Export Data</button>
           <button type="button" id="importDataBtn" class="btn-secondary">📥 Import Data</button>
           <input type="file" id="importFileInput" accept=".json" style="display: none;">
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -350,10 +382,6 @@
   
   <!-- Bottom Navigation Bar (iOS Style) -->
   <nav id="bottomNav" class="bottom-nav">
-    <button type="button" id="navExercises" class="nav-btn" title="Exercises">
-      <div class="nav-icon">🏋️</div>
-      <div class="nav-label">Exercises</div>
-    </button>
     <button type="button" id="navTimer" class="nav-btn" title="Timer">
       <div class="nav-icon">⏱️</div>
       <div class="nav-label">Timer</div>
