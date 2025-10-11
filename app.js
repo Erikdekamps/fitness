@@ -44,6 +44,9 @@ const addMachineBtn = document.getElementById('addMachineBtn');
 const newMachineNameInput = document.getElementById('newMachineName');
 const machineListDiv = document.getElementById('machineList');
 
+// Home screen elements
+const startEmptyWorkoutBtn = document.getElementById('startEmptyWorkoutBtn');
+
 // Exercise elements (for settings exercises screen)
 const addMachineBtnExercises = document.getElementById('addMachineBtnExercises');
 const newMachineNameInputExercises = document.getElementById('newMachineNameExercises');
@@ -630,6 +633,11 @@ cancelWorkoutBtn.addEventListener('click', () => {
 backFromDetailBtn.addEventListener('click', () => {
   currentWorkoutDetail = null; // Clear tracking when leaving detail view
   showScreen('history');
+});
+
+// Start empty workout button
+startEmptyWorkoutBtn.addEventListener('click', () => {
+  showScreen('tracker');
 });
 
 // Add machine button
