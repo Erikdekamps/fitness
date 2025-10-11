@@ -4368,9 +4368,11 @@ function showDayDetails(dateStr, entries) {
       group.entries.forEach((entry, index) => {
         const setItem = document.createElement('div');
         setItem.className = 'detail-set-item';
+        const time = formatTime(entry.timestamp);
         setItem.innerHTML = `
           <span class="detail-set-number">Set ${index + 1}:</span>
           <span class="detail-set-details"><strong>${entry.weight}kg</strong> × <strong>${entry.reps}</strong> reps</span>
+          <span class="detail-set-time">${time}</span>
         `;
         setsContainer.appendChild(setItem);
       });

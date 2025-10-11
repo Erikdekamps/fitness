@@ -1632,6 +1632,7 @@ select:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--spacing-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--bg-primary);
   border-radius: var(--radius-sm);
@@ -1641,12 +1642,20 @@ select:focus {
 .detail-set-number {
   color: var(--text-secondary);
   font-weight: 500;
+  min-width: 3rem;
 }
 
 .detail-set-details {
+  flex: 1;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+}
+
+.detail-set-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 /* Keep this for backward compatibility, but it's not used in the new design */
