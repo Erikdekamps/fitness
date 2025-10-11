@@ -317,46 +317,51 @@
   <div id="settingsExercisesScreen" class="screen-hidden">
     <div class="header">
       <button type="button" class="btn-icon-header back-to-settings" title="Back">←</button>
-      <h1>Exercises</h1>
+      <h1>💪 Exercises</h1>
       <div class="header-spacer"></div>
     </div>
     
     <div class="machine-container">
-      <div class="add-machine-section">
-        <h3 class="add-exercise-title">Add New Exercise</h3>
-        <div class="add-exercise-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="newMachineNameExercises" class="form-label">Exercise Name</label>
-              <input type="text" id="newMachineNameExercises" placeholder="e.g., Bench Press" required>
-            </div>
-            <div class="form-group form-group-small">
-              <label for="newMachineCategoryExercises" class="form-label">Type</label>
-              <select id="newMachineCategoryExercises" class="category-select-add">
-                <option value="weight">🏋️ Weight</option>
-                <option value="cardio">🏃 Cardio</option>
-              </select>
-            </div>
-            <div class="form-group form-group-small">
-              <label for="newMachineMuscleGroupExercises" class="form-label">Muscle Group</label>
-              <select id="newMachineMuscleGroupExercises" class="category-select-add">
-                <option value="Chest">Chest</option>
-                <option value="Back">Back</option>
-                <option value="Shoulders">Shoulders</option>
-                <option value="Biceps">Biceps</option>
-                <option value="Triceps">Triceps</option>
-                <option value="Quads">Quads</option>
-                <option value="Hamstrings">Hamstrings</option>
-                <option value="Glutes">Glutes</option>
-                <option value="Calves">Calves</option>
-                <option value="Core">Core</option>
-                <option value="Full Body">Full Body</option>
-                <option value="Cardio">Cardio</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div class="form-group-button">
-              <button type="button" id="addMachineBtnExercises" class="btn-primary">Add Exercise</button>
+      <div class="add-machine-section collapsible-section collapsed">
+        <div class="collapsible-header">
+          <span class="collapse-toggle">▶</span>
+          <h3>Add New Exercise</h3>
+        </div>
+        <div class="collapsible-content">
+          <div class="add-exercise-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="newMachineNameExercises" class="form-label">Exercise Name</label>
+                <input type="text" id="newMachineNameExercises" placeholder="e.g., Bench Press" required>
+              </div>
+              <div class="form-group form-group-small">
+                <label for="newMachineCategoryExercises" class="form-label">Type</label>
+                <select id="newMachineCategoryExercises" class="category-select-add">
+                  <option value="weight">🏋️ Weight</option>
+                  <option value="cardio">🏃 Cardio</option>
+                </select>
+              </div>
+              <div class="form-group form-group-small">
+                <label for="newMachineMuscleGroupExercises" class="form-label">Muscle Group</label>
+                <select id="newMachineMuscleGroupExercises" class="category-select-add">
+                  <option value="Chest">Chest</option>
+                  <option value="Back">Back</option>
+                  <option value="Shoulders">Shoulders</option>
+                  <option value="Biceps">Biceps</option>
+                  <option value="Triceps">Triceps</option>
+                  <option value="Quads">Quads</option>
+                  <option value="Hamstrings">Hamstrings</option>
+                  <option value="Glutes">Glutes</option>
+                  <option value="Calves">Calves</option>
+                  <option value="Core">Core</option>
+                  <option value="Full Body">Full Body</option>
+                  <option value="Cardio">Cardio</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group-button">
+                <button type="button" id="addMachineBtnExercises" class="btn-primary">Add Exercise</button>
+              </div>
             </div>
           </div>
         </div>

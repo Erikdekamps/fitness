@@ -232,6 +232,65 @@ main {
 }
 
 /* Add Exercise Form Styles */
+.add-machine-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.collapsible-section {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.collapsible-header:hover {
+  background: var(--bg-primary);
+}
+
+.collapsible-section:not(.collapsed) .collapsible-header {
+  border-bottom-color: var(--border);
+}
+
+.collapsible-header h3 {
+  margin: 0;
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.collapse-toggle {
+  font-size: 0.75rem;
+  color: var(--accent);
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.collapsible-section:not(.collapsed) .collapse-toggle {
+  transform: rotate(90deg);
+}
+
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.collapsible-section:not(.collapsed) .collapsible-content {
+  max-height: 500px;
+}
+
 .add-exercise-title {
   font-size: var(--font-lg);
   font-weight: 600;
@@ -240,10 +299,7 @@ main {
 }
 
 .add-exercise-form {
-  background: var(--bg-secondary);
   padding: var(--spacing-lg);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
 }
 
 .form-row {

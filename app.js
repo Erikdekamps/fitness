@@ -1612,6 +1612,17 @@ newMachineNameInputExercises.addEventListener('keypress', (e) => {
   }
 });
 
+// Collapsible sections
+const collapsibleSections = document.querySelectorAll('.collapsible-section');
+collapsibleSections.forEach(section => {
+  const header = section.querySelector('.collapsible-header');
+  if (header) {
+    header.addEventListener('click', () => {
+      section.classList.toggle('collapsed');
+    });
+  }
+});
+
 // Add cardio button
 addCardioBtn.addEventListener('click', () => {
   const name = newCardioNameInput.value.trim();
