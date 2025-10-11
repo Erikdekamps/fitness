@@ -47,6 +47,7 @@ const backFromEditPlanBtn = document.getElementById('backFromEditPlanBtn');
 const backFromMachinesBtn = document.getElementById('backFromMachinesBtn');
 const cancelWorkoutBtn = document.getElementById('cancelWorkoutBtn');
 const backFromDetailBtn = document.getElementById('backFromDetailBtn');
+const closeTimerBtn = document.getElementById('closeTimerBtn');
 
 // Bottom Navigation
 const bottomNav = document.getElementById('bottomNav');
@@ -1722,6 +1723,11 @@ cancelWorkoutBtn.addEventListener('click', () => {
 backFromDetailBtn.addEventListener('click', () => {
   currentWorkoutDetail = null; // Clear tracking when leaving detail view
   showScreen('history');
+});
+
+// Close timer button - return to home
+closeTimerBtn.addEventListener('click', () => {
+  showScreen('home');
 });
 
 // Start empty workout button
