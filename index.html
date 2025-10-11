@@ -503,20 +503,20 @@
       
       <div id="timerTab" class="tab-content active">
         <div class="timer">
+          <div class="timer-display">00:00</div>
           <div class="timer-setup">
             <div class="timer-inputs">
               <div class="timer-input-group">
-                <input type="text" pattern="\d*" id="timerMinutes" min="0" max="59" value="0">
+                <input type="text" pattern="\d*" inputmode="numeric" id="timerMinutes" min="0" max="59" value="0">
                 <label>min</label>
               </div>
               <div class="timer-separator">:</div>
               <div class="timer-input-group">
-                <input type="text" pattern="\d*" id="timerSeconds" min="0" max="59" value="0">
+                <input type="text" pattern="\d*" inputmode="numeric" id="timerSeconds" min="0" max="59" value="0">
                 <label>sec</label>
               </div>
             </div>
           </div>
-          <div class="timer-display">00:00</div>
           <div class="timer-controls">
             <button type="button" id="timerStartBtn" class="btn-timer start">Start</button>
             <button type="button" id="timerResetBtn" class="btn-timer reset">Reset</button>
