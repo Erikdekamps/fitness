@@ -2077,28 +2077,16 @@ function renderHomeWorkoutPlans() {
     header.appendChild(name);
     header.appendChild(menuContainer);
     
-    // Plan info
-    const info = document.createElement('div');
-    info.className = 'home-plan-info';
-    
-    const exerciseCount = plan.exercises.length;
-    const totalSets = plan.exercises.reduce((sum, ex) => {
+    // Exercise names (comma separated)
+    const exerciseNames = document.createElement('div');
+    exerciseNames.className = 'home-plan-exercises';
+    const names = plan.exercises.map(ex => {
       if (ex.type === 'cardio') {
-        return sum + 1; // Count cardio as 1 "set"
+        return ex.exercise;
       }
-      return sum + (ex.sets ? ex.sets.length : 1);
-    }, 0);
-    
-    const exerciseItem = document.createElement('div');
-    exerciseItem.className = 'home-plan-info-item';
-    exerciseItem.innerHTML = `<span>📋</span><span>${exerciseCount} exercise${exerciseCount !== 1 ? 's' : ''}</span>`;
-    
-    const setsItem = document.createElement('div');
-    setsItem.className = 'home-plan-info-item';
-    setsItem.innerHTML = `<span>🔢</span><span>${totalSets} set${totalSets !== 1 ? 's' : ''}</span>`;
-    
-    info.appendChild(exerciseItem);
-    info.appendChild(setsItem);
+      return ex.machine;
+    }).filter(Boolean);
+    exerciseNames.textContent = names.join(', ');
     
     // Start button
     const startBtn = document.createElement('button');
@@ -2109,7 +2097,7 @@ function renderHomeWorkoutPlans() {
     });
     
     card.appendChild(header);
-    card.appendChild(info);
+    card.appendChild(exerciseNames);
     card.appendChild(startBtn);
     
     container.appendChild(card);

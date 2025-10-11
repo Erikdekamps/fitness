@@ -2917,7 +2917,14 @@ main,
 
 /* Home Section */
 .home-section {
-  margin: var(--spacing-xl) var(--spacing-md) var(--spacing-md);
+  margin: var(--spacing-md);
+  background: transparent;
+}
+
+#homeScreen .machine-container {
+  background: transparent;
+  border: none;
+  padding: var(--spacing-md);
 }
 
 .home-section-title {
@@ -2942,16 +2949,18 @@ main,
   justify-content: center;
   gap: var(--spacing-md);
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--elevation-3);
+  box-shadow: var(--elevation-2);
 }
 
 .btn-empty-workout:hover {
   background: var(--accent-hover);
-  box-shadow: var(--elevation-4);
+  box-shadow: var(--elevation-3);
+  transform: translateY(-2px);
 }
 
 .btn-empty-workout:active {
-  box-shadow: var(--elevation-2);
+  box-shadow: var(--elevation-1);
+  transform: translateY(0);
 }
 
 .empty-workout-icon {
@@ -3019,39 +3028,41 @@ main,
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
+  padding: 0;
 }
 
 .widget-content.expanded {
   max-height: 2000px;
   border-top: none;
+  padding: var(--spacing-md) 0;
 }
 
 .home-workout-plans {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  padding-top: var(--spacing-lg);
+  padding: 0;
+  background: transparent;
 }
 
 .home-plan-card {
-  background: var(--bg-secondary);
-  border: none;
-  border-left: 3px solid var(--border);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: visible;
   box-shadow: var(--elevation-1);
 }
 
 .home-plan-card:hover {
-  border-left-color: var(--success);
-  box-shadow: var(--elevation-2);
+  box-shadow: var(--elevation-3);
+  transform: translateY(-2px);
+  border-color: var(--primary);
 }
 
 .home-plan-header {
@@ -3067,6 +3078,24 @@ main,
   color: var(--text-primary);
   flex: 1;
   line-height: 1.3;
+}
+
+.home-plan-exercises {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  border-left: none;
+  max-height: none;
+  overflow: visible;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .home-plan-menu {
@@ -3194,9 +3223,10 @@ main,
 }
 
 .widget-empty {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) 0;
   text-align: center;
   color: var(--text-secondary);
+  background: transparent;
 }
 
 .widget-empty p {
