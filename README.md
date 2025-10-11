@@ -1,414 +1,431 @@
 # 💪 Fitness Tracker
 
-> **Built with AI** – A modern, minimal, mobile-first fitness tracking progressive web app with dark mode. Track your gym workouts, create custom training plans, monitor progress with detailed analytics, and manage your data with full backup/restore capabilities.
+> **Built with AI** – A modern, minimal, mobile-first fitness tracking progressive web app with dark mode. Track your gym workouts with a beautiful calendar view, create custom training plans, manage exercises, use built-in timers, and maintain complete control over your data with full backup/restore capabilities.
 
 ---
 
 ## ✨ Key Features
 
-### � Home Dashboard
-- **Quick access cards** to all major features
-- 6 main shortcuts:
-  - 🏋️ Quick Add - Log a single set instantly
-  - 📋 Workout Plans - Manage training routines
-  - 📊 History - View workout progress
-  - ⏱️ Timer - Rest countdown timer
-  - 🏋️ Exercises - Manage exercise library
-  - ⚙️ Settings - App preferences
-- Clean grid layout optimized for mobile
-- iOS-style card design with hover effects
+### 🏠 Home Dashboard
+- **Quick Start Widget**: 
+  - 🏋️ Start Empty Workout button for quick logging
+  - 📋 Workout Plans widget with expandable list
+  - One-tap access to your saved training routines
+- **Clean, focused interface** optimized for mobile
+- iOS-style card design with smooth animations
 
-### �🏋️ Quick Set Logging
-- **Smart number inputs** with mobile-optimized pattern attributes
+### 👤 Profile Screen
+Central hub for accessing all app features:
+- **📋 Plans** - Manage workout routines
+- **🏋️ Exercises** - Manage exercise library
+- **⏱️ Timer** - Rest timer & stopwatch
+- **📊 History** - Calendar view of workouts
+- **⚙️ Settings** - App preferences
+
+### 💪 Quick Set Logging
+- **Smart number inputs** with `type="text" pattern="\d*"` for mobile keyboards
 - **Spinner controls** for quick weight/rep adjustments
-- Automatically remembers your last used values per machine
+- Automatically remembers your last used values per exercise
 - Instant save to browser storage – no server needed
-- **Today's Workout** section shows real-time workout progress
+- **Today's Workout** section shows real-time progress
 - Quick delete from today's section with confirmation
 
-### 📋 Multi-Set Workout Plans
-- Create exercises with multiple sets at different weights/reps
-- **Exercise Bundling**: Consecutive sets of the same exercise are grouped together
-- Example: Bench Press – 3 sets shown as "Set 1/2/3" in one bundle
-- Build complete workout routines (Push/Pull/Legs, Full Body, etc.)
-- Start a plan and track each set individually
+### 📋 Workout Plans
+- Create multi-exercise training routines
+- Build complete programs (Push/Pull/Legs, Full Body, etc.)
+- Add multiple sets per exercise with different weights/reps
+- Start a plan and track progress in real-time
 - **Visual progress bar** shows completion status
 - Each set automatically logged to history
 - Edit or delete plans anytime
+- Plans widget on home screen for quick access
 
-### 🎯 Guided Workout Sessions
+### 🎯 Active Workout Sessions
 - Step-by-step progression through planned exercises
 - Visual progress tracking with status indicators
 - Complete sets one at a time with clear UI feedback
+- **Real-time workout timer** shows elapsed time and start time
 - Auto-logging to history after each set
-- Real-time updates to today's workout section
-- Cancel option with confirmation to prevent accidental data loss
+- Cancel option with confirmation
+- Workout persists even if you navigate away or close app
 
-### 📊 Advanced Workout Analytics & History
-- **Total Statistics Dashboard**: View overall progress
+### � Calendar-Based History
+- **True monthly calendar grid** (7 columns: Sun-Sat)
+- **Month navigation** with arrow buttons (← →)
+- **Today highlighting** - Current date has accent border
+- **Workout day highlighting** - Darker green background on days with workouts
+- **Click to expand** - Click any workout day to see full details below calendar
+- **Selected state** - Clicked day gets cyan border and stays highlighted
+- **Detailed workout view**:
+  - Date header with close button
+  - Summary stats (exercises, sets, duration)
+  - All exercises grouped together
+  - Every set with weight and reps
+  - Smooth slide-in animation
+- **Total Statistics Dashboard**:
   - Total workouts completed
   - Total sets performed
   - Unique exercises tracked
   - Total time spent training
-- **Workout Summary Cards**: Each workout day displays:
-  - Date with calendar icon
-  - Workout duration in HH:MM:SS format
-  - Exercise badges showing all exercises performed
-  - **Interactive view details icon** (👁️) in top-right corner
-- **Detailed Workout View**: Click any workout to see:
-  - Complete statistics and metadata
-  - All exercises grouped together
-  - Every set with timestamp, weight, and reps
-  - Organized by exercise with set numbering
-  - Same width as other screens for consistency
 
-### 🎛️ Machine Management
-- **Inline Editing**: Rename machines directly from the list
-- Click to edit, auto-saves on blur/enter
-- Auto-cancel when editing another machine
-- **Global Updates**: Renaming updates all history and workout plans
-- Add/delete custom machines with confirmation
-- Alphabetically sorted for easy browsing
-- Comes pre-loaded with 11 common exercises
-- Accessible from Settings → Exercises
+### �️ Exercise Management
+- **Inline editing** - Click exercise name to edit directly
+- **Alphabetical sorting** with dedicated sort button
+- **Global updates** - Renaming updates all history and workout plans
+- Add/delete custom exercises with confirmation
+- Visual feedback on sort (green checkmark)
+- Pre-loaded with 11 common exercises
+- Accessible from Profile → Exercises
+
+### ⏱️ Built-in Timer & Stopwatch
+- **Dual-tab interface** with Timer and Stopwatch
+- **Timer Tab**:
+  - Large, responsive display (clamps from 2.5rem to 4rem)
+  - Minute and second input fields with numeric keyboard
+  - Pre-configured with default duration from settings
+  - Start/Pause/Reset controls
+  - Auto-resets to default duration
+  - Vibration feedback on completion
+- **Stopwatch Tab**:
+  - Lap tracking with history
+  - HH:MM:SS display format
+  - Start/Pause/Reset controls
+  - Laps displayed in reverse order
+- **Fits within window** - Properly sized and scrollable
+- Quick access from Profile screen
 
 ### ⚙️ Comprehensive Settings
 
 #### Multi-Page Settings Navigation
-- **iOS-style menu interface** with dedicated pages for each category
-- Main settings screen with 5 organized categories:
-  - 📋 **Workout Plans** - Manage training routines
-  - 🏋️ **Exercises** - Manage exercise machines
+- **iOS-style menu interface** with dedicated pages:
   - 🎯 **Default Values** - Workout preferences
   - 🎨 **Appearance** - Display and format settings
   - 💾 **Data Management** - Backup and restore
-- Each category has its own dedicated page with back navigation
-- Clean separation of concerns for better organization
-- Smooth drill-down navigation with visual feedback
+- Clean separation with back navigation
+- Smooth drill-down navigation
 
 #### Workout Preferences
-- **Weight Increment**: Adjust how much weight changes with +/- buttons (default: 2.5kg)
-- **Default Weight**: Set starting weight for new exercises (default: 20kg)
-- **Default Reps**: Set starting reps for new exercises (default: 10)
-- **Default Timer Duration**: Set rest timer default (default: 3 minutes)
-  - Auto-applies on app load, timer reset, and navigation
+- **Weight Increment**: How much weight changes with +/- (default: 2.5kg)
+- **Default Weight**: Starting weight for new exercises (default: 20kg)
+- **Default Reps**: Starting reps for new exercises (default: 10)
+- **Default Timer Duration**: Rest timer default in minutes (default: 3)
+- All values use spinner controls for easy adjustment
 
-#### Display & Format Settings (Badge-Style Selectors)
-- **Font Size**: 5 scaling options with badge selection
-  - Tiny (80%), Small (90%), Normal (100%), Large (110%), XL (120%)
-  - Scales all text throughout the app
-  - Perfect for visibility in bright gym environments
-- **Layout Density**: 3 spacing options
-  - Compact, Normal, Spacious
+#### Appearance Settings
+- **Font Size**: 5 scaling options (Tiny 80% → XL 120%)
+  - Scales all text throughout the app using CSS variables
+- **Layout Density**: 3 spacing options (Compact 75% → Spacious 125%)
   - Adjusts padding and gaps globally
-- **Date Format**: 3 format options
-  - US (MM/DD/YYYY), EU (DD/MM/YYYY), ISO (YYYY-MM-DD)
-- **Time Format**: 2 display options
-  - 12-hour (AM/PM), 24-hour
-- All settings use modern badge-style selectors for easy selection
-- Everything auto-saved to localStorage instantly
+- **Date Format**: 3 options (US, EU, ISO)
+- **Time Format**: 2 options (12-hour, 24-hour)
+- Badge-style selectors for easy selection
+- Auto-saved to localStorage instantly
 
 #### Data Management
-- **Export Data**: One-click backup to JSON file
-  - Includes all workout history, machines, plans, and settings
-  - Filename includes export date for easy organization
-  - Human-readable JSON format
-- **Import Data**: Restore from previous export
+- **Export Data**: One-click JSON backup
+  - Includes workouts, exercises, plans, and settings
+  - Filename includes export date
+  - Human-readable format
+- **Import Data**: Restore from JSON file
   - File picker with validation
-  - Preview confirmation showing what will be imported
-  - Safe operation with user confirmation
-  - Automatic page reload to apply changes
-
-### ⏱️ Built-in Timer & Stopwatch
-- **Timer Tab (Primary)**: Rest timer between sets
-  - Pre-configured with default duration setting
-  - Large display with MM:SS format
-  - Auto-resets to default duration
-  - Input controls for custom durations
-- **Stopwatch Tab**: Track workout or exercise time
-  - Lap tracking with history
-  - Clear display with HH:MM:SS format
-  - Start/stop/reset controls
-- Quick access from bottom navigation
-- Timer defaults intelligently set on load and reset
+  - Preview confirmation
+  - Automatic page reload
+- **Reset Everything**: Nuclear option with confirmation
 
 ### 🎨 Beautiful Interface
-- **Dark mode optimized** for gym lighting conditions
-- **Mobile-first responsive design** fits all screen sizes
-- **Smooth animations** and intuitive controls throughout
-- **iOS-style bottom navigation** with 3 main tabs:
-  - 🏠 **Home** - Dashboard with quick access to all features
-  - 💪 **Workout** - Active workout session or quick add tracker
-  - 👤 **Profile** - Access to history, timer, and settings
-  - **Active tab highlighting** with background accent
-  - Smart context-aware navigation
-- **Multi-page settings** with drill-down navigation
-- **Consistent layout** with full-width design
-- **Touch-optimized** with appropriate tap targets
-- Clean card-based design with hover effects
-- **No horizontal overflow** – everything fits on screen
+- **Dark mode optimized** with carefully chosen colors:
+  - Primary: `#0a0a0a` (near black)
+  - Secondary: `#1a1a1a` (dark gray)
+  - Accent: `#00d4ff` (cyan)
+  - Success: `#00ff88` (green)
+- **Flat Material Design** with zero border radius
+- **Mobile-first responsive design**
+- **iOS-style bottom navigation** (3 tabs):
+  - 🏠 Home - Dashboard
+  - 💪 Workout - Active session or quick add
+  - 👤 Profile - History, timer, settings
+- **No horizontal overflow** - Everything fits on screen
+- **Touch-optimized** with proper tap targets
+- Smooth animations and transitions
 - Pinch-zoom disabled for app-like experience
 
 ### 🔐 Enhanced UI/UX
-- **Clickable workout cards**: Entire card is clickable, not just buttons
-- **Keyboard navigation support**: Tab and Enter/Space for accessibility
-- **Visual feedback**: Hover states, active states, and transitions
-- **Confirmation dialogs**: Prevent accidental deletions and data loss
-- **Error handling**: User-friendly error messages
-- **Accessibility features**: ARIA labels, semantic HTML, proper focus management
+- **Keyboard navigation** - Tab, Enter, Space support
+- **Visual feedback** - Hover states, active states, transitions
+- **Confirmation dialogs** - Prevent accidental deletions
+- **Error handling** - User-friendly messages
+- **Accessibility** - ARIA labels, semantic HTML, focus management
+- **Smart navigation** - Context-aware screen transitions
+- **Persistent state** - Active workout survives page navigation
 
 ---
 
 ## 📖 Usage Guide
 
 ### Getting Started
-1. App opens on **Home** screen with quick access cards
-2. Navigate using the bottom navigation:
-   - 🏠 **Home** - Main dashboard
-   - 💪 **Workout** - Training session
-   - 👤 **Profile** - History, timer, and settings
+1. Open app in browser → Lands on **Home** screen
+2. Bottom navigation:
+   - 🏠 **Home** - Dashboard with quick start
+   - 💪 **Workout** - Training or quick add
+   - 👤 **Profile** - All features hub
 
-### Log a Single Set
-1. From Home, tap **Quick Add** card (or use Workout tab)
-2. Select a machine from the dropdown
+### Log a Quick Set
+1. From Home, tap **Start Empty Workout**
+2. Select exercise from dropdown
 3. Use **spinner buttons (+/−)** or type weight and reps
 4. Click **"Add Set"**
-5. View immediately in "Today's Workout" section below
-6. Delete individual sets if needed
+5. Appears in "Today's Workout" below
+6. Delete sets with trash icon if needed
 
-### Create a Training Plan
-1. From Home, tap **Workout Plans** card (or go to Profile → Settings)
-2. Tap **"📋 Workout Plans"** from the settings menu
-3. Click **"📋 Manage Workout Plans"** button
-4. Click **"Create New Plan"**
-5. Name your plan (e.g., "Upper Body A", "Leg Day")
-6. Add exercises:
-   - Select a machine from dropdown
-   - Click **"+ Add Set"** to add multiple sets
-   - Enter different weight/reps for each set
-   - Consecutive same-exercise sets will be bundled together
-7. Click **"Save Plan"**
-8. Plan appears in your plans list
-9. Navigate back to Workout tab to use the plan
+### Create a Workout Plan
+1. Go to Profile → **Plans**
+2. Click **"Create New Plan"**
+3. Name your plan (e.g., "Push Day", "Leg Day")
+4. Add exercises:
+   - Select exercise from dropdown
+   - Enter sets, weight, and reps
+   - Click **"+ Add Set"** for more sets
+5. Click **"Save Plan"**
+6. Plan appears in home widget
 
-### Execute a Training Plan
-1. Select your plan from the **Quick Start Plan** dropdown
-2. Click **"Start"**
-3. Active Workout screen appears with all exercises
-4. Complete each set one by one:
-   - Review the target weight/reps
-   - Click **"Mark Complete"** after finishing
-5. Track progress with the visual progress bar
-6. View real-time updates in "Today's Workout" section
-7. Click **"Finish Workout"** when done
-8. All sets are automatically saved to history
+### Execute a Workout Plan
+1. From Home widget, select your plan
+2. Click **"Start"** button
+3. Active Workout screen opens:
+   - Shows all exercises in sequence
+   - Progress bar at top
+   - Elapsed time display
+4. Complete each set:
+   - Review target weight/reps
+   - Do the exercise
+   - Click **"Mark Complete"**
+5. Watch progress bar fill up
+6. Click **"Finish Workout"** when done
+7. All sets saved to history automatically
 
-### View Workout History & Analytics
-1. From Home, tap **History** card (or use Profile tab)
-2. **Total Stats** at top show overall progress
-3. **Last Workout** section shows your most recent session
-4. **All Workouts** section lists all workout days
-5. Each card shows:
-   - Date with calendar icon
-   - Duration with clock icon
-   - Exercise badges
-   - View details icon (👁️) in top-right
-6. Click anywhere on a card to view full details
-7. Detail view shows complete workout breakdown
+### View Workout History
+1. Go to Profile → **History**
+2. **Total Stats** shown at top
+3. **Calendar View** displays:
+   - Current month with day headers
+   - Days with workouts have darker green background
+   - Today highlighted with cyan border
+4. **Navigate months** with ← → buttons
+5. **Click any workout day** to see details:
+   - Details panel slides in below calendar
+   - Shows all exercises and sets
+   - Close with X button
+   - Click another day to compare
 
-### Manage Machines/Exercises
-1. From Home, tap **Exercises** card (or go to Profile → Settings)
-2. Tap **"🏋️ Exercises"** from the settings menu
-3. Click **"🏋️ Manage Exercises"** button to access the machine list
-4. **Add new machine**:
+### Manage Exercises
+1. Go to Profile → **Exercises**
+2. **Add new**:
    - Type name in input field
    - Click **"+"** button
-5. **Rename machine**:
-   - Click on machine name
+3. **Rename**:
+   - Click exercise name
    - Edit inline
-   - Press Enter or click away to save
-6. **Delete machine**:
-   - Click trash icon (⚠️)
+   - Press Enter to save
+4. **Delete**:
+   - Click trash icon
    - Confirm deletion
-   - Machine removed from all history and plans
+5. **Sort alphabetically**:
+   - Click **"Sort Alphabetically A-Z"** button
+   - Green checkmark confirms
 
-### Use the Timer
-1. From Home, tap **Timer** card (or go to Profile tab)
-2. **Timer (default tab)**:
-   - Shows default duration from settings
+### Use Timer/Stopwatch
+1. Go to Profile → **Timer**
+2. **Timer tab** (rest timer):
+   - Shows default from settings
    - Adjust minutes/seconds if needed
-   - Click **"Start"** to begin countdown
-   - Click **"Reset"** to restore default
+   - Click **"Start"** → countdown begins
+   - Click **"Pause"** to stop
+   - Click **"Reset"** → back to default
 3. **Stopwatch tab**:
    - Click **"Start"** to begin
-   - Click **"Lap"** to record lap times
-   - Click **"Stop"** to pause
+   - Click **"Pause"** to add lap
+   - Laps list shows all splits
    - Click **"Reset"** to clear
 
 ### Customize Settings
-1. From Home, tap **Settings** card (or go to Profile → tap Settings card)
-2. Main settings menu shows 5 categories - tap any to open:
-
-**Workout Plans**:
-   - Access workout plan management
-   - Create, edit, and organize training routines
-
-**Exercises**:
-   - Access exercise/machine management
-   - Add, edit, and delete machines
+1. Go to Profile → **Settings**
+2. Choose category:
 
 **Default Values**:
-   - Adjust weight increment (spinner controls)
-   - Set default weight and reps
-   - Set default timer duration
+   - Adjust all workout defaults
+   - Use spinners to change values
 
-**Appearance** (click badges to select):
-   - Choose font size (5 options)
-   - Select layout density (3 options)
-   - Pick date format (3 options)
-   - Choose time format (2 options)
+**Appearance**:
+   - Select font size (click badge)
+   - Choose layout density
+   - Pick date/time formats
+   - Changes apply instantly
 
 **Data Management**:
-   - Click **"📤 Export Data"** to download backup
-   - Click **"📥 Import Data"** to restore from file
-
-3. Use back arrow (←) to return to main settings menu
-4. All changes save automatically
+   - **Export**: Download JSON backup
+   - **Import**: Restore from file
+   - **Reset**: Clear all data (with confirmation)
 
 ### Backup and Restore
-1. **Create Backup**:
-   - Go to Settings → Data Management
-   - Click **"📤 Export Data"**
-   - JSON file downloads automatically
-   - Save file in safe location
-2. **Restore Backup**:
-   - Go to Settings → Data Management
-   - Click **"📥 Import Data"**
-   - Select your backup JSON file
-   - Review confirmation dialog
-   - Confirm to import
-   - Page reloads with restored data
+**Create Backup**:
+1. Profile → Settings → Data Management
+2. Click **"📤 Export Data"**
+3. JSON file downloads with date in filename
+4. Save in cloud storage or safe location
+
+**Restore Backup**:
+1. Profile → Settings → Data Management
+2. Click **"📥 Import Data"**
+3. Select backup JSON file
+4. Confirm import
+5. Page reloads with restored data
 
 ---
 
 ## 💾 Data & Privacy
 
-### Storage
-All data stored locally in your browser using localStorage:
-- **Workout history** with timestamps, weights, reps, and machines
-- **Training plans** with multi-set exercises and configurations
-- **Custom machines** list with user additions
-- **User settings** (increments, formats, font size, timer defaults)
+### Local Storage
+All data stored in browser localStorage:
+- **Workout history** - Date-indexed with timestamps, weights, reps, exercises
+- **Workout plans** - Multi-set routines with all configurations
+- **Exercises** - Custom and default exercise library
+- **Active workout** - Current session state (persists across navigation)
+- **Settings** - All preferences and defaults
 
 ### Privacy & Security
-✅ **100% offline** – no server, no account, no tracking  
-✅ **Zero data collection** – everything stays on your device  
-✅ **No dependencies** – pure HTML/CSS/JavaScript  
-✅ **No cookies** – all data in localStorage only  
-✅ **Export/Import** – full control over your data  
-✅ **No analytics** – complete privacy
+✅ **100% offline** – No server, no account, no login  
+✅ **Zero tracking** – No analytics, no cookies, no external requests  
+✅ **No dependencies** – Pure vanilla JavaScript  
+✅ **Complete privacy** – Everything stays on your device  
+✅ **Full control** – Export/import/delete anytime  
+✅ **Portable** – Transfer between devices via JSON export
 
-### Data Portability
-- Export data anytime as JSON
-- Import on any device with a modern browser
-- Transfer between devices easily
-- Keep backups for long-term storage
-- Human-readable format for data inspection
+### Data Format
+```json
+{
+  "fitnessHistory": {
+    "2025-10-11": [
+      {
+        "machine": "Bench Press",
+        "weight": 80,
+        "reps": 10,
+        "timestamp": "2025-10-11T14:30:00.000Z"
+      }
+    ]
+  },
+  "fitnessMachines": ["Bench Press", "Squat Rack", ...],
+  "fitnessPlans": [...],
+  "fitnessSettings": {...}
+}
+```
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **HTML5** – Semantic markup with accessibility features
-- **CSS3** – Modern styling with advanced features:
-  - CSS custom properties (variables) for theming
-  - Dynamic font scaling with calc() and var()
-  - Flexbox layouts for responsive design
-  - Smooth transitions and hover effects
-  - Mobile-first media queries
-  - No horizontal overflow handling
-- **Vanilla JavaScript** – No frameworks, no build step:
+- **HTML5** – Semantic, accessible markup
+- **CSS3** – Modern styling:
+  - CSS custom properties for theming
+  - Dynamic font/density scaling with `calc()`
+  - Flexbox and Grid layouts
+  - Smooth transitions and animations
+  - Mobile-first responsive design
+  - `clamp()` for responsive typography
+- **Vanilla JavaScript (ES6+)**:
+  - No frameworks, no build step
   - Event-driven architecture
-  - Modular function design
-  - Real-time DOM updates
-  - ES6+ features (arrow functions, template literals, destructuring)
-  - Async file handling for import/export
+  - Modular functions
+  - Template literals for dynamic HTML
+  - Arrow functions, destructuring, spread operator
+  - Async file handling
 
-### Storage & Data
-- **localStorage API** – Client-side persistence
-- **JSON** – Data serialization and export format
-- **Blob API** – File download generation
-- **FileReader API** – File import handling
+### Browser APIs
+- **localStorage** – Client-side persistence
+- **FileReader** – JSON import
+- **Blob** – File download generation
+- **Date** – Timestamp management and calendar rendering
+- **Vibration** – Haptic feedback (timer completion)
 
-### Features
-- Progressive Web App ready (PWA-capable)
-- Touch-optimized event handling
-- Keyboard navigation support
-- Mobile input pattern attributes
-- No external dependencies or CDNs
+### Key Features
+- Progressive Web App ready
+- Touch-optimized events
+- Keyboard navigation
+- Mobile input patterns (`type="text" pattern="\d*" inputmode="numeric"`)
+- No external dependencies
+- No CDN requirements
 
 ---
 
 ## 📱 Browser Compatibility
 
 ### Fully Supported
-- ✅ **Chrome/Edge** 90+ (recommended)
-- ✅ **Safari** 14+ (iOS & macOS)
-- ✅ **Firefox** 88+
+- ✅ Chrome/Edge 90+
+- ✅ Safari 14+ (iOS & macOS)
+- ✅ Firefox 88+
 
 ### Requirements
-- Modern browser with ES6+ support
-- localStorage support
-- FileReader API support (for import)
-- Blob API support (for export)
+- ES6+ support
+- localStorage API
+- FileReader API
+- Blob API
+- CSS custom properties
+- CSS Grid and Flexbox
 
 ### Mobile Optimization
-- Touch-friendly controls
-- Mobile keyboard optimization
-- Responsive layout (fits all screen sizes)
-- No pinch-zoom for app-like experience
-- All content fits on screen without overflow
+- Touch-friendly tap targets
+- Numeric keyboard for number inputs
+- Responsive grid calendar
+- No horizontal scroll
+- Viewport meta tag prevents zoom
+- Fits all screen sizes
 
 ---
 
 ## 🚀 Getting Started
 
-1. **Open the app** in your browser
-2. **Start logging** – select a machine, enter weight/reps, click "Add Set"
-3. **Create plans** – build workout routines for different days
-4. **Track progress** – view history and statistics
-5. **Customize** – adjust settings to your preference
-6. **Backup regularly** – export your data for safekeeping
+### Installation
+1. Download or clone repository
+2. Open `index.html` in browser
+3. No build process needed!
+
+### First Use
+1. **Add exercises** (or use defaults)
+2. **Log a set** to test the tracker
+3. **Create a plan** for your routine
+4. **Start tracking** your fitness journey
+5. **Export backup** regularly
+
+### Pro Tips
+- Create separate plans for different training days
+- Use the sort button to keep exercises organized
+- Export your data monthly for backup
+- Adjust font size for gym lighting conditions
+- Use timer between sets for consistent rest periods
+
+---
+
+## 🎯 Recent Updates
+
+### Latest Version (October 2025)
+- � **Calendar-based history view** with monthly grid
+- ✅ **Workout day highlighting** with darker green backgrounds
+- �️ **Click-to-expand details** for any workout day
+- 🎨 **Selected day state** with cyan highlighting
+- ⏱️ **Improved timer screen** with proper layout and sizing
+- � **Fixed number inputs** with `type="text" pattern="\d*"` for mobile
+- 📱 **Responsive timer display** using `clamp()` for sizing
+- 🏋️ **Exercise sorting** with alphabetical sort button
+- 📋 **Profile screen reorganization** - Plans moved to first position
+- 🎨 **Enhanced visual feedback** on calendar interactions
+- ♿ **Better accessibility** with keyboard navigation
+- � **Bug fixes** for input patterns and calendar rendering
 
 ---
 
 ## 📄 License
 
-Open source – feel free to use, modify, and distribute!
-
----
-
-## 🎯 Version History
-
-### Latest Version
-- 🏠 New Home dashboard with quick access cards
-- 👤 Profile screen consolidating History, Timer, and Settings
-- 📱 Simplified bottom navigation (3 tabs: Home, Workout, Profile)
-- ✨ Multi-page settings navigation with iOS-style menu
-- 📋 Separate settings pages for Workout Plans and Exercises
-- 🎨 Reorganized settings into 5 clear categories
-- 🏋️ Moved Exercises from bottom nav to Settings menu
-- 🎯 Improved navigation flow and discoverability
-- 🔧 Fixed spinner button alignment with text fields
-- ✨ Badge-style setting selectors for better UX
-- 📤 Data export/import functionality
-- ⏱️ Default timer duration setting
-- 🎨 Enhanced active tab styling
-- 👁️ View details icon repositioned to top-right
-- 🐛 Fixed settings save bug with spinner buttons
-- 📱 Improved mobile experience and overflow handling
-- 🧹 Code cleanup and CSS optimization
+Open source – Use, modify, and distribute freely!
 
 ---
 
