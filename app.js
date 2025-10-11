@@ -2485,20 +2485,30 @@ function renderActiveProgramWidget() {
   const scheduleContent = container.querySelector('.program-schedule-content');
   
   if (scheduleToggle && scheduleContent) {
+    // Restore saved state
+    const states = getCollapsibleStates();
+    const isCollapsed = states['active-program-schedule'] === true;
+    
+    if (isCollapsed) {
+      scheduleContent.classList.remove('open');
+      scheduleToggle.classList.remove('active');
+    } else {
+      scheduleContent.classList.add('open');
+      scheduleToggle.classList.add('active');
+    }
+    
     scheduleToggle.addEventListener('click', () => {
       const isOpen = scheduleContent.classList.contains('open');
       if (isOpen) {
         scheduleContent.classList.remove('open');
         scheduleToggle.classList.remove('active');
+        saveCollapsibleState('active-program-schedule', true); // Collapsed
       } else {
         scheduleContent.classList.add('open');
         scheduleToggle.classList.add('active');
+        saveCollapsibleState('active-program-schedule', false); // Open
       }
     });
-    
-    // Open by default
-    scheduleContent.classList.add('open');
-    scheduleToggle.classList.add('active');
   }
   
   // Add action button listeners
