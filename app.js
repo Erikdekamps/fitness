@@ -44,6 +44,11 @@ const addMachineBtn = document.getElementById('addMachineBtn');
 const newMachineNameInput = document.getElementById('newMachineName');
 const machineListDiv = document.getElementById('machineList');
 
+// Exercise elements (for settings exercises screen)
+const addMachineBtnExercises = document.getElementById('addMachineBtnExercises');
+const newMachineNameInputExercises = document.getElementById('newMachineNameExercises');
+const machineListDivExercises = document.getElementById('machineListExercises');
+
 // Plan elements
 const planSelector = document.getElementById('planSelector');
 const activePlanSelect = document.getElementById('activePlan');
@@ -77,6 +82,7 @@ let workoutTimerInterval = null; // Track workout elapsed time
 
 // Track navigation context for proper back navigation
 let machinesScreenContext = 'settings'; // Can be 'settings' or 'settingsExercises'
+let plansScreenContext = 'profile'; // Track where to navigate back from plans screen
 
 // ===== ACTIVE WORKOUT PERSISTENCE =====
 
@@ -317,6 +323,7 @@ function addMachine(name) {
   machines.sort();
   saveMachines(machines);
   renderMachineList();
+  renderMachineList(machineListDivExercises);
   renderMachineSelect();
   return true;
 }
@@ -327,6 +334,7 @@ function deleteMachine(name) {
   const filtered = machines.filter(m => m !== name);
   saveMachines(filtered);
   renderMachineList();
+  renderMachineList(machineListDivExercises);
   renderMachineSelect();
 }
 
@@ -388,6 +396,7 @@ function renameMachine(oldName, newName) {
   }
   
   renderMachineList();
+  renderMachineList(machineListDivExercises);
   renderMachineSelect();
   renderHistory();
   renderPlansList();
@@ -420,13 +429,14 @@ function renderMachineSelect() {
 // Render machine list for management
 let currentEditingMachine = null;
 
-function renderMachineList() {
+function renderMachineList(targetDiv = null) {
   const machines = getMachines();
-  machineListDiv.innerHTML = '';
+  const container = targetDiv || machineListDiv;
+  container.innerHTML = '';
   currentEditingMachine = null; // Reset editing state
   
   if (machines.length === 0) {
-    machineListDiv.innerHTML = '<div class="empty-state">No machines added yet.</div>';
+    container.innerHTML = '<div class="empty-state">No machines added yet.</div>';
     return;
   }
   
@@ -537,7 +547,7 @@ function renderMachineList() {
     machineItem.appendChild(machineName);
     machineItem.appendChild(editInput);
     machineItem.appendChild(actions);
-    machineListDiv.appendChild(machineItem);
+    container.appendChild(machineItem);
   });
 }
 
@@ -640,6 +650,29 @@ newMachineNameInput.addEventListener('keypress', (e) => {
     if (name) {
       if (addMachine(name)) {
         newMachineNameInput.value = '';
+      }
+    }
+  }
+});
+
+// Add machine button for exercises screen
+addMachineBtnExercises.addEventListener('click', () => {
+  const name = newMachineNameInputExercises.value.trim();
+  if (name) {
+    if (addMachine(name)) {
+      newMachineNameInputExercises.value = '';
+    }
+  }
+});
+
+// Allow Enter key to add machine for exercises screen
+newMachineNameInputExercises.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const name = newMachineNameInputExercises.value.trim();
+    if (name) {
+      if (addMachine(name)) {
+        newMachineNameInputExercises.value = '';
       }
     }
   }
@@ -1820,12 +1853,12 @@ addExerciseBtn.addEventListener('click', () => {
   renderPlanExercises();
 });
 
-// Manage exercises button in settings
-manageExercisesBtn.addEventListener('click', () => {
-  machinesScreenContext = 'settingsExercises'; // Set context from settings
-  showScreen('machines');
-  renderMachineList();
-});
+// Manage exercises button in settings - DEPRECATED (now goes directly to exercise list)
+// manageExercisesBtn.addEventListener('click', () => {
+//   machinesScreenContext = 'settingsExercises';
+//   showScreen('machines');
+//   renderMachineList();
+// });
 
 // Create new plan
 createPlanBtn.addEventListener('click', () => {
@@ -2889,7 +2922,7 @@ document.addEventListener('click', (e) => {
       showScreen('settingsPlans');
     } else if (target === 'settingsExercises') {
       machinesScreenContext = 'profile';
-      renderMachineList();
+      renderMachineList(machineListDivExercises);
       showScreen('settingsExercises');
     } else if (target === 'settingsMenu') {
       showSettingsScreen();
@@ -2956,7 +2989,29 @@ document.querySelectorAll('.settings-menu-item').forEach(item => {
 // Back to settings buttons
 document.querySelectorAll('.back-to-settings').forEach(btn => {
   btn.addEventListener('click', () => {
-    showScreen('settings');
+    // Determine which screen to go back to based on context
+    const currentScreen = Array.from(document.querySelectorAll('.screen-hidden')).find(screen => {
+      return !screen.classList.contains('screen-hidden');
+    });
+    
+    if (currentScreen) {
+      const screenId = currentScreen.id;
+      
+      // Navigate based on the screen we're leaving
+      if (screenId === 'settingsPlansScreen') {
+        // Use plansScreenContext if it exists, otherwise go to profile
+        showScreen(plansScreenContext || 'profile');
+      } else if (screenId === 'settingsExercisesScreen') {
+        // Use machinesScreenContext if it exists, otherwise go to profile
+        showScreen(machinesScreenContext || 'profile');
+      } else {
+        // Default behavior: go back to settings or profile
+        showScreen('profile');
+      }
+    } else {
+      // Fallback to profile
+      showScreen('profile');
+    }
   });
 });
 

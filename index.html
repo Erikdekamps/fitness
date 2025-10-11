@@ -272,17 +272,16 @@
     </div>
     
     <div class="machine-container">
-      <div class="settings-section">
-        <div class="settings-info-card">
-          <div class="settings-info-icon">🏋️</div>
-          <h2 class="settings-info-title">Manage Exercises</h2>
-          <p class="settings-info-description">
-            Add, edit, and remove exercise machines from your list. Customize your exercise database to match the equipment available at your gym.
-          </p>
-          <button type="button" id="manageExercisesBtn" class="btn-primary" style="margin-top: var(--spacing-lg);">
-            Open Exercises Manager
-          </button>
+      <div class="add-machine-section">
+        <div class="add-machine-group">
+          <input type="text" id="newMachineNameExercises" placeholder="Add new exercise..." required>
+          <button type="button" id="addMachineBtnExercises" class="btn-add">+</button>
         </div>
+      </div>
+      
+      <div class="machine-list-container">
+        <h2>Your Exercises</h2>
+        <div id="machineListExercises"></div>
       </div>
     </div>
   </div>
