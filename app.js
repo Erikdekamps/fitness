@@ -1627,6 +1627,16 @@ function renderCardioList() {
 
 // ===== SCREEN NAVIGATION =====
 
+// Store active screen in localStorage
+function saveActiveScreen(screen) {
+  localStorage.setItem('fitnessActiveScreen', screen);
+}
+
+// Get active screen from localStorage
+function getActiveScreen() {
+  return localStorage.getItem('fitnessActiveScreen') || 'home';
+}
+
 function showScreen(screen) {
   homeScreen.classList.toggle('screen-hidden', screen !== 'home');
   profileScreen.classList.toggle('screen-hidden', screen !== 'profile');
@@ -1646,6 +1656,12 @@ function showScreen(screen) {
   timerScreen.classList.toggle('screen-hidden', screen !== 'timer');
   historyScreen.classList.toggle('screen-hidden', screen !== 'history');
   workoutDetailScreen.classList.toggle('screen-hidden', screen !== 'workoutDetail');
+  
+  // Store current screen (but not edit screens or detail screens)
+  const persistableScreens = ['home', 'profile', 'tracker', 'history', 'settings', 'activeWorkout', 'timer'];
+  if (persistableScreens.includes(screen)) {
+    saveActiveScreen(screen);
+  }
   
   // Render example plans when showing settingsPlans screen
   if (screen === 'settingsPlans') {
@@ -1931,7 +1947,13 @@ function exportData() {
     history: JSON.parse(localStorage.getItem('fitnessHistory') || '[]'),
     machines: JSON.parse(localStorage.getItem('fitnessMachines') || '[]'),
     plans: JSON.parse(localStorage.getItem('fitnessPlans') || '[]'),
-    settings: JSON.parse(localStorage.getItem('fitnessSettings') || '{}')
+    settings: JSON.parse(localStorage.getItem('fitnessSettings') || '{}'),
+    activeScreen: localStorage.getItem('fitnessActiveScreen') || 'home',
+    programs: JSON.parse(localStorage.getItem('fitnessPrograms') || '[]'),
+    activeProgram: JSON.parse(localStorage.getItem('fitnessActiveProgram') || 'null'),
+    weightData: JSON.parse(localStorage.getItem('fitnessWeightData') || '[]'),
+    personalRecords: JSON.parse(localStorage.getItem('fitnessPersonalRecords') || '{}'),
+    collapsibleStates: JSON.parse(localStorage.getItem('fitnessCollapsibleStates') || '{}')
   };
   
   const dataStr = JSON.stringify(data, null, 2);
@@ -1962,14 +1984,23 @@ function importData(file) {
         throw new Error('Invalid backup file format');
       }
       
+      // Count items for confirmation message
+      const historyCount = Array.isArray(data.history) ? data.history.length : Object.keys(data.history || {}).length;
+      const machineCount = (data.machines || []).length;
+      const planCount = (data.plans || []).length;
+      const programCount = (data.programs || []).length;
+      const weightDataCount = (data.weightData || []).length;
+      
       // Confirm with user before overwriting
       const confirmed = confirm(
         `Import data from ${new Date(data.exportDate).toLocaleString()}?\n\n` +
         `This will replace your current data:\n` +
-        `- ${(data.history || []).length} workout entries\n` +
-        `- ${(data.machines || []).length} machines\n` +
-        `- ${(data.plans || []).length} workout plans\n` +
-        `- Settings\n\n` +
+        `- ${historyCount} workout entries\n` +
+        `- ${machineCount} exercises\n` +
+        `- ${planCount} workout plans\n` +
+        `- ${programCount} programs\n` +
+        `- ${weightDataCount} weight entries\n` +
+        `- Settings & preferences\n\n` +
         `Current data will be overwritten. Continue?`
       );
       
@@ -1977,11 +2008,17 @@ function importData(file) {
         return;
       }
       
-      // Import data
+      // Import all data
       if (data.history) localStorage.setItem('fitnessHistory', JSON.stringify(data.history));
       if (data.machines) localStorage.setItem('fitnessMachines', JSON.stringify(data.machines));
       if (data.plans) localStorage.setItem('fitnessPlans', JSON.stringify(data.plans));
       if (data.settings) localStorage.setItem('fitnessSettings', JSON.stringify(data.settings));
+      if (data.activeScreen) localStorage.setItem('fitnessActiveScreen', data.activeScreen);
+      if (data.programs) localStorage.setItem('fitnessPrograms', JSON.stringify(data.programs));
+      if (data.activeProgram !== undefined) localStorage.setItem('fitnessActiveProgram', JSON.stringify(data.activeProgram));
+      if (data.weightData) localStorage.setItem('fitnessWeightData', JSON.stringify(data.weightData));
+      if (data.personalRecords) localStorage.setItem('fitnessPersonalRecords', JSON.stringify(data.personalRecords));
+      if (data.collapsibleStates) localStorage.setItem('fitnessCollapsibleStates', JSON.stringify(data.collapsibleStates));
       
       alert('Data imported successfully! The page will now reload.');
       
@@ -6097,8 +6134,9 @@ window.addEventListener('DOMContentLoaded', () => {
     startWorkoutTimer(); // Start the timer for the restored workout
     showScreen('activeWorkout');
   } else {
-    // Start at home screen
-    showScreen('home');
+    // Restore the last active screen, or default to home
+    const lastScreen = getActiveScreen();
+    showScreen(lastScreen);
   }
   
   // Set timer inputs and display to default timer duration
