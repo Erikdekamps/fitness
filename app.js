@@ -9,7 +9,11 @@ const form = document.getElementById('entryForm');
 const machineSelect = document.getElementById('machine');
 const weightInput = document.getElementById('weight');
 const repsInput = document.getElementById('reps');
-const historyList = document.getElementById('historyList');
+const historyCalendar = document.getElementById('historyCalendar');
+const calendarPrevMonth = document.getElementById('calendarPrevMonth');
+const calendarNextMonth = document.getElementById('calendarNextMonth');
+const calendarMonthYear = document.getElementById('calendarMonthYear');
+const selectedDayDetails = document.getElementById('selectedDayDetails');
 
 // Today section
 const todaySection = document.getElementById('todaySection');
@@ -101,6 +105,9 @@ const importFileInput = document.getElementById('importFileInput');
 const resetEverythingBtn = document.getElementById('resetEverythingBtn');
 
 // ========== STATE MANAGEMENT ==========
+
+// Calendar state
+let currentCalendarDate = new Date();
 
 // Current editing state
 let currentEditingPlanId = null;
@@ -2231,24 +2238,14 @@ function createEditForm(date, entry) {
 function renderHistory() {
   const history = getHistory();
   const historyStatsSummary = document.getElementById('historyStatsSummary');
-  const lastWorkoutContainer = document.getElementById('lastWorkoutContainer');
-  const historyList = document.getElementById('historyList');
   
   historyStatsSummary.innerHTML = '';
-  lastWorkoutContainer.innerHTML = '';
-  historyList.innerHTML = '';
   
   const days = Object.keys(history).sort().reverse();
-  
-  if (days.length === 0) {
-    historyList.innerHTML = '<div class="empty-state">No workout history yet. Add your first set from the Workout tab! 💪</div>';
-    return;
-  }
   
   // Calculate overall stats
   let totalWorkouts = 0;
   let totalSetsAllTime = 0;
-  let totalExercisesAllTime = 0; // Count unique exercises across all workouts
   let totalMinutesAllTime = 0;
   let uniqueExercisesAllTime = new Set();
   
@@ -2258,14 +2255,9 @@ function renderHistory() {
       totalWorkouts++;
       totalSetsAllTime += entries.length;
       
-      // Count unique exercises in this workout
       const exercisesInWorkout = [...new Set(entries.map(e => e.machine))];
-      totalExercisesAllTime += exercisesInWorkout.length;
-      
-      // Add to the set of all unique exercises
       exercisesInWorkout.forEach(exercise => uniqueExercisesAllTime.add(exercise));
       
-      // Calculate workout duration
       const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
       if (timestamps.length > 1) {
         const earliest = new Date(Math.min(...timestamps));
@@ -2278,132 +2270,195 @@ function renderHistory() {
   // Render total stats
   renderTotalStats(totalWorkouts, totalSetsAllTime, uniqueExercisesAllTime.size, totalMinutesAllTime);
   
-  // Render last workout (first day in the sorted days array)
-  if (days.length > 0) {
-    const lastWorkoutDay = days[0];
-    const lastWorkoutEntries = history[lastWorkoutDay];
-    renderLastWorkout(lastWorkoutDay, lastWorkoutEntries);
+  // Render calendar
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const history = getHistory();
+  const historyCalendar = document.getElementById('historyCalendar');
+  const calendarMonthYear = document.getElementById('calendarMonthYear');
+  
+  historyCalendar.innerHTML = '';
+  
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+  
+  // Set header
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+  calendarMonthYear.textContent = `📅 ${monthNames[month]} ${year}`;
+  
+  // Add day headers
+  const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  dayHeaders.forEach(day => {
+    const header = document.createElement('div');
+    header.className = 'calendar-day-header-cell';
+    header.textContent = day;
+    historyCalendar.appendChild(header);
+  });
+  
+  // Get first day of month and number of days
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  // Add empty cells for days before month starts
+  for (let i = 0; i < firstDay; i++) {
+    const emptyCell = document.createElement('div');
+    emptyCell.className = 'calendar-day-cell empty';
+    historyCalendar.appendChild(emptyCell);
   }
   
-  days.forEach(day => {
-    const entries = history[day];
-    if (!entries || entries.length === 0) return;
+  // Add cells for each day of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const entries = history[dateStr];
+    const hasWorkout = entries && entries.length > 0;
     
-    // Skip the most recent workout as it's already shown in lastWorkoutContainer
-    if (days.length > 0 && day === days[0]) {
-      return;
+    const dayCell = document.createElement('div');
+    dayCell.className = 'calendar-day-cell';
+    
+    // Check if it's today
+    const today = new Date();
+    const isToday = today.getFullYear() === year && 
+                    today.getMonth() === month && 
+                    today.getDate() === day;
+    
+    if (isToday) {
+      dayCell.classList.add('today');
     }
     
-    // Calculate workout summary
-    const totalSets = entries.length;
-    const uniqueExercises = [...new Set(entries.map(e => e.machine))].length;
-    
-    // Calculate time span (earliest to latest entry)
-    const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
-    let timeSpentSeconds = 0;
-    if (timestamps.length > 1) {
-      const earliest = new Date(Math.min(...timestamps));
-      const latest = new Date(Math.max(...timestamps));
-      timeSpentSeconds = Math.round((latest - earliest) / 1000); // seconds
+    if (hasWorkout) {
+      dayCell.classList.add('has-workout');
+      
+      dayCell.innerHTML = `
+        <div class="calendar-day-number">${day}</div>
+      `;
+      
+      // Make clickable
+      dayCell.style.cursor = 'pointer';
+      dayCell.addEventListener('click', (e) => {
+        // Remove 'selected' class from all calendar cells
+        document.querySelectorAll('.calendar-day-cell.selected').forEach(cell => {
+          cell.classList.remove('selected');
+        });
+        
+        // Add 'selected' class to clicked day
+        dayCell.classList.add('selected');
+        
+        showDayDetails(dateStr, entries);
+      });
+    } else {
+      dayCell.innerHTML = `<div class="calendar-day-number">${day}</div>`;
     }
     
-    // Format the time as HH:MM:SS
-    const hours = Math.floor(timeSpentSeconds / 3600);
-    const minutes = Math.floor((timeSpentSeconds % 3600) / 60);
-    const seconds = timeSpentSeconds % 60;
-    const formattedTime = [
-      hours.toString().padStart(2, '0'),
-      minutes.toString().padStart(2, '0'),
-      seconds.toString().padStart(2, '0')
-    ].join(':');
-    
-    const summaryCard = document.createElement('div');
-    summaryCard.className = 'workout-summary-card';
-    summaryCard.tabIndex = 0; // Make the card focusable for accessibility
-    
-    // Create a container for the card content
-    const cardContent = document.createElement('div');
-    cardContent.className = 'workout-summary-content';
-    
-    // Date with calendar icon
-    const dateDiv = document.createElement('div');
-    dateDiv.className = 'workout-summary-date';
-    dateDiv.innerHTML = `
-      <div class="workout-summary-date-icon">📅</div>
-      <div>${formatDate(day)}</div>
-    `;
-    
-    // We're removing the exercise and set counts as they're redundant with badges
-    
-    // Duration with clock icon and HH:MM:SS format
-    const timeDiv = document.createElement('div');
-    timeDiv.className = 'workout-summary-time';
-    timeDiv.innerHTML = `
-      <div class="workout-summary-time-icon">⏱️</div>
-      <div class="workout-summary-time-value">${timeSpentSeconds > 0 ? formattedTime : 'N/A'}</div>
-    `;
-    
-    // Group by exercise for badges
-    const exerciseGroups = {};
-    entries.forEach(entry => {
-      if (!exerciseGroups[entry.machine]) {
-        exerciseGroups[entry.machine] = [];
-      }
-      exerciseGroups[entry.machine].push(entry);
-    });
-    
-    // Exercises as badges
-    const exercisesDiv = document.createElement('div');
-    exercisesDiv.className = 'workout-summary-exercises';
-    
-    const exercisesTitle = document.createElement('div');
-    exercisesTitle.className = 'workout-summary-exercises-title';
-    exercisesTitle.innerHTML = '<span class="workout-summary-exercises-icon">🏋️</span> Exercises';
-    
-    const exercisesBadges = document.createElement('div');
-    exercisesBadges.className = 'workout-summary-badges';
-    
-    Object.keys(exerciseGroups).forEach(exercise => {
-      const badge = document.createElement('div');
-      badge.className = 'exercise-badge';
-      badge.textContent = exercise;
-      exercisesBadges.appendChild(badge);
-    });
-    
-    exercisesDiv.appendChild(exercisesTitle);
-    exercisesDiv.appendChild(exercisesBadges);
-    
-    // View Details button indicator in top right
-    const viewDetailsIndicator = document.createElement('div');
-    viewDetailsIndicator.className = 'view-details-indicator';
-    viewDetailsIndicator.innerHTML = '👁️'; // Eye icon to indicate viewing details
-    viewDetailsIndicator.title = "View Workout Details"; // Tooltip
-    
-    // Add content to card content container
-    cardContent.appendChild(dateDiv);
-    cardContent.appendChild(timeDiv);
-    cardContent.appendChild(exercisesDiv);
-    // Add the indicator to the card instead of the content for absolute positioning
-    summaryCard.appendChild(viewDetailsIndicator);
-    
-    // Add card content to the main card
-    summaryCard.appendChild(cardContent);
-    
-    // Make the entire card clickable
-    summaryCard.addEventListener('click', () => {
-      showWorkoutDetail(day, entries);
-    });
-    
-    // Add keyboard support for accessibility
-    summaryCard.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        showWorkoutDetail(day, entries);
-      }
-    });
-    
-    historyList.appendChild(summaryCard);
+    historyCalendar.appendChild(dayCell);
+  }
+}
+
+function showDayDetails(dateStr, entries) {
+  const selectedDayDetails = document.getElementById('selectedDayDetails');
+  selectedDayDetails.innerHTML = '';
+  
+  if (!entries || entries.length === 0) return;
+  
+  const detailCard = document.createElement('div');
+  detailCard.className = 'day-detail-card';
+  
+  // Header
+  const header = document.createElement('div');
+  header.className = 'day-detail-header';
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'day-detail-close';
+  closeBtn.innerHTML = '×';
+  closeBtn.addEventListener('click', () => {
+    selectedDayDetails.innerHTML = '';
   });
+  
+  const dateTitle = document.createElement('h3');
+  dateTitle.textContent = formatDate(dateStr);
+  
+  header.appendChild(dateTitle);
+  header.appendChild(closeBtn);
+  
+  // Calculate stats
+  const totalSets = entries.length;
+  const uniqueExercises = [...new Set(entries.map(e => e.machine))].length;
+  
+  const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
+  let timeSpentSeconds = 0;
+  if (timestamps.length > 1) {
+    const earliest = new Date(Math.min(...timestamps));
+    const latest = new Date(Math.max(...timestamps));
+    timeSpentSeconds = Math.round((latest - earliest) / 1000);
+  }
+  
+  const hours = Math.floor(timeSpentSeconds / 3600);
+  const minutes = Math.floor((timeSpentSeconds % 3600) / 60);
+  const formattedTime = hours > 0 
+    ? `${hours}h ${minutes}m`
+    : `${minutes}m`;
+  
+  const stats = document.createElement('div');
+  stats.className = 'day-detail-stats';
+  stats.innerHTML = `
+    <span class="detail-stat">🏋️ ${uniqueExercises} exercises</span>
+    <span class="detail-stat">📊 ${totalSets} sets</span>
+    ${timeSpentSeconds > 0 ? `<span class="detail-stat">⏱️ ${formattedTime}</span>` : ''}
+  `;
+  
+  // Group entries by exercise
+  const exerciseGroups = {};
+  entries.forEach(entry => {
+    if (!exerciseGroups[entry.machine]) {
+      exerciseGroups[entry.machine] = [];
+    }
+    exerciseGroups[entry.machine].push(entry);
+  });
+  
+  // Exercises container
+  const exercisesContainer = document.createElement('div');
+  exercisesContainer.className = 'day-detail-exercises';
+  
+  Object.keys(exerciseGroups).forEach(exercise => {
+    const sets = exerciseGroups[exercise];
+    
+    const exerciseCard = document.createElement('div');
+    exerciseCard.className = 'detail-exercise-card';
+    
+    const exerciseHeader = document.createElement('div');
+    exerciseHeader.className = 'detail-exercise-header';
+    exerciseHeader.innerHTML = `
+      <span class="detail-exercise-name">${exercise}</span>
+      <span class="detail-exercise-count">${sets.length} set${sets.length > 1 ? 's' : ''}</span>
+    `;
+    
+    const setsContainer = document.createElement('div');
+    setsContainer.className = 'detail-exercise-sets';
+    
+    sets.forEach((set, index) => {
+      const setItem = document.createElement('div');
+      setItem.className = 'detail-set-item';
+      setItem.innerHTML = `
+        <span class="detail-set-number">Set ${index + 1}</span>
+        <span class="detail-set-details">${set.weight} kg × ${set.reps} reps</span>
+      `;
+      setsContainer.appendChild(setItem);
+    });
+    
+    exerciseCard.appendChild(exerciseHeader);
+    exerciseCard.appendChild(setsContainer);
+    exercisesContainer.appendChild(exerciseCard);
+  });
+  
+  detailCard.appendChild(header);
+  detailCard.appendChild(stats);
+  detailCard.appendChild(exercisesContainer);
+  selectedDayDetails.appendChild(detailCard);
+  
+  // Scroll to details
+  selectedDayDetails.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // Render total stats summary
@@ -2447,122 +2502,6 @@ function renderTotalStats(totalWorkouts, totalSets, uniqueExercises, totalMinute
   historyStatsSummary.appendChild(setsStat);
   historyStatsSummary.appendChild(exercisesStat);
   historyStatsSummary.appendChild(timeStat);
-}
-
-// Render last workout
-function renderLastWorkout(day, entries) {
-  const lastWorkoutContainer = document.getElementById('lastWorkoutContainer');
-  lastWorkoutContainer.innerHTML = '';
-  
-  // Use the same card creation logic as in the main history rendering
-  const totalSets = entries.length;
-  const uniqueExercises = [...new Set(entries.map(e => e.machine))].length;
-  
-  // Calculate time span
-  const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
-  let timeSpentSeconds = 0;
-  if (timestamps.length > 1) {
-    const earliest = new Date(Math.min(...timestamps));
-    const latest = new Date(Math.max(...timestamps));
-    timeSpentSeconds = Math.round((latest - earliest) / 1000); // seconds
-  }
-  
-  // Format the time as HH:MM:SS
-  const hours = Math.floor(timeSpentSeconds / 3600);
-  const minutes = Math.floor((timeSpentSeconds % 3600) / 60);
-  const seconds = timeSpentSeconds % 60;
-  const formattedTime = [
-    hours.toString().padStart(2, '0'),
-    minutes.toString().padStart(2, '0'),
-    seconds.toString().padStart(2, '0')
-  ].join(':');
-  
-  const summaryCard = document.createElement('div');
-  summaryCard.className = 'workout-summary-card last-workout-card';
-  summaryCard.tabIndex = 0;
-  
-  // Create a container for the card content
-  const cardContent = document.createElement('div');
-  cardContent.className = 'workout-summary-content';
-  
-  // Date with calendar icon
-  const dateDiv = document.createElement('div');
-  dateDiv.className = 'workout-summary-date';
-  dateDiv.innerHTML = `
-    <div class="workout-summary-date-icon">📅</div>
-    <div>${formatDate(day)}</div>
-  `;
-  
-  // We're removing the exercise and set counts as they're redundant with badges
-  
-  // Duration with clock icon and HH:MM:SS format
-  const timeDiv = document.createElement('div');
-  timeDiv.className = 'workout-summary-time';
-  timeDiv.innerHTML = `
-    <div class="workout-summary-time-icon">⏱️</div>
-    <div class="workout-summary-time-value">${timeSpentSeconds > 0 ? formattedTime : 'N/A'}</div>
-  `;
-  
-  // Group by exercise for badges
-  const exerciseGroups = {};
-  entries.forEach(entry => {
-    if (!exerciseGroups[entry.machine]) {
-      exerciseGroups[entry.machine] = [];
-    }
-    exerciseGroups[entry.machine].push(entry);
-  });
-  
-  // Exercises as badges
-  const exercisesDiv = document.createElement('div');
-  exercisesDiv.className = 'workout-summary-exercises';
-  
-  const exercisesTitle = document.createElement('div');
-  exercisesTitle.className = 'workout-summary-exercises-title';
-  exercisesTitle.innerHTML = '<span class="workout-summary-exercises-icon">🏋️</span> Exercises';
-  
-  const exercisesBadges = document.createElement('div');
-  exercisesBadges.className = 'workout-summary-badges';
-  
-  Object.keys(exerciseGroups).forEach(exercise => {
-    const badge = document.createElement('div');
-    badge.className = 'exercise-badge';
-    badge.textContent = exercise;
-    exercisesBadges.appendChild(badge);
-  });
-  
-  exercisesDiv.appendChild(exercisesTitle);
-  exercisesDiv.appendChild(exercisesBadges);
-  
-  // View Details button indicator in top right
-  const viewDetailsIndicator = document.createElement('div');
-  viewDetailsIndicator.className = 'view-details-indicator';
-  viewDetailsIndicator.innerHTML = '👁️'; // Eye icon to indicate viewing details
-  viewDetailsIndicator.title = "View Workout Details"; // Tooltip
-  
-  // Add content to card content container
-  cardContent.appendChild(dateDiv);
-  cardContent.appendChild(timeDiv);
-  cardContent.appendChild(exercisesDiv);
-  // Add the indicator to the card instead of the content for absolute positioning
-  summaryCard.appendChild(viewDetailsIndicator);
-  
-  // Add card content to the main card
-  summaryCard.appendChild(cardContent);
-  
-  // Make the entire card clickable
-  summaryCard.addEventListener('click', () => {
-    showWorkoutDetail(day, entries);
-  });
-  
-  // Add keyboard support for accessibility
-  summaryCard.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      showWorkoutDetail(day, entries);
-    }
-  });
-  
-  lastWorkoutContainer.appendChild(summaryCard);
 }
 
 // Show workout detail screen
@@ -2954,6 +2893,21 @@ navWorkout.addEventListener('click', () => {
 navProfile.addEventListener('click', () => {
   showScreen('profile');
 });
+
+// Calendar navigation
+if (calendarPrevMonth) {
+  calendarPrevMonth.addEventListener('click', () => {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+    renderCalendar();
+  });
+}
+
+if (calendarNextMonth) {
+  calendarNextMonth.addEventListener('click', () => {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+    renderCalendar();
+  });
+}
 
 // Home screen card navigation
 document.addEventListener('click', (e) => {

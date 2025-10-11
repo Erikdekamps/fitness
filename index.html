@@ -146,16 +146,15 @@
       <!-- Will be populated dynamically -->
     </section>
     
-    <!-- Last Workout -->
-    <section id="lastWorkoutSection" class="history-section">
-      <h2>Last Workout</h2>
-      <div id="lastWorkoutContainer"></div>
-    </section>
-    
-    <!-- All History -->
-    <section id="allHistorySection" class="history-section">
-      <h2>All Workouts</h2>
-      <div id="historyList"></div>
+    <!-- Calendar View -->
+    <section id="historyCalendarSection" class="history-section">
+      <div class="calendar-header">
+        <button type="button" id="calendarPrevMonth" class="calendar-nav-btn">←</button>
+        <h2 id="calendarMonthYear">📅 Calendar</h2>
+        <button type="button" id="calendarNextMonth" class="calendar-nav-btn">→</button>
+      </div>
+      <div id="historyCalendar" class="calendar-grid"></div>
+      <div id="selectedDayDetails" class="selected-day-details"></div>
     </section>
   </div>
   
