@@ -65,13 +65,7 @@
         <button type="button" class="home-card" data-nav="settingsExercises">
           <div class="home-card-icon">🏋️</div>
           <div class="home-card-title">Exercises</div>
-          <div class="home-card-description">Manage machines</div>
-        </button>
-        
-        <button type="button" class="home-card" data-nav="settingsCardio">
-          <div class="home-card-icon">🏃</div>
-          <div class="home-card-title">Cardio</div>
-          <div class="home-card-description">Manage cardio</div>
+          <div class="home-card-description">Weight & cardio</div>
         </button>
         
         <button type="button" class="home-card" data-nav="timer">
@@ -185,14 +179,47 @@
     
     <div class="machine-container">
       <div class="add-machine-section">
-        <div class="add-machine-group">
-          <input type="text" id="newMachineName" placeholder="Add new machine..." required>
-          <button type="button" id="addMachineBtn" class="btn-add">+</button>
+        <h3 class="add-exercise-title">Add New Exercise</h3>
+        <div class="add-exercise-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="newMachineName" class="form-label">Exercise Name</label>
+              <input type="text" id="newMachineName" placeholder="e.g., Bench Press" required>
+            </div>
+            <div class="form-group form-group-small">
+              <label for="newMachineCategory" class="form-label">Type</label>
+              <select id="newMachineCategory" class="category-select-add">
+                <option value="weight">🏋️ Weight</option>
+                <option value="cardio">🏃 Cardio</option>
+              </select>
+            </div>
+            <div class="form-group form-group-small">
+              <label for="newMachineMuscleGroup" class="form-label">Muscle Group</label>
+              <select id="newMachineMuscleGroup" class="category-select-add">
+                <option value="Chest">Chest</option>
+                <option value="Back">Back</option>
+                <option value="Shoulders">Shoulders</option>
+                <option value="Biceps">Biceps</option>
+                <option value="Triceps">Triceps</option>
+                <option value="Quads">Quads</option>
+                <option value="Hamstrings">Hamstrings</option>
+                <option value="Glutes">Glutes</option>
+                <option value="Calves">Calves</option>
+                <option value="Core">Core</option>
+                <option value="Full Body">Full Body</option>
+                <option value="Cardio">Cardio</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group-button">
+              <button type="button" id="addMachineBtn" class="btn-primary">Add Exercise</button>
+            </div>
+          </div>
         </div>
       </div>
       
       <div class="machine-list-container">
-        <h2>Your Machines</h2>
+        <h2>Your Exercises</h2>
         <div id="machineList"></div>
       </div>
     </div>
@@ -287,9 +314,42 @@
     
     <div class="machine-container">
       <div class="add-machine-section">
-        <div class="add-machine-group">
-          <input type="text" id="newMachineNameExercises" placeholder="Add new exercise..." required>
-          <button type="button" id="addMachineBtnExercises" class="btn-add">+</button>
+        <h3 class="add-exercise-title">Add New Exercise</h3>
+        <div class="add-exercise-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="newMachineNameExercises" class="form-label">Exercise Name</label>
+              <input type="text" id="newMachineNameExercises" placeholder="e.g., Bench Press" required>
+            </div>
+            <div class="form-group form-group-small">
+              <label for="newMachineCategoryExercises" class="form-label">Type</label>
+              <select id="newMachineCategoryExercises" class="category-select-add">
+                <option value="weight">🏋️ Weight</option>
+                <option value="cardio">🏃 Cardio</option>
+              </select>
+            </div>
+            <div class="form-group form-group-small">
+              <label for="newMachineMuscleGroupExercises" class="form-label">Muscle Group</label>
+              <select id="newMachineMuscleGroupExercises" class="category-select-add">
+                <option value="Chest">Chest</option>
+                <option value="Back">Back</option>
+                <option value="Shoulders">Shoulders</option>
+                <option value="Biceps">Biceps</option>
+                <option value="Triceps">Triceps</option>
+                <option value="Quads">Quads</option>
+                <option value="Hamstrings">Hamstrings</option>
+                <option value="Glutes">Glutes</option>
+                <option value="Calves">Calves</option>
+                <option value="Core">Core</option>
+                <option value="Full Body">Full Body</option>
+                <option value="Cardio">Cardio</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group-button">
+              <button type="button" id="addMachineBtnExercises" class="btn-primary">Add Exercise</button>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -297,10 +357,6 @@
         <h2>Your Exercises</h2>
         <div id="machineListExercises"></div>
       </div>
-      
-      <button type="button" id="sortExercisesBtn" class="btn-secondary" style="margin-top: var(--spacing-xl);">
-        Sort Alphabetically A-Z
-      </button>
     </div>
   </div>
   
@@ -324,10 +380,6 @@
         <h2>Your Cardio Exercises</h2>
         <div id="cardioListDiv"></div>
       </div>
-      
-      <button type="button" id="sortCardioBtn" class="btn-secondary" style="margin-top: var(--spacing-xl);">
-        Sort Alphabetically A-Z
-      </button>
     </div>
   </div>
   

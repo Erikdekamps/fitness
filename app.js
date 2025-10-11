@@ -52,6 +52,8 @@ const navProfile = document.getElementById('navProfile');
 // Machine management
 const addMachineBtn = document.getElementById('addMachineBtn');
 const newMachineNameInput = document.getElementById('newMachineName');
+const newMachineCategorySelect = document.getElementById('newMachineCategory');
+const newMachineMuscleGroupSelect = document.getElementById('newMachineMuscleGroup');
 const machineListDiv = document.getElementById('machineList');
 
 // Home screen elements
@@ -60,13 +62,13 @@ const startEmptyWorkoutBtn = document.getElementById('startEmptyWorkoutBtn');
 // Exercise elements (for settings exercises screen)
 const addMachineBtnExercises = document.getElementById('addMachineBtnExercises');
 const newMachineNameInputExercises = document.getElementById('newMachineNameExercises');
+const newMachineCategorySelectExercises = document.getElementById('newMachineCategoryExercises');
+const newMachineMuscleGroupSelectExercises = document.getElementById('newMachineMuscleGroupExercises');
 const machineListDivExercises = document.getElementById('machineListExercises');
-const sortExercisesBtn = document.getElementById('sortExercisesBtn');
 
 // Cardio elements
 const addCardioBtn = document.getElementById('addCardioBtn');
 const newCardioNameInput = document.getElementById('newCardioName');
-const sortCardioBtn = document.getElementById('sortCardioBtn');
 
 // Plan elements
 const planSelector = document.getElementById('planSelector');
@@ -136,17 +138,126 @@ let plansScreenContext = 'profile';
 
 // Default machines
 const DEFAULT_MACHINES = [
-  'Bench Press',
-  'Squat Rack',
-  'Leg Press',
-  'Lat Pulldown',
-  'Shoulder Press',
-  'Cable Rows',
-  'Leg Curl',
-  'Leg Extension',
-  'Chest Fly',
-  'Bicep Curl',
-  'Tricep Extension'
+  // Chest
+  { name: 'Bench Press', category: 'weight', muscleGroup: 'Chest' },
+  { name: 'Incline Bench Press', category: 'weight', muscleGroup: 'Chest' },
+  { name: 'Decline Bench Press', category: 'weight', muscleGroup: 'Chest' },
+  { name: 'Chest Press Machine', category: 'weight', muscleGroup: 'Chest' },
+  { name: 'Chest Fly Machine', category: 'weight', muscleGroup: 'Chest' },
+  { name: 'Cable Chest Fly', category: 'weight', muscleGroup: 'Chest' },
+  { name: 'Dumbbell Fly', category: 'weight', muscleGroup: 'Chest' },
+  { name: 'Push-ups', category: 'weight', muscleGroup: 'Chest' },
+  { name: 'Dips', category: 'weight', muscleGroup: 'Chest' },
+  
+  // Back
+  { name: 'Lat Pulldown', category: 'weight', muscleGroup: 'Back' },
+  { name: 'Pull-ups', category: 'weight', muscleGroup: 'Back' },
+  { name: 'Chin-ups', category: 'weight', muscleGroup: 'Back' },
+  { name: 'Seated Cable Row', category: 'weight', muscleGroup: 'Back' },
+  { name: 'Bent Over Row', category: 'weight', muscleGroup: 'Back' },
+  { name: 'T-Bar Row', category: 'weight', muscleGroup: 'Back' },
+  { name: 'Deadlift', category: 'weight', muscleGroup: 'Back' },
+  { name: 'Romanian Deadlift', category: 'weight', muscleGroup: 'Back' },
+  { name: 'Face Pulls', category: 'weight', muscleGroup: 'Back' },
+  { name: 'Hyperextension', category: 'weight', muscleGroup: 'Back' },
+  
+  // Shoulders
+  { name: 'Shoulder Press', category: 'weight', muscleGroup: 'Shoulders' },
+  { name: 'Overhead Press', category: 'weight', muscleGroup: 'Shoulders' },
+  { name: 'Lateral Raise', category: 'weight', muscleGroup: 'Shoulders' },
+  { name: 'Front Raise', category: 'weight', muscleGroup: 'Shoulders' },
+  { name: 'Rear Delt Fly', category: 'weight', muscleGroup: 'Shoulders' },
+  { name: 'Upright Row', category: 'weight', muscleGroup: 'Shoulders' },
+  { name: 'Arnold Press', category: 'weight', muscleGroup: 'Shoulders' },
+  { name: 'Shrugs', category: 'weight', muscleGroup: 'Shoulders' },
+  
+  // Arms - Biceps
+  { name: 'Bicep Curl', category: 'weight', muscleGroup: 'Biceps' },
+  { name: 'Hammer Curl', category: 'weight', muscleGroup: 'Biceps' },
+  { name: 'Preacher Curl', category: 'weight', muscleGroup: 'Biceps' },
+  { name: 'Cable Curl', category: 'weight', muscleGroup: 'Biceps' },
+  { name: 'Concentration Curl', category: 'weight', muscleGroup: 'Biceps' },
+  { name: 'EZ Bar Curl', category: 'weight', muscleGroup: 'Biceps' },
+  
+  // Arms - Triceps
+  { name: 'Tricep Extension', category: 'weight', muscleGroup: 'Triceps' },
+  { name: 'Tricep Pushdown', category: 'weight', muscleGroup: 'Triceps' },
+  { name: 'Overhead Tricep Extension', category: 'weight', muscleGroup: 'Triceps' },
+  { name: 'Skull Crushers', category: 'weight', muscleGroup: 'Triceps' },
+  { name: 'Close Grip Bench Press', category: 'weight', muscleGroup: 'Triceps' },
+  { name: 'Tricep Dips', category: 'weight', muscleGroup: 'Triceps' },
+  
+  // Legs - Quads
+  { name: 'Squat', category: 'weight', muscleGroup: 'Quads' },
+  { name: 'Front Squat', category: 'weight', muscleGroup: 'Quads' },
+  { name: 'Leg Press', category: 'weight', muscleGroup: 'Quads' },
+  { name: 'Leg Extension', category: 'weight', muscleGroup: 'Quads' },
+  { name: 'Bulgarian Split Squat', category: 'weight', muscleGroup: 'Quads' },
+  { name: 'Lunges', category: 'weight', muscleGroup: 'Quads' },
+  { name: 'Hack Squat', category: 'weight', muscleGroup: 'Quads' },
+  
+  // Legs - Hamstrings
+  { name: 'Leg Curl', category: 'weight', muscleGroup: 'Hamstrings' },
+  { name: 'Seated Leg Curl', category: 'weight', muscleGroup: 'Hamstrings' },
+  { name: 'Lying Leg Curl', category: 'weight', muscleGroup: 'Hamstrings' },
+  { name: 'Stiff Leg Deadlift', category: 'weight', muscleGroup: 'Hamstrings' },
+  
+  // Legs - Glutes
+  { name: 'Hip Thrust', category: 'weight', muscleGroup: 'Glutes' },
+  { name: 'Glute Bridge', category: 'weight', muscleGroup: 'Glutes' },
+  { name: 'Cable Kickbacks', category: 'weight', muscleGroup: 'Glutes' },
+  { name: 'Abductor Machine', category: 'weight', muscleGroup: 'Glutes' },
+  { name: 'Adductor Machine', category: 'weight', muscleGroup: 'Glutes' },
+  
+  // Legs - Calves
+  { name: 'Calf Raise', category: 'weight', muscleGroup: 'Calves' },
+  { name: 'Seated Calf Raise', category: 'weight', muscleGroup: 'Calves' },
+  { name: 'Standing Calf Raise', category: 'weight', muscleGroup: 'Calves' },
+  
+  // Core
+  { name: 'Cable Crunch', category: 'weight', muscleGroup: 'Core' },
+  { name: 'Ab Wheel', category: 'weight', muscleGroup: 'Core' },
+  { name: 'Plank', category: 'weight', muscleGroup: 'Core' },
+  { name: 'Side Plank', category: 'weight', muscleGroup: 'Core' },
+  { name: 'Russian Twist', category: 'weight', muscleGroup: 'Core' },
+  { name: 'Leg Raises', category: 'weight', muscleGroup: 'Core' },
+  { name: 'Hanging Leg Raise', category: 'weight', muscleGroup: 'Core' },
+  { name: 'Sit-ups', category: 'weight', muscleGroup: 'Core' },
+  { name: 'Bicycle Crunches', category: 'weight', muscleGroup: 'Core' },
+  
+  // Cardio Machines
+  { name: 'Treadmill', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Stationary Bike', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Rowing Machine', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Elliptical', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Stair Climber', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Assault Bike', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Spin Bike', category: 'cardio', muscleGroup: 'Cardio' },
+  
+  // Cardio Activities
+  { name: 'Running', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Jogging', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Walking', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Cycling', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Swimming', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Jump Rope', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Burpees', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Mountain Climbers', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'High Knees', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Jumping Jacks', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Box Jumps', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Battle Ropes', category: 'cardio', muscleGroup: 'Cardio' },
+  { name: 'Kettlebell Swings', category: 'cardio', muscleGroup: 'Cardio' },
+  
+  // Functional/CrossFit
+  { name: 'Clean and Press', category: 'weight', muscleGroup: 'Full Body' },
+  { name: 'Power Clean', category: 'weight', muscleGroup: 'Full Body' },
+  { name: 'Snatch', category: 'weight', muscleGroup: 'Full Body' },
+  { name: 'Thruster', category: 'weight', muscleGroup: 'Full Body' },
+  { name: 'Wall Balls', category: 'weight', muscleGroup: 'Full Body' },
+  { name: 'Farmer\'s Walk', category: 'weight', muscleGroup: 'Full Body' },
+  { name: 'Sled Push', category: 'weight', muscleGroup: 'Full Body' },
+  { name: 'Sled Pull', category: 'weight', muscleGroup: 'Full Body' }
 ];
 
 const DEFAULT_CARDIO = [
@@ -355,14 +466,76 @@ function getSelectedBadgeValue(container) {
  * Get exercise machines list from localStorage
  * @returns {Array<string>} Array of machine names
  */
+/**
+ * Get machines list from localStorage with defaults
+ * @returns {Array<Object>} Array of machine objects with name and category
+ */
 function getMachines() {
   const saved = localStorage.getItem('fitnessMachines');
-  return saved ? JSON.parse(saved) : DEFAULT_MACHINES;
+  if (!saved) return DEFAULT_MACHINES;
+  
+  const parsed = JSON.parse(saved);
+  
+  // Helper function to find muscle group from DEFAULT_MACHINES
+  const findMuscleGroup = (name, category) => {
+    const defaultExercise = DEFAULT_MACHINES.find(
+      m => m.name.toLowerCase() === name.toLowerCase()
+    );
+    if (defaultExercise) {
+      return defaultExercise.muscleGroup;
+    }
+    // If not found in defaults, use category to determine group
+    return category === 'cardio' ? 'Cardio' : 'Other';
+  };
+  
+  // Migrate old string format to new object format
+  if (parsed.length > 0 && typeof parsed[0] === 'string') {
+    const migrated = parsed.map(name => {
+      const category = 'weight'; // Default to weight for old exercises
+      return {
+        name: name,
+        category: category,
+        muscleGroup: findMuscleGroup(name, category)
+      };
+    });
+    saveMachines(migrated);
+    return migrated;
+  }
+  
+  // Migrate objects without muscleGroup OR re-migrate exercises in "Other" that match defaults
+  let needsMigration = false;
+  if (parsed.length > 0) {
+    // Check if any exercise needs migration
+    needsMigration = parsed.some(machine => {
+      if (!machine.muscleGroup) return true;
+      // Re-migrate if it's in "Other" but matches a default exercise with a specific group
+      if (machine.muscleGroup === 'Other') {
+        const defaultExercise = DEFAULT_MACHINES.find(
+          m => m.name.toLowerCase() === machine.name.toLowerCase()
+        );
+        if (defaultExercise && defaultExercise.muscleGroup !== 'Other') {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+  
+  if (needsMigration) {
+    const migrated = parsed.map(machine => ({
+      ...machine,
+      muscleGroup: findMuscleGroup(machine.name, machine.category || 'weight')
+    }));
+    saveMachines(migrated);
+    return migrated;
+  }
+  
+  return parsed;
 }
 
 /**
  * Save machines list to localStorage
- * @param {Array<string>} machines - Array of machine names to save
+ * @param {Array<Object>} machines - Array of machine objects with name and category
  */
 function saveMachines(machines) {
   localStorage.setItem('fitnessMachines', JSON.stringify(machines));
@@ -390,18 +563,23 @@ function saveCardio(cardio) {
  * @param {string} name - Name of the machine to add
  * @returns {boolean} True if successful, false if invalid or duplicate
  */
-function addMachine(name) {
+function addMachine(name, category = 'weight', muscleGroup = null) {
   const machines = getMachines();
   const trimmed = name.trim();
   
   if (!trimmed) return false;
-  if (machines.includes(trimmed)) {
-    alert('This machine already exists!');
+  if (machines.some(m => m.name === trimmed)) {
+    alert('This exercise already exists!');
     return false;
   }
   
-  machines.push(trimmed);
-  machines.sort();
+  // Auto-assign muscle group if not provided
+  if (!muscleGroup) {
+    muscleGroup = category === 'cardio' ? 'Cardio' : 'Other';
+  }
+  
+  machines.push({ name: trimmed, category: category, muscleGroup: muscleGroup });
+  machines.sort((a, b) => a.name.localeCompare(b.name));
   saveMachines(machines);
   renderMachineList();
   renderMachineList(machineListDivExercises);
@@ -437,7 +615,7 @@ function addCardio(name) {
  */
 function deleteMachine(name) {
   const machines = getMachines();
-  const filtered = machines.filter(m => m !== name);
+  const filtered = machines.filter(m => m.name !== name);
   saveMachines(filtered);
   renderMachineList();
   renderMachineList(machineListDivExercises);
@@ -464,14 +642,14 @@ function renameMachine(oldName, newName) {
   newName = newName.trim();
   
   if (!newName) {
-    alert('Machine name cannot be empty');
+    alert('Exercise name cannot be empty');
     return false;
   }
   
   const machines = getMachines();
   
-  if (newName !== oldName && machines.includes(newName)) {
-    alert('A machine with this name already exists');
+  if (newName !== oldName && machines.some(m => m.name === newName)) {
+    alert('An exercise with this name already exists');
     return false;
   }
   
@@ -480,9 +658,9 @@ function renameMachine(oldName, newName) {
   }
   
   // Update machine name in the list
-  const index = machines.indexOf(oldName);
-  if (index !== -1) {
-    machines[index] = newName;
+  const machine = machines.find(m => m.name === oldName);
+  if (machine) {
+    machine.name = newName;
     saveMachines(machines);
   }
   
@@ -530,19 +708,20 @@ function renderMachineSelect() {
   const machines = getMachines();
   const currentValue = machineSelect.value;
   
-  // Sort machines alphabetically
-  const sortedMachines = [...machines].sort((a, b) => a.localeCompare(b));
+  // Filter only weight exercises and sort alphabetically
+  const weightMachines = machines.filter(m => m.category === 'weight');
+  const sortedMachines = [...weightMachines].sort((a, b) => a.name.localeCompare(b.name));
   
-  machineSelect.innerHTML = '<option value="">Select machine</option>';
+  machineSelect.innerHTML = '<option value="">Select exercise</option>';
   sortedMachines.forEach(machine => {
     const option = document.createElement('option');
-    option.value = machine;
-    option.textContent = machine;
+    option.value = machine.name;
+    option.textContent = machine.name;
     machineSelect.appendChild(option);
   });
   
   // Restore selection if it still exists
-  if (currentValue && machines.includes(currentValue)) {
+  if (currentValue && machines.some(m => m.name === currentValue)) {
     machineSelect.value = currentValue;
   }
 }
@@ -561,23 +740,199 @@ function renderMachineList(targetDiv = null) {
   currentEditingMachine = null; // Reset editing state
   
   if (machines.length === 0) {
-    container.innerHTML = '<div class="empty-state">No machines added yet.</div>';
+    container.innerHTML = '<div class="empty-state">No exercises added yet.</div>';
     return;
   }
   
+  // Group by muscle group, then sort by name within groups
+  const groupedMachines = {};
   machines.forEach(machine => {
-    const machineItem = document.createElement('div');
-    machineItem.className = 'machine-item';
+    const group = machine.muscleGroup || 'Other';
+    if (!groupedMachines[group]) {
+      groupedMachines[group] = [];
+    }
+    groupedMachines[group].push(machine);
+  });
+  
+  // Define display order for muscle groups
+  const groupOrder = [
+    'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps',
+    'Quads', 'Hamstrings', 'Glutes', 'Calves', 'Core',
+    'Full Body', 'Cardio', 'Other'
+  ];
+  
+  // Sort exercises within each group
+  Object.keys(groupedMachines).forEach(group => {
+    groupedMachines[group].sort((a, b) => a.name.localeCompare(b.name));
+  });
+  
+  // Render groups in order
+  groupOrder.forEach(groupName => {
+    if (!groupedMachines[groupName] || groupedMachines[groupName].length === 0) {
+      return; // Skip empty groups
+    }
     
-    const machineName = document.createElement('div');
-    machineName.className = 'machine-item-name';
-    machineName.textContent = machine;
+    // Create group header (collapsible)
+    const groupHeader = document.createElement('div');
+    groupHeader.className = 'exercise-group-header';
+    groupHeader.style.cursor = 'pointer';
+    groupHeader.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="group-toggle">▼</span>
+        <span class="exercise-group-name">${groupName}</span>
+      </div>
+      <span class="exercise-group-count">${groupedMachines[groupName].length} exercise${groupedMachines[groupName].length !== 1 ? 's' : ''}</span>
+    `;
+    
+    // Create container for exercises in this group
+    const groupContainer = document.createElement('div');
+    groupContainer.className = 'exercise-group-content';
+    groupContainer.style.display = 'block'; // Start expanded
+    
+    // Render exercises in this group
+    groupedMachines[groupName].forEach(machine => {
+      renderMachineItem(machine, groupContainer, targetDiv);
+    });
+    
+    // Toggle collapse/expand on header click
+    groupHeader.addEventListener('click', () => {
+      const toggle = groupHeader.querySelector('.group-toggle');
+      if (groupContainer.style.display === 'none') {
+        groupContainer.style.display = 'block';
+        toggle.textContent = '▼';
+      } else {
+        groupContainer.style.display = 'none';
+        toggle.textContent = '▶';
+      }
+    });
+    
+    container.appendChild(groupHeader);
+    container.appendChild(groupContainer);
+  });
+  
+  // Render any groups not in the predefined order
+  Object.keys(groupedMachines).forEach(groupName => {
+    if (!groupOrder.includes(groupName) && groupedMachines[groupName].length > 0) {
+      const groupHeader = document.createElement('div');
+      groupHeader.className = 'exercise-group-header';
+      groupHeader.style.cursor = 'pointer';
+      groupHeader.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="group-toggle">▼</span>
+          <span class="exercise-group-name">${groupName}</span>
+        </div>
+        <span class="exercise-group-count">${groupedMachines[groupName].length} exercise${groupedMachines[groupName].length !== 1 ? 's' : ''}</span>
+      `;
+      
+      // Create container for exercises in this group
+      const groupContainer = document.createElement('div');
+      groupContainer.className = 'exercise-group-content';
+      groupContainer.style.display = 'block'; // Start expanded
+      
+      groupedMachines[groupName].forEach(machine => {
+        renderMachineItem(machine, groupContainer, targetDiv);
+      });
+      
+      // Toggle collapse/expand on header click
+      groupHeader.addEventListener('click', () => {
+        const toggle = groupHeader.querySelector('.group-toggle');
+        if (groupContainer.style.display === 'none') {
+          groupContainer.style.display = 'block';
+          toggle.textContent = '▼';
+        } else {
+          groupContainer.style.display = 'none';
+          toggle.textContent = '▶';
+        }
+      });
+      
+      container.appendChild(groupHeader);
+      container.appendChild(groupContainer);
+    }
+  });
+}
+
+// Render individual machine item
+function renderMachineItem(machine, container, targetDiv) {
+  const machineItem = document.createElement('div');
+  machineItem.className = 'machine-item';
+  
+  const machineInfo = document.createElement('div');
+  machineInfo.style.display = 'flex';
+  machineInfo.style.alignItems = 'center';
+  machineInfo.style.gap = '8px';
+  machineInfo.style.flex = '1';
+  
+  const machineName = document.createElement('div');
+  machineName.className = 'machine-item-name';
+  machineName.textContent = machine.name;
+  
+  const badgesContainer = document.createElement('div');
+  badgesContainer.style.display = 'flex';
+  badgesContainer.style.gap = '4px';
+  
+  const categoryBadge = document.createElement('span');
+    categoryBadge.className = `category-badge category-${machine.category}`;
+    categoryBadge.textContent = machine.category === 'weight' ? '🏋️' : '🏃';
+    categoryBadge.title = machine.category === 'weight' ? 'Weight' : 'Cardio';
+    categoryBadge.style.fontSize = '0.75rem';
+    categoryBadge.style.padding = '2px 6px';
+    categoryBadge.style.borderRadius = '12px';
+    categoryBadge.style.backgroundColor = machine.category === 'weight' ? 'var(--primary-light)' : 'var(--accent-light)';
+    categoryBadge.style.color = machine.category === 'weight' ? 'var(--primary)' : 'var(--accent)';
+    categoryBadge.style.fontWeight = '600';
+    
+    const muscleGroupBadge = document.createElement('span');
+    muscleGroupBadge.className = 'muscle-group-badge';
+    muscleGroupBadge.textContent = machine.muscleGroup || 'Other';
+    muscleGroupBadge.style.fontSize = '0.7rem';
+    muscleGroupBadge.style.padding = '2px 6px';
+    muscleGroupBadge.style.borderRadius = '12px';
+    muscleGroupBadge.style.backgroundColor = 'var(--bg-tertiary)';
+    muscleGroupBadge.style.color = 'var(--text-secondary)';
+    muscleGroupBadge.style.border = '1px solid var(--border)';
+    
+    badgesContainer.appendChild(categoryBadge);
+    badgesContainer.appendChild(muscleGroupBadge);
     
     const editInput = document.createElement('input');
     editInput.type = 'text';
     editInput.className = 'machine-edit-input';
-    editInput.value = machine;
+    editInput.value = machine.name;
     editInput.style.display = 'none';
+    
+    const categorySelect = document.createElement('select');
+    categorySelect.className = 'category-select';
+    categorySelect.style.display = 'none';
+    categorySelect.style.padding = '4px 8px';
+    categorySelect.style.borderRadius = '4px';
+    categorySelect.style.border = '1px solid var(--border)';
+    categorySelect.innerHTML = `
+      <option value="weight" ${machine.category === 'weight' ? 'selected' : ''}>🏋️ Weight</option>
+      <option value="cardio" ${machine.category === 'cardio' ? 'selected' : ''}>🏃 Cardio</option>
+    `;
+    
+    const muscleGroupSelect = document.createElement('select');
+    muscleGroupSelect.className = 'category-select';
+    muscleGroupSelect.style.display = 'none';
+    muscleGroupSelect.style.padding = '4px 8px';
+    muscleGroupSelect.style.borderRadius = '4px';
+    muscleGroupSelect.style.border = '1px solid var(--border)';
+    const currentMuscleGroup = machine.muscleGroup || 'Other';
+    muscleGroupSelect.innerHTML = `
+      <option value="Chest" ${currentMuscleGroup === 'Chest' ? 'selected' : ''}>Chest</option>
+      <option value="Back" ${currentMuscleGroup === 'Back' ? 'selected' : ''}>Back</option>
+      <option value="Shoulders" ${currentMuscleGroup === 'Shoulders' ? 'selected' : ''}>Shoulders</option>
+      <option value="Biceps" ${currentMuscleGroup === 'Biceps' ? 'selected' : ''}>Biceps</option>
+      <option value="Triceps" ${currentMuscleGroup === 'Triceps' ? 'selected' : ''}>Triceps</option>
+      <option value="Quads" ${currentMuscleGroup === 'Quads' ? 'selected' : ''}>Quads</option>
+      <option value="Hamstrings" ${currentMuscleGroup === 'Hamstrings' ? 'selected' : ''}>Hamstrings</option>
+      <option value="Glutes" ${currentMuscleGroup === 'Glutes' ? 'selected' : ''}>Glutes</option>
+      <option value="Calves" ${currentMuscleGroup === 'Calves' ? 'selected' : ''}>Calves</option>
+      <option value="Core" ${currentMuscleGroup === 'Core' ? 'selected' : ''}>Core</option>
+      <option value="Full Body" ${currentMuscleGroup === 'Full Body' ? 'selected' : ''}>Full Body</option>
+      <option value="Cardio" ${currentMuscleGroup === 'Cardio' ? 'selected' : ''}>Cardio</option>
+      <option value="Other" ${currentMuscleGroup === 'Other' ? 'selected' : ''}>Other</option>
+    `;
     
     const actions = document.createElement('div');
     actions.className = 'history-entry-actions';
@@ -594,7 +949,10 @@ function renderMachineList(targetDiv = null) {
       
       // Switch to edit mode
       machineName.style.display = 'none';
+      badgesContainer.style.display = 'none';
       editInput.style.display = 'block';
+      categorySelect.style.display = 'block';
+      muscleGroupSelect.style.display = 'block';
       editInput.focus();
       editInput.select();
       editBtn.style.display = 'none';
@@ -604,13 +962,17 @@ function renderMachineList(targetDiv = null) {
       
       // Store current editing state
       currentEditingMachine = {
+        machineInfo,
         machineName,
+        badgesContainer,
         editInput,
+        categorySelect,
+        muscleGroupSelect,
         editBtn,
         deleteBtn,
         saveBtn,
         cancelBtn,
-        originalName: machine
+        originalMachine: machine
       };
     });
     
@@ -621,11 +983,23 @@ function renderMachineList(targetDiv = null) {
     saveBtn.style.display = 'none';
     saveBtn.addEventListener('click', () => {
       const newName = editInput.value.trim();
-      if (newName && renameMachine(machine, newName)) {
+      const newCategory = categorySelect.value;
+      const newMuscleGroup = muscleGroupSelect.value;
+      
+      if (newName && renameMachine(machine.name, newName)) {
+        // Update category and muscle group if changed
+        const machines = getMachines();
+        const updated = machines.find(m => m.name === newName);
+        if (updated) {
+          updated.category = newCategory;
+          updated.muscleGroup = newMuscleGroup;
+          saveMachines(machines);
+        }
         currentEditingMachine = null;
-        // renderMachineList will be called by renameMachine
+        renderMachineList(targetDiv);
+        renderMachineSelect();
       } else {
-        editInput.value = machine;
+        editInput.value = machine.name;
       }
     });
     
@@ -635,9 +1009,14 @@ function renderMachineList(targetDiv = null) {
     cancelBtn.title = 'Cancel';
     cancelBtn.style.display = 'none';
     cancelBtn.addEventListener('click', () => {
-      editInput.value = machine;
+      editInput.value = machine.name;
+      categorySelect.value = machine.category;
+      muscleGroupSelect.value = machine.muscleGroup || 'Other';
       machineName.style.display = 'block';
+      badgesContainer.style.display = 'flex';
       editInput.style.display = 'none';
+      categorySelect.style.display = 'none';
+      muscleGroupSelect.style.display = 'none';
       editBtn.style.display = 'flex';
       deleteBtn.style.display = 'flex';
       saveBtn.style.display = 'none';
@@ -650,8 +1029,8 @@ function renderMachineList(targetDiv = null) {
     deleteBtn.innerHTML = '🗑️';
     deleteBtn.title = 'Delete';
     deleteBtn.addEventListener('click', () => {
-      if (confirm(`Delete "${machine}"?`)) {
-        deleteMachine(machine);
+      if (confirm(`Delete "${machine.name}"?`)) {
+        deleteMachine(machine.name);
       }
     });
     
@@ -664,16 +1043,20 @@ function renderMachineList(targetDiv = null) {
       }
     });
     
+    machineInfo.appendChild(machineName);
+    machineInfo.appendChild(badgesContainer);
+    machineInfo.appendChild(editInput);
+    machineInfo.appendChild(categorySelect);
+    machineInfo.appendChild(muscleGroupSelect);
+    
     actions.appendChild(editBtn);
     actions.appendChild(saveBtn);
     actions.appendChild(cancelBtn);
     actions.appendChild(deleteBtn);
     
-    machineItem.appendChild(machineName);
-    machineItem.appendChild(editInput);
+    machineItem.appendChild(machineInfo);
     machineItem.appendChild(actions);
     container.appendChild(machineItem);
-  });
 }
 
 function renderCardioList() {
@@ -688,7 +1071,10 @@ function renderCardioList() {
     return;
   }
   
-  cardio.forEach(exercise => {
+  // Sort alphabetically
+  const sortedCardio = [...cardio].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  
+  sortedCardio.forEach(exercise => {
     const item = document.createElement('div');
     item.className = 'machine-item';
     
@@ -807,8 +1193,10 @@ startEmptyWorkoutBtn.addEventListener('click', () => {
 // Add machine button
 addMachineBtn.addEventListener('click', () => {
   const name = newMachineNameInput.value.trim();
+  const category = newMachineCategorySelect.value;
+  const muscleGroup = newMachineMuscleGroupSelect.value;
   if (name) {
-    if (addMachine(name)) {
+    if (addMachine(name, category, muscleGroup)) {
       newMachineNameInput.value = '';
     }
   }
@@ -819,8 +1207,10 @@ newMachineNameInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
     const name = newMachineNameInput.value.trim();
+    const category = newMachineCategorySelect.value;
+    const muscleGroup = newMachineMuscleGroupSelect.value;
     if (name) {
-      if (addMachine(name)) {
+      if (addMachine(name, category, muscleGroup)) {
         newMachineNameInput.value = '';
       }
     }
@@ -830,8 +1220,10 @@ newMachineNameInput.addEventListener('keypress', (e) => {
 // Add machine button for exercises screen
 addMachineBtnExercises.addEventListener('click', () => {
   const name = newMachineNameInputExercises.value.trim();
+  const category = newMachineCategorySelectExercises.value;
+  const muscleGroup = newMachineMuscleGroupSelectExercises.value;
   if (name) {
-    if (addMachine(name)) {
+    if (addMachine(name, category, muscleGroup)) {
       newMachineNameInputExercises.value = '';
     }
   }
@@ -842,33 +1234,14 @@ newMachineNameInputExercises.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
     const name = newMachineNameInputExercises.value.trim();
+    const category = newMachineCategorySelectExercises.value;
+    const muscleGroup = newMachineMuscleGroupSelectExercises.value;
     if (name) {
-      if (addMachine(name)) {
+      if (addMachine(name, category, muscleGroup)) {
         newMachineNameInputExercises.value = '';
       }
     }
   }
-});
-
-// Sort exercises alphabetically
-sortExercisesBtn.addEventListener('click', () => {
-  const machines = getMachines();
-  machines.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-  saveMachines(machines);
-  renderMachineList(machineListDivExercises);
-  renderMachineSelect();
-  
-  // Show feedback
-  const originalText = sortExercisesBtn.textContent;
-  sortExercisesBtn.textContent = '✓ Sorted!';
-  sortExercisesBtn.style.background = 'var(--success)';
-  sortExercisesBtn.style.color = 'var(--bg-primary)';
-  
-  setTimeout(() => {
-    sortExercisesBtn.textContent = originalText;
-    sortExercisesBtn.style.background = '';
-    sortExercisesBtn.style.color = '';
-  }, 1500);
 });
 
 // Add cardio button
@@ -892,26 +1265,6 @@ newCardioNameInput.addEventListener('keypress', (e) => {
       }
     }
   }
-});
-
-// Sort cardio alphabetically
-sortCardioBtn.addEventListener('click', () => {
-  const cardio = getCardio();
-  cardio.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-  saveCardio(cardio);
-  renderCardioList();
-  
-  // Show feedback
-  const originalText = sortCardioBtn.textContent;
-  sortCardioBtn.textContent = '✓ Sorted!';
-  sortCardioBtn.style.background = 'var(--success)';
-  sortCardioBtn.style.color = 'var(--bg-primary)';
-  
-  setTimeout(() => {
-    sortCardioBtn.textContent = originalText;
-    sortCardioBtn.style.background = '';
-    sortCardioBtn.style.color = '';
-  }, 1500);
 });
 
 // Auto-save settings when inputs change
