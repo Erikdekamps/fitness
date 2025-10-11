@@ -210,10 +210,10 @@ main {
 }
 
 .machine-container {
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 0;
+  padding: var(--spacing-md);
+  border: none;
   max-width: 100%;
   box-sizing: border-box;
   overflow-x: hidden;
@@ -2919,12 +2919,6 @@ main,
 .home-section {
   margin: var(--spacing-md);
   background: transparent;
-}
-
-#homeScreen .machine-container {
-  background: transparent;
-  border: none;
-  padding: var(--spacing-md);
 }
 
 .home-section-title {
