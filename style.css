@@ -2676,13 +2676,15 @@ select:focus {
 }
 
 .workout-set-item.completed {
-  opacity: 0.7;
+  opacity: 0.9;
   background: var(--bg-primary);
 }
 
-.workout-set-item.completed .workout-set-label,
+.workout-set-item.completed .workout-set-label {
+  color: #22c55e; /* Green for checkmark */
+}
+
 .workout-set-item.completed .workout-set-details {
-  text-decoration: line-through;
   color: var(--text-secondary);
 }
 
