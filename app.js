@@ -773,7 +773,7 @@ function updateWorkoutTimer() {
 
 /**
  * Get user settings from localStorage with defaults
- * @returns {Object} Settings object with weightIncrement, defaultWeight, defaultReps, fontSize, layoutDensity, dateFormat, timeFormat, defaultTimerMinutes
+ * @returns {Object} Settings object with weightIncrement, defaultWeight, defaultReps, fontSize, layoutDensity, dateFormat, timeFormat, defaultTimerMinutes, themeColor
  */
 function getSettings() {
   const defaultSettings = {
@@ -784,7 +784,8 @@ function getSettings() {
     layoutDensity: 'normal',
     dateFormat: 'eu',
     timeFormat: '24h',
-    defaultTimerMinutes: 3
+    defaultTimerMinutes: 3,
+    themeColor: '#00d4ff'
   };
   const saved = localStorage.getItem('fitnessSettings');
   return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
@@ -813,6 +814,9 @@ function applySettings() {
   updateBadgeSelection(dateFormatBadges, settings.dateFormat);
   updateBadgeSelection(timeFormatBadges, settings.timeFormat);
   
+  // Apply theme color
+  applyThemeColor(settings.themeColor);
+  
   // Update weight input step
   weightInput.step = settings.weightIncrement;
   
@@ -823,6 +827,21 @@ function applySettings() {
   // Apply layout density to html element
   document.documentElement.classList.remove('density-narrow', 'density-normal', 'density-wide');
   document.documentElement.classList.add(`density-${settings.layoutDensity}`);
+}
+
+// Apply theme color to the entire app
+function applyThemeColor(color) {
+  document.documentElement.style.setProperty('--theme-color', color);
+  
+  // Update color picker UI if it exists
+  const themeColorInput = document.getElementById('themeColorInput');
+  const currentColorPreview = document.getElementById('currentColorPreview');
+  if (themeColorInput) {
+    themeColorInput.value = color;
+  }
+  if (currentColorPreview) {
+    currentColorPreview.style.background = color;
+  }
 }
 
 // Helper function to update badge selection
@@ -1860,6 +1879,7 @@ newCardioNameInput.addEventListener('keypress', (e) => {
 
 // Auto-save settings when inputs change
 function getCurrentSettingsFromInputs() {
+  const themeColorInput = document.getElementById('themeColorInput');
   return {
     weightIncrement: parseFloat(weightIncrementInput.value),
     defaultWeight: parseFloat(defaultWeightInput.value),
@@ -1868,7 +1888,8 @@ function getCurrentSettingsFromInputs() {
     layoutDensity: getSelectedBadgeValue(layoutDensityBadges),
     dateFormat: getSelectedBadgeValue(dateFormatBadges),
     timeFormat: getSelectedBadgeValue(timeFormatBadges),
-    defaultTimerMinutes: parseInt(defaultTimerMinutesInput.value)
+    defaultTimerMinutes: parseInt(defaultTimerMinutesInput.value),
+    themeColor: themeColorInput ? themeColorInput.value : '#00d4ff'
   };
 }
 
@@ -1935,6 +1956,37 @@ defaultTimerMinutesInput.addEventListener('change', () => {
   timerSecondsInput.value = 0;
   const defaultDurationMs = settings.defaultTimerMinutes * 60 * 1000;
   timerDisplay.textContent = formatTimerTime(defaultDurationMs);
+});
+
+// Theme color picker handler
+const themeColorInput = document.getElementById('themeColorInput');
+const currentColorPreview = document.getElementById('currentColorPreview');
+const colorPresetButtons = document.querySelectorAll('.color-preset');
+
+if (themeColorInput) {
+  themeColorInput.addEventListener('input', () => {
+    const color = themeColorInput.value;
+    if (currentColorPreview) {
+      currentColorPreview.style.background = color;
+    }
+    applyThemeColor(color);
+    saveSettings(getCurrentSettingsFromInputs());
+  });
+}
+
+// Color preset buttons handler
+colorPresetButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const color = button.getAttribute('data-color');
+    if (themeColorInput) {
+      themeColorInput.value = color;
+    }
+    if (currentColorPreview) {
+      currentColorPreview.style.background = color;
+    }
+    applyThemeColor(color);
+    saveSettings(getCurrentSettingsFromInputs());
+  });
 });
 
 // ===== DATA EXPORT/IMPORT =====

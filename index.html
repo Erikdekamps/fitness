@@ -637,6 +637,25 @@
     <div class="machine-container">
       <div class="settings-section">
         <div class="form-group">
+          <label>Theme Color</label>
+          <p class="setting-description">Choose an accent color for buttons, borders, and highlights</p>
+          <div class="theme-color-picker">
+            <div class="color-preview" id="currentColorPreview"></div>
+            <input type="color" id="themeColorInput" value="#00d4ff" title="Choose theme color">
+            <div class="theme-presets" id="themePresets">
+              <button type="button" class="color-preset" data-color="#00d4ff" style="background: #00d4ff" title="Cyan (Default)"></button>
+              <button type="button" class="color-preset" data-color="#ff4444" style="background: #ff4444" title="Red"></button>
+              <button type="button" class="color-preset" data-color="#00ff88" style="background: #00ff88" title="Green"></button>
+              <button type="button" class="color-preset" data-color="#ffa500" style="background: #ffa500" title="Orange"></button>
+              <button type="button" class="color-preset" data-color="#ff00ff" style="background: #ff00ff" title="Magenta"></button>
+              <button type="button" class="color-preset" data-color="#ffff00" style="background: #ffff00" title="Yellow"></button>
+              <button type="button" class="color-preset" data-color="#4169e1" style="background: #4169e1" title="Royal Blue"></button>
+              <button type="button" class="color-preset" data-color="#9370db" style="background: #9370db" title="Purple"></button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
           <label>Font Size</label>
           <p class="setting-description">Adjust the overall text size in the app</p>
           <div class="setting-badges" id="fontSizeBadges">
@@ -679,7 +698,6 @@
       </div>
     </div>
   </div>
-  
   <!-- Data Management Settings Page -->
   <div id="settingsDataScreen" class="screen-hidden">
     <div class="header">
