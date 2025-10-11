@@ -68,6 +68,12 @@
           <div class="home-card-description">Manage machines</div>
         </button>
         
+        <button type="button" class="home-card" data-nav="settingsCardio">
+          <div class="home-card-icon">🏃</div>
+          <div class="home-card-title">Cardio</div>
+          <div class="home-card-description">Manage cardio</div>
+        </button>
+        
         <button type="button" class="home-card" data-nav="timer">
           <div class="home-card-icon">⏱️</div>
           <div class="home-card-title">Timer</div>
@@ -298,6 +304,33 @@
     </div>
   </div>
   
+  <!-- Cardio Settings Page -->
+  <div id="settingsCardioScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" class="btn-icon-header back-to-profile" title="Back">←</button>
+      <h1>🏃 Cardio</h1>
+      <div class="header-spacer"></div>
+    </div>
+    
+    <div class="machine-container">
+      <div class="add-machine-section">
+        <div class="add-machine-group">
+          <input type="text" id="newCardioName" placeholder="Add new cardio exercise..." required>
+          <button type="button" id="addCardioBtn" class="btn-add">+</button>
+        </div>
+      </div>
+      
+      <div class="machine-list-container">
+        <h2>Your Cardio Exercises</h2>
+        <div id="cardioListDiv"></div>
+      </div>
+      
+      <button type="button" id="sortCardioBtn" class="btn-secondary" style="margin-top: var(--spacing-xl);">
+        Sort Alphabetically A-Z
+      </button>
+    </div>
+  </div>
+  
   <!-- Defaults Settings Page -->
   <div id="settingsDefaultsScreen" class="screen-hidden">
     <div class="header">
@@ -452,7 +485,10 @@
         <div class="form-group">
           <label>Exercises</label>
           <div id="planExercises"></div>
-          <button type="button" id="addExerciseBtn" class="btn-secondary">+ Add Exercise</button>
+          <div class="add-exercise-buttons">
+            <button type="button" id="addExerciseBtn" class="btn-secondary">🏋️ Add Exercise</button>
+            <button type="button" id="addCardioExerciseBtn" class="btn-secondary">🏃 Add Cardio</button>
+          </div>
         </div>
         
         <button type="submit" class="btn-primary">Save Plan</button>

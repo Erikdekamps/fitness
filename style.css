@@ -433,6 +433,17 @@ form {
   margin-bottom: var(--spacing-xl);
 }
 
+.add-exercise-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.add-exercise-buttons .btn-secondary {
+  margin: 0;
+}
+
 label {
   display: block;
   font-size: 0.875rem;
@@ -599,10 +610,45 @@ select:focus {
 .history-stats-section {
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
   border-left: 4px solid var(--accent);
   box-shadow: var(--elevation-2);
+}
+
+/* Compact stats bar for single-line layout */
+.compact-stats-bar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.compact-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  min-width: 60px;
+}
+
+.compact-stat-value {
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.compact-stat-label {
+  font-size: clamp(0.65rem, 2.5vw, 0.75rem);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 2px;
+  white-space: nowrap;
 }
 
 .total-stat-card {
@@ -1718,6 +1764,33 @@ select:focus {
   border-color: var(--accent);
 }
 
+.form-group-inline input.duration-input {
+  width: 100%;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+  transition: all 0.2s ease;
+}
+
+.form-group-inline input.duration-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+}
+
+.form-group-inline input.duration-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
 .form-group-inline .spinner-input {
   display: flex;
   gap: var(--spacing-sm);
@@ -2362,6 +2435,89 @@ select:focus {
 }
 
 .btn-complete-exercise:active {
+  transform: translateY(0);
+}
+
+/* Cardio Timer Styles */
+.cardio-timer {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.cardio-timer-display {
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.cardio-timer-bar {
+  width: 100%;
+  height: 40px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  border: 2px solid var(--border);
+}
+
+.cardio-timer-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  transition: width 0.5s linear;
+  border-radius: var(--radius-lg);
+  position: relative;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.cardio-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.btn-cardio-control {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cardio-start,
+.btn-cardio-pause {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.btn-cardio-start:hover,
+.btn-cardio-pause:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-cardio-skip,
+.btn-cardio-stop {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-cardio-skip:hover,
+.btn-cardio-stop:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.btn-cardio-control:active {
   transform: translateY(0);
 }
 

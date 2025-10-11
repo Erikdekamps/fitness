@@ -27,6 +27,7 @@ const machineScreen = document.getElementById('machineScreen');
 const settingsScreen = document.getElementById('settingsScreen');
 const settingsPlansScreen = document.getElementById('settingsPlansScreen');
 const settingsExercisesScreen = document.getElementById('settingsExercisesScreen');
+const settingsCardioScreen = document.getElementById('settingsCardioScreen');
 const settingsDefaultsScreen = document.getElementById('settingsDefaultsScreen');
 const settingsAppearanceScreen = document.getElementById('settingsAppearanceScreen');
 const settingsDataScreen = document.getElementById('settingsDataScreen');
@@ -62,6 +63,11 @@ const newMachineNameInputExercises = document.getElementById('newMachineNameExer
 const machineListDivExercises = document.getElementById('machineListExercises');
 const sortExercisesBtn = document.getElementById('sortExercisesBtn');
 
+// Cardio elements
+const addCardioBtn = document.getElementById('addCardioBtn');
+const newCardioNameInput = document.getElementById('newCardioName');
+const sortCardioBtn = document.getElementById('sortCardioBtn');
+
 // Plan elements
 const planSelector = document.getElementById('planSelector');
 const activePlanSelect = document.getElementById('activePlan');
@@ -74,6 +80,7 @@ const editPlanTitle = document.getElementById('editPlanTitle');
 const planNameInput = document.getElementById('planName');
 const planExercisesDiv = document.getElementById('planExercises');
 const addExerciseBtn = document.getElementById('addExerciseBtn');
+const addCardioExerciseBtn = document.getElementById('addCardioExerciseBtn');
 
 // Active workout elements
 const activeWorkoutTitle = document.getElementById('activeWorkoutTitle');
@@ -137,6 +144,17 @@ const DEFAULT_MACHINES = [
   'Chest Fly',
   'Bicep Curl',
   'Tricep Extension'
+];
+
+const DEFAULT_CARDIO = [
+  'Running',
+  'Cycling',
+  'Rowing',
+  'Elliptical',
+  'Swimming',
+  'Jump Rope',
+  'Stair Climber',
+  'Walking'
 ];
 
 
@@ -344,6 +362,23 @@ function saveMachines(machines) {
 }
 
 /**
+ * Get cardio exercises list from localStorage
+ * @returns {Array<string>} Array of cardio exercise names
+ */
+function getCardio() {
+  const saved = localStorage.getItem('fitnessCardio');
+  return saved ? JSON.parse(saved) : DEFAULT_CARDIO;
+}
+
+/**
+ * Save cardio exercises list to localStorage
+ * @param {Array<string>} cardio - Array of cardio exercise names to save
+ */
+function saveCardio(cardio) {
+  localStorage.setItem('fitnessCardio', JSON.stringify(cardio));
+}
+
+/**
  * Add a new exercise machine to the list
  * @param {string} name - Name of the machine to add
  * @returns {boolean} True if successful, false if invalid or duplicate
@@ -368,6 +403,28 @@ function addMachine(name) {
 }
 
 /**
+ * Add a new cardio exercise to the list
+ * @param {string} name - Name of the cardio exercise to add
+ * @returns {boolean} True if successful, false if invalid or duplicate
+ */
+function addCardio(name) {
+  const cardio = getCardio();
+  const trimmed = name.trim();
+  
+  if (!trimmed) return false;
+  if (cardio.includes(trimmed)) {
+    alert('This cardio exercise already exists!');
+    return false;
+  }
+  
+  cardio.push(trimmed);
+  cardio.sort();
+  saveCardio(cardio);
+  renderCardioList();
+  return true;
+}
+
+/**
  * Delete an exercise machine from the list
  * @param {string} name - Name of the machine to delete
  */
@@ -378,6 +435,17 @@ function deleteMachine(name) {
   renderMachineList();
   renderMachineList(machineListDivExercises);
   renderMachineSelect();
+}
+
+/**
+ * Delete a cardio exercise from the list
+ * @param {string} name - Name of the cardio exercise to delete
+ */
+function deleteCardio(name) {
+  const cardio = getCardio();
+  const filtered = cardio.filter(c => c !== name);
+  saveCardio(filtered);
+  renderCardioList();
 }
 
 /**
@@ -601,6 +669,47 @@ function renderMachineList(targetDiv = null) {
   });
 }
 
+function renderCardioList() {
+  const cardio = getCardio();
+  const container = document.getElementById('cardioListDiv');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (cardio.length === 0) {
+    container.innerHTML = '<div class="empty-state">No cardio exercises added yet.</div>';
+    return;
+  }
+  
+  cardio.forEach(exercise => {
+    const item = document.createElement('div');
+    item.className = 'machine-item';
+    
+    const name = document.createElement('div');
+    name.className = 'machine-item-name';
+    name.textContent = exercise;
+    
+    const actions = document.createElement('div');
+    actions.className = 'history-entry-actions';
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-icon delete';
+    deleteBtn.innerHTML = '🗑️';
+    deleteBtn.title = 'Delete';
+    deleteBtn.addEventListener('click', () => {
+      if (confirm(`Delete "${exercise}"?`)) {
+        deleteCardio(exercise);
+      }
+    });
+    
+    actions.appendChild(deleteBtn);
+    
+    item.appendChild(name);
+    item.appendChild(actions);
+    container.appendChild(item);
+  });
+}
+
 // ===== SCREEN NAVIGATION =====
 
 function showScreen(screen) {
@@ -611,6 +720,7 @@ function showScreen(screen) {
   settingsScreen.classList.toggle('screen-hidden', screen !== 'settings');
   settingsPlansScreen.classList.toggle('screen-hidden', screen !== 'settingsPlans');
   settingsExercisesScreen.classList.toggle('screen-hidden', screen !== 'settingsExercises');
+  settingsCardioScreen.classList.toggle('screen-hidden', screen !== 'settingsCardio');
   settingsDefaultsScreen.classList.toggle('screen-hidden', screen !== 'settingsDefaults');
   settingsAppearanceScreen.classList.toggle('screen-hidden', screen !== 'settingsAppearance');
   settingsDataScreen.classList.toggle('screen-hidden', screen !== 'settingsData');
@@ -641,7 +751,7 @@ function updateNavActiveState(screen) {
   const workoutScreens = new Set(['tracker', 'activeWorkout', 'editPlan']);
   
   // Screens that belong to profile (settings, history, timer, etc.)
-  const profileScreens = new Set(['profile', 'settings', 'settingsPlans', 'settingsExercises', 'settingsDefaults', 'settingsAppearance', 'settingsData', 'machines', 'history', 'workoutDetail', 'timer']);
+  const profileScreens = new Set(['profile', 'settings', 'settingsPlans', 'settingsExercises', 'settingsCardio', 'settingsDefaults', 'settingsAppearance', 'settingsData', 'machines', 'history', 'workoutDetail', 'timer']);
 
   // Home screen
   if (screen === 'home') {
@@ -751,6 +861,49 @@ sortExercisesBtn.addEventListener('click', () => {
     sortExercisesBtn.textContent = originalText;
     sortExercisesBtn.style.background = '';
     sortExercisesBtn.style.color = '';
+  }, 1500);
+});
+
+// Add cardio button
+addCardioBtn.addEventListener('click', () => {
+  const name = newCardioNameInput.value.trim();
+  if (name) {
+    if (addCardio(name)) {
+      newCardioNameInput.value = '';
+    }
+  }
+});
+
+// Allow Enter key to add cardio
+newCardioNameInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const name = newCardioNameInput.value.trim();
+    if (name) {
+      if (addCardio(name)) {
+        newCardioNameInput.value = '';
+      }
+    }
+  }
+});
+
+// Sort cardio alphabetically
+sortCardioBtn.addEventListener('click', () => {
+  const cardio = getCardio();
+  cardio.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  saveCardio(cardio);
+  renderCardioList();
+  
+  // Show feedback
+  const originalText = sortCardioBtn.textContent;
+  sortCardioBtn.textContent = '✓ Sorted!';
+  sortCardioBtn.style.background = 'var(--success)';
+  sortCardioBtn.style.color = 'var(--bg-primary)';
+  
+  setTimeout(() => {
+    sortCardioBtn.textContent = originalText;
+    sortCardioBtn.style.background = '';
+    sortCardioBtn.style.color = '';
   }, 1500);
 });
 
@@ -1061,13 +1214,15 @@ function renderPlansList() {
       const exDiv = document.createElement('div');
       exDiv.className = 'plan-item-exercise';
       
-      // Handle both old and new format
-      if (ex.sets && ex.sets.length > 0) {
+      // Handle cardio vs strength exercises
+      if (ex.type === 'cardio') {
+        exDiv.textContent = `🏃 ${ex.exercise} - ${ex.duration} min`;
+      } else if (ex.sets && ex.sets.length > 0) {
         const setsSummary = ex.sets.map(s => `${s.reps}×${s.weight}kg`).join(', ');
-        exDiv.textContent = `${ex.machine} - ${ex.sets.length} set${ex.sets.length > 1 ? 's' : ''}: ${setsSummary}`;
+        exDiv.textContent = `🏋️ ${ex.machine} - ${ex.sets.length} set${ex.sets.length > 1 ? 's' : ''}: ${setsSummary}`;
       } else {
         // Old format fallback
-        exDiv.textContent = `${ex.machine} - ${ex.weight}kg × ${ex.reps} reps`;
+        exDiv.textContent = `🏋️ ${ex.machine} - ${ex.weight}kg × ${ex.reps} reps`;
       }
       
       exercises.appendChild(exDiv);
@@ -1200,6 +1355,9 @@ function renderHomeWorkoutPlans() {
     
     const exerciseCount = plan.exercises.length;
     const totalSets = plan.exercises.reduce((sum, ex) => {
+      if (ex.type === 'cardio') {
+        return sum + 1; // Count cardio as 1 "set"
+      }
       return sum + (ex.sets ? ex.sets.length : 1);
     }, 0);
     
@@ -1313,57 +1471,43 @@ function startPlan() {
 function renderActiveWorkout() {
   if (!currentWorkoutPlan) return;
   
-  // Flatten exercises into individual sets
-  const allSets = [];
+  // Process all exercises (both cardio and strength)
+  const processedExercises = [];
+  let globalIndex = 0;
+  
   currentWorkoutPlan.exercises.forEach((exercise, exIndex) => {
-    // Handle both old and new format
-    const sets = exercise.sets || [{ weight: exercise.weight, reps: exercise.reps }];
-    sets.forEach((set, setIndex) => {
-      allSets.push({
+    if (exercise.type === 'cardio') {
+      // Cardio exercise - treat as single unit
+      processedExercises.push({
+        type: 'cardio',
         exerciseIndex: exIndex,
-        setIndex: setIndex,
-        machine: exercise.machine,
-        weight: set.weight,
-        reps: set.reps,
-        totalSets: sets.length
+        exercise: exercise.exercise,
+        duration: exercise.duration,
+        globalIndex: globalIndex++
       });
-    });
-  });
-  
-  // Bundle consecutive sets of the same exercise
-  const bundledExercises = [];
-  let currentBundle = null;
-  
-  allSets.forEach((set, globalIndex) => {
-    if (!currentBundle || currentBundle.machine !== set.machine) {
-      // Start a new bundle
-      if (currentBundle) {
-        bundledExercises.push(currentBundle);
-      }
-      currentBundle = {
-        machine: set.machine,
-        exerciseIndex: set.exerciseIndex,
-        sets: [{
-          ...set,
-          globalIndex
-        }]
-      };
     } else {
-      // Add to current bundle
-      currentBundle.sets.push({
-        ...set,
-        globalIndex
+      // Strength exercise - expand into sets
+      const sets = exercise.sets || [{ weight: exercise.weight, reps: exercise.reps }];
+      const setsData = [];
+      sets.forEach((set, setIndex) => {
+        setsData.push({
+          setIndex: setIndex,
+          weight: set.weight,
+          reps: set.reps,
+          globalIndex: globalIndex++
+        });
+      });
+      processedExercises.push({
+        type: 'strength',
+        exerciseIndex: exIndex,
+        machine: exercise.machine,
+        sets: setsData
       });
     }
   });
   
-  // Push the last bundle
-  if (currentBundle) {
-    bundledExercises.push(currentBundle);
-  }
-  
   const completed = completedExercises.size;
-  const total = allSets.length;
+  const total = globalIndex;
   
   // Update progress
   progressCurrent.textContent = completed;
@@ -1371,168 +1515,33 @@ function renderActiveWorkout() {
   const progressPercent = total > 0 ? (completed / total) * 100 : 0;
   progressBarFill.style.width = `${progressPercent}%`;
   
-  // Find the first incomplete bundle (for "In Progress" status)
-  let firstIncompleteBundleIndex = -1;
-  for (let i = 0; i < bundledExercises.length; i++) {
-    const bundle = bundledExercises[i];
-    const allSetsCompleted = bundle.sets.every(s => completedExercises.has(s.globalIndex));
-    if (!allSetsCompleted) {
-      firstIncompleteBundleIndex = i;
-      break;
+  // Find the first incomplete exercise
+  let firstIncompleteIndex = -1;
+  for (let i = 0; i < processedExercises.length; i++) {
+    const ex = processedExercises[i];
+    if (ex.type === 'cardio') {
+      if (!completedExercises.has(ex.globalIndex)) {
+        firstIncompleteIndex = i;
+        break;
+      }
+    } else {
+      const allSetsCompleted = ex.sets.every(s => completedExercises.has(s.globalIndex));
+      if (!allSetsCompleted) {
+        firstIncompleteIndex = i;
+        break;
+      }
     }
   }
   
-  // Render bundled exercises
+  // Render exercises
   workoutExercisesDiv.innerHTML = '';
   
-  bundledExercises.forEach((bundle, bundleIndex) => {
-    const allSetsCompleted = bundle.sets.every(s => completedExercises.has(s.globalIndex));
-    const anySetsCompleted = bundle.sets.some(s => completedExercises.has(s.globalIndex));
-    const currentSetIndex = bundle.sets.findIndex(s => !completedExercises.has(s.globalIndex));
-    // Only mark as current if this is the first incomplete bundle
-    const isCurrent = bundleIndex === firstIncompleteBundleIndex && currentSetIndex >= 0;
-    
-    const exerciseCard = document.createElement('div');
-    exerciseCard.className = `workout-exercise-card ${allSetsCompleted ? 'completed' : ''} ${isCurrent && !allSetsCompleted ? 'current' : ''}`;
-    
-    const cardHeader = document.createElement('div');
-    cardHeader.className = 'workout-exercise-header';
-    
-    const exerciseNumber = document.createElement('div');
-    exerciseNumber.className = 'workout-exercise-number';
-    exerciseNumber.textContent = `Exercise ${bundle.exerciseIndex + 1}`;
-    
-    const status = document.createElement('div');
-    status.className = 'workout-exercise-status';
-    const completedCount = bundle.sets.filter(s => completedExercises.has(s.globalIndex)).length;
-    if (allSetsCompleted) {
-      status.innerHTML = '✓ Completed';
-      status.style.color = 'var(--success)';
-    } else if (anySetsCompleted) {
-      status.innerHTML = `${completedCount}/${bundle.sets.length} Complete`;
-      status.style.color = 'var(--accent)';
-    } else if (isCurrent) {
-      status.innerHTML = '● In Progress';
-      status.style.color = 'var(--accent)';
+  processedExercises.forEach((ex, index) => {
+    if (ex.type === 'cardio') {
+      renderCardioExercise(ex, index === firstIncompleteIndex);
     } else {
-      status.innerHTML = '○ Pending';
-      status.color = 'var(--text-secondary)';
+      renderStrengthExercise(ex, index === firstIncompleteIndex);
     }
-    
-    cardHeader.appendChild(exerciseNumber);
-    cardHeader.appendChild(status);
-    
-    const cardBody = document.createElement('div');
-    cardBody.className = 'workout-exercise-body';
-    
-    const machineName = document.createElement('div');
-    machineName.className = 'workout-exercise-machine';
-    machineName.textContent = bundle.machine;
-    
-    cardBody.appendChild(machineName);
-    
-    // Render individual sets with edit capability
-    const setsContainer = document.createElement('div');
-    setsContainer.className = 'workout-sets-container';
-    
-    bundle.sets.forEach((s, i) => {
-      const isCompleted = completedExercises.has(s.globalIndex);
-      const setNum = i + 1;
-      
-      const setItem = document.createElement('div');
-      setItem.className = `workout-set-item ${isCompleted ? 'completed' : ''}`;
-      
-      const setLabel = document.createElement('div');
-      setLabel.className = 'workout-set-label';
-      setLabel.textContent = `${isCompleted ? '✓' : '○'} Set ${setNum}:`;
-      
-      const setDetails = document.createElement('div');
-      setDetails.className = 'workout-set-details';
-      
-      // Weight input (editable if not completed)
-      const weightInput = document.createElement('input');
-      weightInput.type = 'number';
-      weightInput.value = s.weight;
-      weightInput.step = '2.5';
-      weightInput.min = '0';
-      weightInput.className = 'workout-set-input';
-      weightInput.disabled = isCompleted;
-      weightInput.addEventListener('change', (e) => {
-        const newWeight = parseFloat(e.target.value) || 0;
-        // Update the weight in the plan
-        currentWorkoutPlan.exercises[bundle.exerciseIndex].sets[i].weight = newWeight;
-        saveActiveWorkout();
-      });
-      
-      const weightLabel = document.createElement('span');
-      weightLabel.textContent = 'kg × ';
-      
-      // Reps input (editable if not completed)
-      const repsInput = document.createElement('input');
-      repsInput.type = 'number';
-      repsInput.value = s.reps;
-      repsInput.step = '1';
-      repsInput.min = '1';
-      repsInput.className = 'workout-set-input';
-      repsInput.disabled = isCompleted;
-      repsInput.addEventListener('change', (e) => {
-        const newReps = parseInt(e.target.value) || 0;
-        // Update the reps in the plan
-        currentWorkoutPlan.exercises[bundle.exerciseIndex].sets[i].reps = newReps;
-        saveActiveWorkout();
-      });
-      
-      const repsLabel = document.createElement('span');
-      repsLabel.textContent = ' reps';
-      
-      setDetails.appendChild(weightInput);
-      setDetails.appendChild(weightLabel);
-      setDetails.appendChild(repsInput);
-      setDetails.appendChild(repsLabel);
-      
-      setItem.appendChild(setLabel);
-      setItem.appendChild(setDetails);
-      setsContainer.appendChild(setItem);
-    });
-    
-    cardBody.appendChild(setsContainer);
-    
-    exerciseCard.appendChild(cardHeader);
-    exerciseCard.appendChild(cardBody);
-    
-    // Add complete button for current set
-    if (isCurrent && currentSetIndex >= 0) {
-      const currentSet = bundle.sets[currentSetIndex];
-      const completeBtn = document.createElement('button');
-      completeBtn.className = 'btn-complete-exercise';
-      completeBtn.textContent = `Complete Set ${currentSetIndex + 1}/${bundle.sets.length}`;
-      completeBtn.addEventListener('click', () => {
-        completedExercises.add(currentSet.globalIndex);
-        
-        // Save to localStorage
-        saveActiveWorkout();
-        
-        // Get the actual weight and reps from the plan (in case they were edited)
-        const actualSet = currentWorkoutPlan.exercises[bundle.exerciseIndex].sets[currentSetIndex];
-        
-        // Add to history with the actual values
-        addEntry({
-          machine: currentSet.machine,
-          weight: actualSet.weight,
-          reps: actualSet.reps
-        });
-        
-        renderActiveWorkout();
-        
-        // Check if all sets are complete
-        if (completedExercises.size === allSets.length) {
-          finishWorkoutBtn.style.display = 'block';
-        }
-      });
-      exerciseCard.appendChild(completeBtn);
-    }
-    
-    workoutExercisesDiv.appendChild(exerciseCard);
   });
   
   // Show finish button if all complete
@@ -1541,6 +1550,432 @@ function renderActiveWorkout() {
   } else {
     finishWorkoutBtn.style.display = 'none';
   }
+}
+
+// Render a cardio exercise card with timer
+function renderCardioExercise(exercise, isCurrent) {
+  const isCompleted = completedExercises.has(exercise.globalIndex);
+  
+  const exerciseCard = document.createElement('div');
+  exerciseCard.className = `workout-exercise-card ${isCompleted ? 'completed' : ''} ${isCurrent && !isCompleted ? 'current' : ''}`;
+  exerciseCard.dataset.cardioIndex = exercise.globalIndex;
+  
+  const cardHeader = document.createElement('div');
+  cardHeader.className = 'workout-exercise-header';
+  
+  const exerciseNumber = document.createElement('div');
+  exerciseNumber.className = 'workout-exercise-number';
+  exerciseNumber.textContent = `🏃 Exercise ${exercise.exerciseIndex + 1}`;
+  
+  const status = document.createElement('div');
+  status.className = 'workout-exercise-status';
+  if (isCompleted) {
+    status.innerHTML = '✓ Completed';
+    status.style.color = 'var(--success)';
+  } else if (isCurrent) {
+    status.innerHTML = '● In Progress';
+    status.style.color = 'var(--accent)';
+  } else {
+    status.innerHTML = '○ Pending';
+    status.style.color = 'var(--text-secondary)';
+  }
+  
+  cardHeader.appendChild(exerciseNumber);
+  cardHeader.appendChild(status);
+  
+  const cardBody = document.createElement('div');
+  cardBody.className = 'workout-exercise-body';
+  
+  const exerciseName = document.createElement('div');
+  exerciseName.className = 'workout-exercise-machine';
+  exerciseName.textContent = exercise.exercise;
+  
+  cardBody.appendChild(exerciseName);
+  
+  // Cardio timer UI
+  const cardioTimer = document.createElement('div');
+  cardioTimer.className = 'cardio-timer';
+  
+  const timerDisplay = document.createElement('div');
+  timerDisplay.className = 'cardio-timer-display';
+  timerDisplay.textContent = `${exercise.duration}:00`;
+  timerDisplay.dataset.duration = exercise.duration * 60; // Store in seconds
+  timerDisplay.dataset.elapsed = '0';
+  
+  const timerBar = document.createElement('div');
+  timerBar.className = 'cardio-timer-bar';
+  
+  const timerBarFill = document.createElement('div');
+  timerBarFill.className = 'cardio-timer-bar-fill';
+  timerBarFill.style.width = '0%';
+  
+  timerBar.appendChild(timerBarFill);
+  
+  cardioTimer.appendChild(timerDisplay);
+  cardioTimer.appendChild(timerBar);
+  
+  cardBody.appendChild(cardioTimer);
+  
+  exerciseCard.appendChild(cardHeader);
+  exerciseCard.appendChild(cardBody);
+  
+  // Add control buttons if current and not completed
+  if (isCurrent && !isCompleted) {
+    const controls = document.createElement('div');
+    controls.className = 'cardio-controls';
+    
+    const startBtn = document.createElement('button');
+    startBtn.className = 'btn-cardio-control btn-cardio-start';
+    startBtn.textContent = '▶️ Start';
+    startBtn.addEventListener('click', () => startCardioTimer(exercise.globalIndex, exercise.duration * 60));
+    
+    const skipBtn = document.createElement('button');
+    skipBtn.className = 'btn-cardio-control btn-cardio-skip';
+    skipBtn.textContent = 'Skip';
+    skipBtn.addEventListener('click', () => {
+      completedExercises.add(exercise.globalIndex);
+      saveActiveWorkout();
+      renderActiveWorkout();
+      
+      // Check if all complete
+      const total = currentWorkoutPlan.exercises.reduce((sum, ex) => {
+        return sum + (ex.type === 'cardio' ? 1 : (ex.sets?.length || 1));
+      }, 0);
+      if (completedExercises.size === total) {
+        finishWorkoutBtn.style.display = 'block';
+      }
+    });
+    
+    controls.appendChild(startBtn);
+    controls.appendChild(skipBtn);
+    exerciseCard.appendChild(controls);
+  }
+  
+  workoutExercisesDiv.appendChild(exerciseCard);
+}
+
+// Render a strength exercise card
+function renderStrengthExercise(bundle, isCurrent) {
+  const allSetsCompleted = bundle.sets.every(s => completedExercises.has(s.globalIndex));
+  const anySetsCompleted = bundle.sets.some(s => completedExercises.has(s.globalIndex));
+  const currentSetIndex = bundle.sets.findIndex(s => !completedExercises.has(s.globalIndex));
+  
+  const exerciseCard = document.createElement('div');
+  exerciseCard.className = `workout-exercise-card ${allSetsCompleted ? 'completed' : ''} ${isCurrent && !allSetsCompleted ? 'current' : ''}`;
+  
+  const cardHeader = document.createElement('div');
+  cardHeader.className = 'workout-exercise-header';
+  
+  const exerciseNumber = document.createElement('div');
+  exerciseNumber.className = 'workout-exercise-number';
+  exerciseNumber.textContent = `🏋️ Exercise ${bundle.exerciseIndex + 1}`;
+  
+  const status = document.createElement('div');
+  status.className = 'workout-exercise-status';
+  const completedCount = bundle.sets.filter(s => completedExercises.has(s.globalIndex)).length;
+  if (allSetsCompleted) {
+    status.innerHTML = '✓ Completed';
+    status.style.color = 'var(--success)';
+  } else if (anySetsCompleted) {
+    status.innerHTML = `${completedCount}/${bundle.sets.length} Complete`;
+    status.style.color = 'var(--accent)';
+  } else if (isCurrent) {
+    status.innerHTML = '● In Progress';
+    status.style.color = 'var(--accent)';
+  } else {
+    status.innerHTML = '○ Pending';
+    status.style.color = 'var(--text-secondary)';
+  }
+  
+  cardHeader.appendChild(exerciseNumber);
+  cardHeader.appendChild(status);
+  
+  const cardBody = document.createElement('div');
+  cardBody.className = 'workout-exercise-body';
+  
+  const machineName = document.createElement('div');
+  machineName.className = 'workout-exercise-machine';
+  machineName.textContent = bundle.machine;
+  
+  cardBody.appendChild(machineName);
+  
+  // Render individual sets
+  const setsContainer = document.createElement('div');
+  setsContainer.className = 'workout-sets-container';
+  
+  bundle.sets.forEach((s, i) => {
+    const isCompleted = completedExercises.has(s.globalIndex);
+    const setNum = i + 1;
+    
+    const setItem = document.createElement('div');
+    setItem.className = `workout-set-item ${isCompleted ? 'completed' : ''}`;
+    
+    const setLabel = document.createElement('div');
+    setLabel.className = 'workout-set-label';
+    setLabel.textContent = `${isCompleted ? '✓' : '○'} Set ${setNum}:`;
+    
+    const setDetails = document.createElement('div');
+    setDetails.className = 'workout-set-details';
+    
+    const weightInput = document.createElement('input');
+    weightInput.type = 'number';
+    weightInput.value = s.weight;
+    weightInput.step = '2.5';
+    weightInput.min = '0';
+    weightInput.className = 'workout-set-input';
+    weightInput.disabled = isCompleted;
+    weightInput.addEventListener('change', (e) => {
+      const newWeight = parseFloat(e.target.value) || 0;
+      currentWorkoutPlan.exercises[bundle.exerciseIndex].sets[i].weight = newWeight;
+      saveActiveWorkout();
+    });
+    
+    const weightLabel = document.createElement('span');
+    weightLabel.textContent = 'kg × ';
+    
+    const repsInput = document.createElement('input');
+    repsInput.type = 'number';
+    repsInput.value = s.reps;
+    repsInput.step = '1';
+    repsInput.min = '1';
+    repsInput.className = 'workout-set-input';
+    repsInput.disabled = isCompleted;
+    repsInput.addEventListener('change', (e) => {
+      const newReps = parseInt(e.target.value) || 0;
+      currentWorkoutPlan.exercises[bundle.exerciseIndex].sets[i].reps = newReps;
+      saveActiveWorkout();
+    });
+    
+    const repsLabel = document.createElement('span');
+    repsLabel.textContent = ' reps';
+    
+    setDetails.appendChild(weightInput);
+    setDetails.appendChild(weightLabel);
+    setDetails.appendChild(repsInput);
+    setDetails.appendChild(repsLabel);
+    
+    setItem.appendChild(setLabel);
+    setItem.appendChild(setDetails);
+    setsContainer.appendChild(setItem);
+  });
+  
+  cardBody.appendChild(setsContainer);
+  
+  exerciseCard.appendChild(cardHeader);
+  exerciseCard.appendChild(cardBody);
+  
+  // Add complete button for current set
+  if (isCurrent && currentSetIndex >= 0) {
+    const currentSet = bundle.sets[currentSetIndex];
+    const completeBtn = document.createElement('button');
+    completeBtn.className = 'btn-complete-exercise';
+    completeBtn.textContent = `Complete Set ${currentSetIndex + 1}/${bundle.sets.length}`;
+    completeBtn.addEventListener('click', () => {
+      completedExercises.add(currentSet.globalIndex);
+      saveActiveWorkout();
+      
+      const actualSet = currentWorkoutPlan.exercises[bundle.exerciseIndex].sets[currentSetIndex];
+      
+      addEntry({
+        machine: bundle.machine,
+        weight: actualSet.weight,
+        reps: actualSet.reps
+      });
+      
+      renderActiveWorkout();
+      
+      // Check if all complete
+      const total = currentWorkoutPlan.exercises.reduce((sum, ex) => {
+        return sum + (ex.type === 'cardio' ? 1 : (ex.sets?.length || 1));
+      }, 0);
+      if (completedExercises.size === total) {
+        finishWorkoutBtn.style.display = 'block';
+      }
+    });
+    exerciseCard.appendChild(completeBtn);
+  }
+  
+  workoutExercisesDiv.appendChild(exerciseCard);
+}
+
+// Start cardio timer
+let cardioTimerInterval = null;
+
+function startCardioTimer(globalIndex, durationSeconds) {
+  const card = document.querySelector(`[data-cardio-index="${globalIndex}"]`);
+  if (!card) return;
+  
+  const timerDisplay = card.querySelector('.cardio-timer-display');
+  const timerBarFill = card.querySelector('.cardio-timer-bar-fill');
+  const controls = card.querySelector('.cardio-controls');
+  
+  let elapsed = 0;
+  
+  // Update UI to show pause button
+  controls.innerHTML = '';
+  const pauseBtn = document.createElement('button');
+  pauseBtn.className = 'btn-cardio-control btn-cardio-pause';
+  pauseBtn.textContent = '⏸️ Pause';
+  
+  const stopBtn = document.createElement('button');
+  stopBtn.className = 'btn-cardio-control btn-cardio-stop';
+  stopBtn.textContent = '⏹️ Stop';
+  
+  controls.appendChild(pauseBtn);
+  controls.appendChild(stopBtn);
+  
+  // Start timer
+  cardioTimerInterval = setInterval(() => {
+    elapsed++;
+    const remaining = durationSeconds - elapsed;
+    
+    if (remaining <= 0) {
+      // Timer complete
+      clearInterval(cardioTimerInterval);
+      cardioTimerInterval = null;
+      timerDisplay.textContent = '0:00';
+      timerBarFill.style.width = '100%';
+      
+      // Mark as complete
+      completedExercises.add(globalIndex);
+      saveActiveWorkout();
+      renderActiveWorkout();
+      
+      // Check if all complete
+      const total = currentWorkoutPlan.exercises.reduce((sum, ex) => {
+        return sum + (ex.type === 'cardio' ? 1 : (ex.sets?.length || 1));
+      }, 0);
+      if (completedExercises.size === total) {
+        finishWorkoutBtn.style.display = 'block';
+      }
+      
+      return;
+    }
+    
+    // Update display
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Update progress bar
+    const progress = (elapsed / durationSeconds) * 100;
+    timerBarFill.style.width = `${progress}%`;
+  }, 1000);
+  
+  // Pause button handler
+  pauseBtn.addEventListener('click', () => {
+    clearInterval(cardioTimerInterval);
+    cardioTimerInterval = null;
+    
+    // Show resume button
+    controls.innerHTML = '';
+    const resumeBtn = document.createElement('button');
+    resumeBtn.className = 'btn-cardio-control btn-cardio-start';
+    resumeBtn.textContent = '▶️ Resume';
+    resumeBtn.addEventListener('click', () => {
+      // Continue from where we left off
+      const remaining = durationSeconds - elapsed;
+      startCardioTimerFromElapsed(globalIndex, durationSeconds, elapsed);
+    });
+    
+    const stopBtn2 = document.createElement('button');
+    stopBtn2.className = 'btn-cardio-control btn-cardio-stop';
+    stopBtn2.textContent = '⏹️ Stop';
+    stopBtn2.addEventListener('click', () => stopCardioTimer(globalIndex, durationSeconds));
+    
+    controls.appendChild(resumeBtn);
+    controls.appendChild(stopBtn2);
+  });
+  
+  // Stop button handler
+  stopBtn.addEventListener('click', () => stopCardioTimer(globalIndex, durationSeconds));
+}
+
+function startCardioTimerFromElapsed(globalIndex, durationSeconds, startElapsed) {
+  const card = document.querySelector(`[data-cardio-index="${globalIndex}"]`);
+  if (!card) return;
+  
+  const timerDisplay = card.querySelector('.cardio-timer-display');
+  const timerBarFill = card.querySelector('.cardio-timer-bar-fill');
+  const controls = card.querySelector('.cardio-controls');
+  
+  let elapsed = startElapsed;
+  
+  // Update UI
+  controls.innerHTML = '';
+  const pauseBtn = document.createElement('button');
+  pauseBtn.className = 'btn-cardio-control btn-cardio-pause';
+  pauseBtn.textContent = '⏸️ Pause';
+  
+  const stopBtn = document.createElement('button');
+  stopBtn.className = 'btn-cardio-control btn-cardio-stop';
+  stopBtn.textContent = '⏹️ Stop';
+  
+  controls.appendChild(pauseBtn);
+  controls.appendChild(stopBtn);
+  
+  cardioTimerInterval = setInterval(() => {
+    elapsed++;
+    const remaining = durationSeconds - elapsed;
+    
+    if (remaining <= 0) {
+      clearInterval(cardioTimerInterval);
+      cardioTimerInterval = null;
+      timerDisplay.textContent = '0:00';
+      timerBarFill.style.width = '100%';
+      
+      completedExercises.add(globalIndex);
+      saveActiveWorkout();
+      renderActiveWorkout();
+      
+      const total = currentWorkoutPlan.exercises.reduce((sum, ex) => {
+        return sum + (ex.type === 'cardio' ? 1 : (ex.sets?.length || 1));
+      }, 0);
+      if (completedExercises.size === total) {
+        finishWorkoutBtn.style.display = 'block';
+      }
+      
+      return;
+    }
+    
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    const progress = (elapsed / durationSeconds) * 100;
+    timerBarFill.style.width = `${progress}%`;
+  }, 1000);
+  
+  pauseBtn.addEventListener('click', () => {
+    clearInterval(cardioTimerInterval);
+    cardioTimerInterval = null;
+    
+    controls.innerHTML = '';
+    const resumeBtn = document.createElement('button');
+    resumeBtn.className = 'btn-cardio-control btn-cardio-start';
+    resumeBtn.textContent = '▶️ Resume';
+    resumeBtn.addEventListener('click', () => {
+      startCardioTimerFromElapsed(globalIndex, durationSeconds, elapsed);
+    });
+    
+    const stopBtn2 = document.createElement('button');
+    stopBtn2.className = 'btn-cardio-control btn-cardio-stop';
+    stopBtn2.textContent = '⏹️ Stop';
+    stopBtn2.addEventListener('click', () => stopCardioTimer(globalIndex, durationSeconds));
+    
+    controls.appendChild(resumeBtn);
+    controls.appendChild(stopBtn2);
+  });
+  
+  stopBtn.addEventListener('click', () => stopCardioTimer(globalIndex, durationSeconds));
+}
+
+function stopCardioTimer(globalIndex, durationSeconds) {
+  if (cardioTimerInterval) {
+    clearInterval(cardioTimerInterval);
+    cardioTimerInterval = null;
+  }
+  renderActiveWorkout();
 }
 
 // Finish workout button
@@ -1656,13 +2091,19 @@ function handleDragEnd(e) {
 function renderPlanExercises() {
   planExercisesDiv.innerHTML = '';
   const machines = getMachines();
+  const cardioExercises = getCardio();
   
   currentPlanExercises.forEach((exercise, exerciseIndex) => {
+    // Migrate old exercises to have type
+    if (!exercise.type) {
+      exercise.type = 'strength';
+    }
+    
     const exerciseItem = document.createElement('div');
     const isExpanded = expandedExerciseIndex === exerciseIndex;
     
-    // Ensure exercise has sets array (migration for old plans)
-    if (!exercise.sets) {
+    // Ensure strength exercise has sets array (migration for old plans)
+    if (exercise.type === 'strength' && !exercise.sets) {
       exercise.sets = exercise.weight && exercise.reps ? 
         [{ weight: exercise.weight, reps: exercise.reps }] : 
         [{ weight: 0, reps: 0 }];
@@ -1670,8 +2111,9 @@ function renderPlanExercises() {
       delete exercise.reps;
     }
     
-    const isComplete = exercise.machine && exercise.sets && exercise.sets.length > 0 && 
-                      exercise.sets.every(s => s.weight && s.reps);
+    const isComplete = exercise.type === 'cardio' 
+      ? (exercise.exercise && exercise.duration > 0)
+      : (exercise.machine && exercise.sets && exercise.sets.length > 0 && exercise.sets.every(s => s.weight && s.reps));
     
     exerciseItem.className = 'exercise-item';
     
@@ -1701,10 +2143,18 @@ function renderPlanExercises() {
       const info = document.createElement('div');
       info.className = 'exercise-collapsed-info';
       
-      const setsSummary = exercise.sets.map(s => `${s.reps}×${s.weight}kg`).join(', ');
+      let summary = '';
+      if (exercise.type === 'cardio') {
+        summary = `${exercise.exercise} - ${exercise.duration} min`;
+      } else {
+        const setsSummary = exercise.sets.map(s => `${s.reps}×${s.weight}kg`).join(', ');
+        summary = `${exercise.machine} - ${exercise.sets.length} set${exercise.sets.length > 1 ? 's' : ''}: ${setsSummary}`;
+      }
+      
+      const icon = exercise.type === 'cardio' ? '🏃' : '🏋️';
       info.innerHTML = `
-        <div class="exercise-number">Exercise ${exerciseIndex + 1}</div>
-        <div class="exercise-summary">${exercise.machine} - ${exercise.sets.length} set${exercise.sets.length > 1 ? 's' : ''}: ${setsSummary}</div>
+        <div class="exercise-number">${icon} Exercise ${exerciseIndex + 1}</div>
+        <div class="exercise-summary">${summary}</div>
       `;
       
       const actions = document.createElement('div');
@@ -1752,9 +2202,14 @@ function renderPlanExercises() {
       dragHandle.innerHTML = '⋮⋮';
       dragHandle.title = 'Drag to reorder';
       
+      const icon = exercise.type === 'cardio' ? '🏃' : '🏋️';
+      const title = exercise.type === 'cardio' 
+        ? (exercise.exercise || `Cardio ${exerciseIndex + 1}`)
+        : (exercise.machine || `Exercise ${exerciseIndex + 1}`);
+      
       const number = document.createElement('div');
       number.className = 'exercise-number';
-      number.textContent = exercise.machine ? exercise.machine : `Exercise ${exerciseIndex + 1}`;
+      number.textContent = `${icon} ${title}`;
       
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'btn-icon delete';
@@ -1778,134 +2233,183 @@ function renderPlanExercises() {
       const fields = document.createElement('div');
       fields.className = 'exercise-fields';
       
-      // Machine select
-      const machineGroup = document.createElement('div');
-      machineGroup.className = 'form-group-inline';
-      const machineLabel = document.createElement('label');
-      machineLabel.textContent = 'Machine';
-      const machineSelect = document.createElement('select');
-      machineSelect.innerHTML = '<option value="">Select machine</option>';
-      
-      // Sort machines alphabetically
-      const sortedMachines = [...machines].sort((a, b) => a.localeCompare(b));
-      sortedMachines.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        if (m === exercise.machine) opt.selected = true;
-        machineSelect.appendChild(opt);
-      });
-      machineSelect.addEventListener('change', (e) => {
-        currentPlanExercises[exerciseIndex].machine = e.target.value;
-        renderPlanExercises(); // Re-render to update the title
-      });
-      machineGroup.appendChild(machineLabel);
-      machineGroup.appendChild(machineSelect);
-      fields.appendChild(machineGroup);
-      
-      // Sets section
-      const setsLabel = document.createElement('label');
-      setsLabel.textContent = 'Sets';
-      setsLabel.style.marginTop = '1rem';
-      fields.appendChild(setsLabel);
-      
-      const setsContainer = document.createElement('div');
-      setsContainer.className = 'sets-container';
-      
-      exercise.sets.forEach((set, setIndex) => {
-        const setRow = document.createElement('div');
-        setRow.className = 'set-row';
+      if (exercise.type === 'cardio') {
+        // Cardio exercise fields
+        const cardioGroup = document.createElement('div');
+        cardioGroup.className = 'form-group-inline';
+        const cardioLabel = document.createElement('label');
+        cardioLabel.textContent = 'Cardio Exercise';
+        const cardioSelect = document.createElement('select');
+        cardioSelect.innerHTML = '<option value="">Select cardio</option>';
         
-        const setNumber = document.createElement('div');
-        setNumber.className = 'set-number';
-        setNumber.textContent = `Set ${setIndex + 1}`;
-        
-        const setInputs = document.createElement('div');
-        setInputs.className = 'set-inputs';
-        
-        // Weight input
-        const weightGroup = document.createElement('div');
-        weightGroup.className = 'set-input-group';
-        const weightLabel = document.createElement('label');
-        weightLabel.textContent = 'Weight (kg)';
-        weightLabel.className = 'set-input-label';
-        const weightInput = document.createElement('input');
-        weightInput.type = 'text';
-        weightInput.pattern = '\\d*\\.?\\d*';
-        weightInput.value = set.weight;
-        weightInput.min = 0;
-        weightInput.max = 500;
-        weightInput.step = 2.5;
-        weightInput.placeholder = 'kg';
-        weightInput.className = 'set-number-input';
-        weightInput.addEventListener('input', (e) => {
-          currentPlanExercises[exerciseIndex].sets[setIndex].weight = parseFloat(e.target.value) || 0;
+        // Sort cardio alphabetically
+        const sortedCardio = [...cardioExercises].sort((a, b) => a.localeCompare(b));
+        sortedCardio.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = c;
+          if (c === exercise.exercise) opt.selected = true;
+          cardioSelect.appendChild(opt);
         });
-        weightGroup.appendChild(weightLabel);
-        weightGroup.appendChild(weightInput);
-        
-        // Reps input
-        const repsGroup = document.createElement('div');
-        repsGroup.className = 'set-input-group';
-        const repsLabel = document.createElement('label');
-        repsLabel.textContent = 'Reps';
-        repsLabel.className = 'set-input-label';
-        const repsInput = document.createElement('input');
-        repsInput.type = 'text';
-        repsInput.pattern = '\\d*';
-        repsInput.value = set.reps;
-        repsInput.min = 1;
-        repsInput.max = 100;
-        repsInput.step = 1;
-        repsInput.placeholder = 'reps';
-        repsInput.className = 'set-number-input';
-        repsInput.addEventListener('input', (e) => {
-          currentPlanExercises[exerciseIndex].sets[setIndex].reps = parseInt(e.target.value) || 0;
+        cardioSelect.addEventListener('change', (e) => {
+          currentPlanExercises[exerciseIndex].exercise = e.target.value;
+          renderPlanExercises(); // Re-render to update the title
         });
-        repsGroup.appendChild(repsLabel);
-        repsGroup.appendChild(repsInput);
+        cardioGroup.appendChild(cardioLabel);
+        cardioGroup.appendChild(cardioSelect);
+        fields.appendChild(cardioGroup);
         
-        // Delete set button
-        const deleteSetBtn = document.createElement('button');
-        deleteSetBtn.type = 'button';
-        deleteSetBtn.className = 'btn-icon delete';
-        deleteSetBtn.innerHTML = '🗑️';
-        deleteSetBtn.title = 'Remove Set';
-        deleteSetBtn.addEventListener('click', () => {
-          if (exercise.sets.length > 1) {
-            currentPlanExercises[exerciseIndex].sets.splice(setIndex, 1);
-            renderPlanExercises();
-          } else {
-            alert('Each exercise must have at least one set');
-          }
+        // Duration input
+        const durationGroup = document.createElement('div');
+        durationGroup.className = 'form-group-inline';
+        const durationLabel = document.createElement('label');
+        durationLabel.textContent = 'Duration (minutes)';
+        const durationInput = document.createElement('input');
+        durationInput.type = 'text';
+        durationInput.pattern = '\\d*\\.?\\d*';
+        durationInput.inputMode = 'decimal';
+        durationInput.className = 'duration-input';
+        durationInput.value = exercise.duration || 10;
+        durationInput.min = 0.5;
+        durationInput.step = 0.5;
+        durationInput.placeholder = 'minutes';
+        durationInput.addEventListener('input', (e) => {
+          currentPlanExercises[exerciseIndex].duration = parseFloat(e.target.value) || 0;
+        });
+        durationGroup.appendChild(durationLabel);
+        durationGroup.appendChild(durationInput);
+        fields.appendChild(durationGroup);
+      } else {
+        // Strength exercise fields (existing code)
+        // Machine select
+        const machineGroup = document.createElement('div');
+        machineGroup.className = 'form-group-inline';
+        const machineLabel = document.createElement('label');
+        machineLabel.textContent = 'Machine';
+        const machineSelect = document.createElement('select');
+        machineSelect.innerHTML = '<option value="">Select machine</option>';
+        
+        // Sort machines alphabetically
+        const sortedMachines = [...machines].sort((a, b) => a.localeCompare(b));
+        sortedMachines.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = m;
+          if (m === exercise.machine) opt.selected = true;
+          machineSelect.appendChild(opt);
+        });
+        machineSelect.addEventListener('change', (e) => {
+          currentPlanExercises[exerciseIndex].machine = e.target.value;
+          renderPlanExercises(); // Re-render to update the title
+        });
+        machineGroup.appendChild(machineLabel);
+        machineGroup.appendChild(machineSelect);
+        fields.appendChild(machineGroup);
+        
+        // Sets section
+        const setsLabel = document.createElement('label');
+        setsLabel.textContent = 'Sets';
+        setsLabel.style.marginTop = '1rem';
+        fields.appendChild(setsLabel);
+        
+        const setsContainer = document.createElement('div');
+        setsContainer.className = 'sets-container';
+        
+        exercise.sets.forEach((set, setIndex) => {
+          const setRow = document.createElement('div');
+          setRow.className = 'set-row';
+          
+          const setNumber = document.createElement('div');
+          setNumber.className = 'set-number';
+          setNumber.textContent = `Set ${setIndex + 1}`;
+          
+          const setInputs = document.createElement('div');
+          setInputs.className = 'set-inputs';
+          
+          // Weight input
+          const weightGroup = document.createElement('div');
+          weightGroup.className = 'set-input-group';
+          const weightLabel = document.createElement('label');
+          weightLabel.textContent = 'Weight (kg)';
+          weightLabel.className = 'set-input-label';
+          const weightInput = document.createElement('input');
+          weightInput.type = 'text';
+          weightInput.pattern = '\\d*\\.?\\d*';
+          weightInput.value = set.weight;
+          weightInput.min = 0;
+          weightInput.max = 500;
+          weightInput.step = 2.5;
+          weightInput.placeholder = 'kg';
+          weightInput.className = 'set-number-input';
+          weightInput.addEventListener('input', (e) => {
+            currentPlanExercises[exerciseIndex].sets[setIndex].weight = parseFloat(e.target.value) || 0;
+          });
+          weightGroup.appendChild(weightLabel);
+          weightGroup.appendChild(weightInput);
+          
+          // Reps input
+          const repsGroup = document.createElement('div');
+          repsGroup.className = 'set-input-group';
+          const repsLabel = document.createElement('label');
+          repsLabel.textContent = 'Reps';
+          repsLabel.className = 'set-input-label';
+          const repsInput = document.createElement('input');
+          repsInput.type = 'text';
+          repsInput.pattern = '\\d*';
+          repsInput.value = set.reps;
+          repsInput.min = 1;
+          repsInput.max = 100;
+          repsInput.step = 1;
+          repsInput.placeholder = 'reps';
+          repsInput.className = 'set-number-input';
+          repsInput.addEventListener('input', (e) => {
+            currentPlanExercises[exerciseIndex].sets[setIndex].reps = parseInt(e.target.value) || 0;
+          });
+          repsGroup.appendChild(repsLabel);
+          repsGroup.appendChild(repsInput);
+          
+          // Delete set button
+          const deleteSetBtn = document.createElement('button');
+          deleteSetBtn.type = 'button';
+          deleteSetBtn.className = 'btn-icon delete';
+          deleteSetBtn.innerHTML = '🗑️';
+          deleteSetBtn.title = 'Remove Set';
+          deleteSetBtn.addEventListener('click', () => {
+            if (exercise.sets.length > 1) {
+              currentPlanExercises[exerciseIndex].sets.splice(setIndex, 1);
+              renderPlanExercises();
+            } else {
+              alert('Each exercise must have at least one set');
+            }
+          });
+          
+          setInputs.appendChild(weightGroup);
+          setInputs.appendChild(repsGroup);
+          setInputs.appendChild(deleteSetBtn);
+          
+          setRow.appendChild(setNumber);
+          setRow.appendChild(setInputs);
+          setsContainer.appendChild(setRow);
         });
         
-        setInputs.appendChild(weightGroup);
-        setInputs.appendChild(repsGroup);
-        setInputs.appendChild(deleteSetBtn);
+        fields.appendChild(setsContainer);
         
-        setRow.appendChild(setNumber);
-        setRow.appendChild(setInputs);
-        setsContainer.appendChild(setRow);
-      });
-      
-      fields.appendChild(setsContainer);
-      
-      // Add set button
-      const addSetBtn = document.createElement('button');
-      addSetBtn.type = 'button';
-      addSetBtn.className = 'btn-secondary btn-add-set';
-      addSetBtn.textContent = '+ Add Set';
-      addSetBtn.addEventListener('click', () => {
-        const settings = getSettings();
-        const lastSet = exercise.sets[exercise.sets.length - 1];
-        currentPlanExercises[exerciseIndex].sets.push({
-          weight: lastSet ? lastSet.weight : settings.defaultWeight,
-          reps: lastSet ? lastSet.reps : settings.defaultReps
+        // Add set button
+        const addSetBtn = document.createElement('button');
+        addSetBtn.type = 'button';
+        addSetBtn.className = 'btn-secondary btn-add-set';
+        addSetBtn.textContent = '+ Add Set';
+        addSetBtn.addEventListener('click', () => {
+          const settings = getSettings();
+          const lastSet = exercise.sets[exercise.sets.length - 1];
+          currentPlanExercises[exerciseIndex].sets.push({
+            weight: lastSet ? lastSet.weight : settings.defaultWeight,
+            reps: lastSet ? lastSet.reps : settings.defaultReps
+          });
+          renderPlanExercises();
         });
-        renderPlanExercises();
-      });
-      fields.appendChild(addSetBtn);
+        fields.appendChild(addSetBtn);
+      }
       
       exerciseItem.appendChild(header);
       exerciseItem.appendChild(fields);
@@ -1918,12 +2422,30 @@ function renderPlanExercises() {
 // Add new exercise to plan
 addExerciseBtn.addEventListener('click', () => {
   const settings = getSettings();
+  
+  // Add strength exercise
   currentPlanExercises.push({
+    type: 'strength',
     machine: '',
     sets: [
       { weight: settings.defaultWeight, reps: settings.defaultReps }
     ]
   });
+  
+  // Expand the newly added exercise
+  expandedExerciseIndex = currentPlanExercises.length - 1;
+  renderPlanExercises();
+});
+
+// Add new cardio exercise to plan
+addCardioExerciseBtn.addEventListener('click', () => {
+  // Add cardio exercise
+  currentPlanExercises.push({
+    type: 'cardio',
+    exercise: '',
+    duration: 10 // default 10 minutes
+  });
+  
   // Expand the newly added exercise
   expandedExerciseIndex = currentPlanExercises.length - 1;
   renderPlanExercises();
@@ -1958,18 +2480,31 @@ editPlanForm.addEventListener('submit', (e) => {
   
   // Validate all exercises have required fields
   for (let ex of currentPlanExercises) {
-    if (!ex.machine) {
-      alert('Please select a machine for all exercises');
-      return;
-    }
-    if (!ex.sets || ex.sets.length === 0) {
-      alert('Please add at least one set for each exercise');
-      return;
-    }
-    for (let set of ex.sets) {
-      if (!set.weight || !set.reps) {
-        alert('Please complete all set fields (weight and reps)');
+    if (ex.type === 'cardio') {
+      // Validate cardio exercise
+      if (!ex.exercise) {
+        alert('Please select a cardio exercise for all cardio entries');
         return;
+      }
+      if (!ex.duration || ex.duration <= 0) {
+        alert('Please set a duration for all cardio exercises');
+        return;
+      }
+    } else {
+      // Validate strength exercise
+      if (!ex.machine) {
+        alert('Please select a machine for all exercises');
+        return;
+      }
+      if (!ex.sets || ex.sets.length === 0) {
+        alert('Please add at least one set for each exercise');
+        return;
+      }
+      for (let set of ex.sets) {
+        if (!set.weight || !set.reps) {
+          alert('Please complete all set fields (weight and reps)');
+          return;
+        }
       }
     }
   }
@@ -2466,42 +3001,29 @@ function renderTotalStats(totalWorkouts, totalSets, uniqueExercises, totalMinute
   const historyStatsSummary = document.getElementById('historyStatsSummary');
   historyStatsSummary.innerHTML = '';
   
-  // Workouts stat
-  const workoutsStat = document.createElement('div');
-  workoutsStat.className = 'total-stat-card';
-  workoutsStat.innerHTML = `
-    <div class="total-stat-value">${totalWorkouts}</div>
-    <div class="total-stat-label">Workouts</div>
+  // Create a compact single-line stats bar
+  const statsBar = document.createElement('div');
+  statsBar.className = 'compact-stats-bar';
+  statsBar.innerHTML = `
+    <div class="compact-stat">
+      <span class="compact-stat-value">${totalWorkouts}</span>
+      <span class="compact-stat-label">Workouts</span>
+    </div>
+    <div class="compact-stat">
+      <span class="compact-stat-value">${totalSets}</span>
+      <span class="compact-stat-label">Sets</span>
+    </div>
+    <div class="compact-stat">
+      <span class="compact-stat-value">${uniqueExercises}</span>
+      <span class="compact-stat-label">Exercises</span>
+    </div>
+    <div class="compact-stat">
+      <span class="compact-stat-value">${totalMinutes}</span>
+      <span class="compact-stat-label">Minutes</span>
+    </div>
   `;
   
-  // Sets stat
-  const setsStat = document.createElement('div');
-  setsStat.className = 'total-stat-card';
-  setsStat.innerHTML = `
-    <div class="total-stat-value">${totalSets}</div>
-    <div class="total-stat-label">Total Sets</div>
-  `;
-  
-  // Unique exercises stat
-  const exercisesStat = document.createElement('div');
-  exercisesStat.className = 'total-stat-card';
-  exercisesStat.innerHTML = `
-    <div class="total-stat-value">${uniqueExercises}</div>
-    <div class="total-stat-label">Exercises</div>
-  `;
-  
-  // Total workout time
-  const timeStat = document.createElement('div');
-  timeStat.className = 'total-stat-card';
-  timeStat.innerHTML = `
-    <div class="total-stat-value">${totalMinutes}</div>
-    <div class="total-stat-label">Minutes</div>
-  `;
-  
-  historyStatsSummary.appendChild(workoutsStat);
-  historyStatsSummary.appendChild(setsStat);
-  historyStatsSummary.appendChild(exercisesStat);
-  historyStatsSummary.appendChild(timeStat);
+  historyStatsSummary.appendChild(statsBar);
 }
 
 // Show workout detail screen
@@ -2937,6 +3459,9 @@ document.addEventListener('click', (e) => {
       machinesScreenContext = 'profile';
       renderMachineList(machineListDivExercises);
       showScreen('settingsExercises');
+    } else if (target === 'settingsCardio') {
+      renderCardioList();
+      showScreen('settingsCardio');
     } else if (target === 'settingsMenu') {
       showSettingsScreen();
     } else if (target === 'settings') {
@@ -3025,6 +3550,13 @@ document.querySelectorAll('.back-to-settings').forEach(btn => {
       // Fallback to profile
       showScreen('profile');
     }
+  });
+});
+
+// Back to profile buttons
+document.querySelectorAll('.back-to-profile').forEach(btn => {
+  btn.addEventListener('click', () => {
+    showScreen('profile');
   });
 });
 
