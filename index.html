@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fitness Tracker</title>
+  <title>Workout Tracker</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -381,6 +381,12 @@
     <div class="machine-container">
       <!-- Settings Menu List -->
       <div class="settings-menu">
+        <button type="button" class="settings-menu-item" data-setting-page="programs">
+          <span class="settings-menu-icon">📚</span>
+          <span class="settings-menu-text">Workout Programs</span>
+          <span class="settings-menu-arrow">›</span>
+        </button>
+        
         <button type="button" class="settings-menu-item" data-setting-page="plans">
           <span class="settings-menu-icon">📋</span>
           <span class="settings-menu-text">Workout Plans</span>
@@ -421,6 +427,24 @@
   </div>
   
   <!-- Settings Sub-Pages -->
+  
+  <!-- Workout Programs Settings Page -->
+  <div id="settingsProgramsScreen" class="screen-hidden">
+    <div class="header">
+      <button type="button" class="btn-icon-header back-to-settings" title="Back">←</button>
+      <h1>📚 Workout Programs</h1>
+      <div class="header-spacer"></div>
+    </div>
+    
+    <div class="machine-container">
+      <button type="button" id="createProgramBtn" class="btn-primary">Create New Program</button>
+      
+      <div class="machine-list-container">
+        <h2>Your Programs</h2>
+        <div id="programsList"></div>
+      </div>
+    </div>
+  </div>
   
   <!-- Workout Plans Settings Page -->
   <div id="settingsPlansScreen" class="screen-hidden">
@@ -706,6 +730,40 @@
         </div>
         
         <button type="submit" class="btn-primary">Save Plan</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Create/Edit Program Screen -->
+  <div id="editProgramScreen" class="screen-hidden">
+    <div class="header sticky-header">
+      <button type="button" id="backFromEditProgramBtn" class="btn-icon-header" title="Back">←</button>
+      <h1 id="editProgramTitle">✏️ Create Program</h1>
+      <button type="button" id="saveProgramBtnTop" class="btn-icon-header save-btn" title="Save">✓</button>
+    </div>
+    
+    <div class="machine-container">
+      <form id="editProgramForm">
+        <div class="form-group">
+          <label for="programName">Program Name</label>
+          <input type="text" id="programName" placeholder="e.g., 8-Week Strength Building" required class="edit-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="programDuration">Duration (weeks)</label>
+          <div class="spinner-input-group">
+            <button type="button" class="spinner-btn" data-action="decrease" data-target="programDuration">−</button>
+            <input type="text" pattern="\d*" inputmode="numeric" id="programDuration" value="4" min="1" max="52" step="1" required>
+            <button type="button" class="spinner-btn" data-action="increase" data-target="programDuration">+</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Program Schedule</label>
+          <div id="programSchedule"></div>
+        </div>
+        
+        <button type="submit" class="btn-primary">Save Program</button>
       </form>
     </div>
   </div>

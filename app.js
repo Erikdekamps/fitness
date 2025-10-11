@@ -5783,3 +5783,273 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 250);
   });
 });
+
+// ==========================================
+// Workout Programs
+// ==========================================
+
+// Get programs from localStorage
+function getPrograms() {
+  return JSON.parse(localStorage.getItem('fitnessPrograms') || '[]');
+}
+
+// Save programs to localStorage
+function savePrograms(programs) {
+  localStorage.setItem('fitnessPrograms', JSON.stringify(programs));
+}
+
+// Save a single program
+function saveProgram(program) {
+  const programs = getPrograms();
+  
+  if (program.id) {
+    // Update existing
+    const index = programs.findIndex(p => p.id === program.id);
+    if (index !== -1) {
+      programs[index] = program;
+    }
+  } else {
+    // Create new
+    program.id = Date.now().toString();
+    program.createdAt = new Date().toISOString();
+    programs.push(program);
+  }
+  
+  savePrograms(programs);
+}
+
+// Delete a program
+function deleteProgram(programId) {
+  const programs = getPrograms();
+  const filtered = programs.filter(p => p.id !== programId);
+  savePrograms(filtered);
+}
+
+// Render programs list
+function renderProgramsList() {
+  const programsList = document.getElementById('programsList');
+  if (!programsList) return;
+  
+  const programs = getPrograms();
+  
+  if (programs.length === 0) {
+    programsList.innerHTML = '<div class="empty-state">No programs yet. Create your first training program!</div>';
+    return;
+  }
+  
+  programsList.innerHTML = '';
+  
+  programs.forEach(program => {
+    const programCard = document.createElement('div');
+    programCard.className = 'plan-card';
+    
+    // Count total workouts in program
+    let totalWorkouts = 0;
+    program.weeks.forEach(week => {
+      week.days.forEach(day => {
+        if (day.workoutPlanId || day.customWorkout) totalWorkouts++;
+      });
+    });
+    
+    programCard.innerHTML = `
+      <div class="plan-card-header">
+        <div class="plan-card-title">
+          <span class="plan-icon">📚</span>
+          <span>${program.name}</span>
+        </div>
+        <div class="plan-card-actions">
+          <button type="button" class="btn-icon edit" data-program-id="${program.id}" title="Edit">✏️</button>
+          <button type="button" class="btn-icon delete" data-program-id="${program.id}" title="Delete">🗑️</button>
+        </div>
+      </div>
+      <div class="plan-card-info">
+        <span>${program.weeks.length} weeks</span>
+        <span>•</span>
+        <span>${totalWorkouts} workouts</span>
+      </div>
+    `;
+    
+    // Edit button
+    programCard.querySelector('.edit').addEventListener('click', () => {
+      editProgram(program.id);
+    });
+    
+    // Delete button
+    programCard.querySelector('.delete').addEventListener('click', () => {
+      if (confirm(`Delete program "${program.name}"?`)) {
+        deleteProgram(program.id);
+        renderProgramsList();
+      }
+    });
+    
+    programsList.appendChild(programCard);
+  });
+}
+
+// Edit or create a program
+let currentEditingProgramId = null;
+let currentProgramWeeks = [];
+
+function editProgram(programId) {
+  const programs = getPrograms();
+  const program = programs.find(p => p.id === programId);
+  
+  if (program) {
+    currentEditingProgramId = program.id;
+    document.getElementById('programName').value = program.name;
+    document.getElementById('programDuration').value = program.weeks.length;
+    currentProgramWeeks = JSON.parse(JSON.stringify(program.weeks)); // Deep copy
+    document.getElementById('editProgramTitle').textContent = '✏️ Edit Program';
+  } else {
+    currentEditingProgramId = null;
+    document.getElementById('programName').value = '';
+    document.getElementById('programDuration').value = '4';
+    currentProgramWeeks = [];
+    document.getElementById('editProgramTitle').textContent = '✏️ Create Program';
+  }
+  
+  renderProgramSchedule();
+  showScreen('editProgram');
+}
+
+// Render program schedule
+function renderProgramSchedule() {
+  const scheduleDiv = document.getElementById('programSchedule');
+  const duration = parseInt(document.getElementById('programDuration').value) || 4;
+  
+  // Initialize weeks if needed
+  while (currentProgramWeeks.length < duration) {
+    currentProgramWeeks.push({
+      weekNumber: currentProgramWeeks.length + 1,
+      days: Array(7).fill(null).map((_, i) => ({ dayOfWeek: i, workoutPlanId: null, customWorkout: null }))
+    });
+  }
+  
+  // Remove extra weeks if duration decreased
+  currentProgramWeeks = currentProgramWeeks.slice(0, duration);
+  
+  scheduleDiv.innerHTML = '';
+  
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const plans = getPlans();
+  
+  currentProgramWeeks.forEach((week, weekIndex) => {
+    const weekCard = document.createElement('div');
+    weekCard.className = 'program-week-card';
+    
+    const weekHeader = document.createElement('div');
+    weekHeader.className = 'program-week-header';
+    weekHeader.innerHTML = `<h3>Week ${week.weekNumber}</h3>`;
+    weekCard.appendChild(weekHeader);
+    
+    const daysGrid = document.createElement('div');
+    daysGrid.className = 'program-days-grid';
+    
+    week.days.forEach((day, dayIndex) => {
+      const dayCard = document.createElement('div');
+      dayCard.className = 'program-day-card';
+      
+      const dayName = document.createElement('div');
+      dayName.className = 'program-day-name';
+      dayName.textContent = dayNames[dayIndex];
+      
+      const workoutSelect = document.createElement('select');
+      workoutSelect.className = 'program-day-select';
+      
+      workoutSelect.innerHTML = '<option value="">Rest Day</option>';
+      plans.forEach(plan => {
+        const option = document.createElement('option');
+        option.value = plan.id;
+        option.textContent = plan.name;
+        if (day.workoutPlanId === plan.id) option.selected = true;
+        workoutSelect.appendChild(option);
+      });
+      
+      workoutSelect.addEventListener('change', (e) => {
+        currentProgramWeeks[weekIndex].days[dayIndex].workoutPlanId = e.target.value || null;
+      });
+      
+      dayCard.appendChild(dayName);
+      dayCard.appendChild(workoutSelect);
+      daysGrid.appendChild(dayCard);
+    });
+    
+    weekCard.appendChild(daysGrid);
+    scheduleDiv.appendChild(weekCard);
+  });
+}
+
+// Update schedule when duration changes
+document.getElementById('programDuration').addEventListener('change', () => {
+  renderProgramSchedule();
+});
+
+// Create program button
+const createProgramBtn = document.getElementById('createProgramBtn');
+if (createProgramBtn) {
+  createProgramBtn.addEventListener('click', () => {
+    editProgram(null);
+  });
+}
+
+// Back button
+const backFromEditProgramBtn = document.getElementById('backFromEditProgramBtn');
+if (backFromEditProgramBtn) {
+  backFromEditProgramBtn.addEventListener('click', () => {
+    showScreen('settingsPrograms');
+  });
+}
+
+// Save program form
+const editProgramForm = document.getElementById('editProgramForm');
+if (editProgramForm) {
+  editProgramForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveProgramData();
+  });
+}
+
+// Top save button
+const saveProgramBtnTop = document.getElementById('saveProgramBtnTop');
+if (saveProgramBtnTop) {
+  saveProgramBtnTop.addEventListener('click', () => {
+    saveProgramData();
+  });
+}
+
+function saveProgramData() {
+  const name = document.getElementById('programName').value.trim();
+  if (!name) {
+    alert('Please enter a program name');
+    return;
+  }
+  
+  if (currentProgramWeeks.length === 0) {
+    alert('Please set program duration');
+    return;
+  }
+  
+  const program = {
+    name: name,
+    weeks: currentProgramWeeks,
+    updatedAt: new Date().toISOString()
+  };
+  
+  if (currentEditingProgramId) {
+    program.id = currentEditingProgramId;
+  }
+  
+  saveProgram(program);
+  showScreen('settingsPrograms');
+  renderProgramsList();
+}
+
+// Initialize programs list when navigating to programs settings
+const originalShowScreen = showScreen;
+showScreen = function(screenName) {
+  originalShowScreen(screenName);
+  
+  if (screenName === 'settingsPrograms') {
+    renderProgramsList();
+  }
+};

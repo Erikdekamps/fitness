@@ -1,6 +1,6 @@
-# 💪 Fitness Tracker
+# 💪 Workout Tracker
 
-> **Built with AI** – A modern, minimal, mobile-first fitness tracking progressive web app with dark mode. Track your gym workouts with a beautiful calendar view, create custom training plans, manage exercises, use built-in timers, and maintain complete control over your data with full backup/restore capabilities.
+> **Built with AI** – A modern, minimal, mobile-first workout tracking progressive web app with dark mode. Track your gym workouts with a beautiful calendar view, create custom training plans, manage exercises, use built-in timers, and maintain complete control over your data with full backup/restore capabilities.
 
 ---
 

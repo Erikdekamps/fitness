@@ -4392,3 +4392,61 @@ main,
   justify-content: flex-end;
 }
 
+/* Workout Programs */
+.program-week-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border);
+}
+
+.program-week-header {
+  margin-bottom: var(--spacing-md);
+}
+
+.program-week-header h3 {
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin: 0;
+}
+
+.program-days-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.program-day-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.program-day-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.program-day-select {
+  padding: var(--spacing-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.program-day-select:hover {
+  border-color: var(--accent);
+}
+
+.program-day-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+}
+
