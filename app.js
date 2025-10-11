@@ -1,4 +1,10 @@
-// Fitness Tracker App with Dark Mode, Editable History, Custom Machines, and Settings
+// ========================================
+// FITNESS TRACKER APP
+// ========================================
+
+// ========== DOM ELEMENT REFERENCES ==========
+
+// Form elements
 const form = document.getElementById('entryForm');
 const machineSelect = document.getElementById('machine');
 const weightInput = document.getElementById('weight');
@@ -34,12 +40,11 @@ const backFromDetailBtn = document.getElementById('backFromDetailBtn');
 
 // Bottom Navigation
 const bottomNav = document.getElementById('bottomNav');
-
-// Track current workout detail for refreshing when settings change
-let currentWorkoutDetail = null;
 const navHome = document.getElementById('navHome');
 const navWorkout = document.getElementById('navWorkout');
 const navProfile = document.getElementById('navProfile');
+
+// Machine management
 const addMachineBtn = document.getElementById('addMachineBtn');
 const newMachineNameInput = document.getElementById('newMachineName');
 const machineListDiv = document.getElementById('machineList');
@@ -76,16 +81,56 @@ const workoutTimeDisplay = document.getElementById('workoutTimeDisplay');
 const workoutElapsedTime = document.getElementById('workoutElapsedTime');
 const workoutStartTime = document.getElementById('workoutStartTime');
 
+// Settings inputs
+const weightIncrementInput = document.getElementById('weightIncrement');
+const defaultWeightInput = document.getElementById('defaultWeight');
+const defaultRepsInput = document.getElementById('defaultReps');
+const defaultTimerMinutesInput = document.getElementById('defaultTimerMinutes');
+
+// Setting badge containers
+const fontSizeBadges = document.getElementById('fontSizeBadges');
+const layoutDensityBadges = document.getElementById('layoutDensityBadges');
+const dateFormatBadges = document.getElementById('dateFormatBadges');
+const timeFormatBadges = document.getElementById('timeFormatBadges');
+
+// Data management buttons
+const exportDataBtn = document.getElementById('exportDataBtn');
+const importDataBtn = document.getElementById('importDataBtn');
+const importFileInput = document.getElementById('importFileInput');
+const resetEverythingBtn = document.getElementById('resetEverythingBtn');
+
+// ========== STATE MANAGEMENT ==========
+
+// Current editing state
 let currentEditingPlanId = null;
 let currentPlanExercises = [];
 let currentWorkoutPlan = null;
 let completedExercises = new Set();
-let expandedExerciseIndex = null; // Track which exercise is expanded
-let workoutTimerInterval = null; // Track workout elapsed time
+let expandedExerciseIndex = null;
+let workoutTimerInterval = null;
+
+// Track current workout detail for refreshing when settings change
+let currentWorkoutDetail = null;
 
 // Track navigation context for proper back navigation
-let machinesScreenContext = 'settings'; // Can be 'settings' or 'settingsExercises'
-let plansScreenContext = 'profile'; // Track where to navigate back from plans screen
+let machinesScreenContext = 'settings';
+let plansScreenContext = 'profile';
+
+// Default machines
+const DEFAULT_MACHINES = [
+  'Bench Press',
+  'Squat Rack',
+  'Leg Press',
+  'Lat Pulldown',
+  'Shoulder Press',
+  'Cable Rows',
+  'Leg Curl',
+  'Leg Extension',
+  'Chest Fly',
+  'Bicep Curl',
+  'Tricep Extension'
+];
+
 
 // ===== ACTIVE WORKOUT PERSISTENCE =====
 
@@ -197,42 +242,12 @@ function updateWorkoutTimer() {
   workoutStartTime.textContent = startTimeText;
 }
 
-// Settings inputs
-const weightIncrementInput = document.getElementById('weightIncrement');
-const defaultWeightInput = document.getElementById('defaultWeight');
-const defaultRepsInput = document.getElementById('defaultReps');
-const defaultTimerMinutesInput = document.getElementById('defaultTimerMinutes');
-
-// Setting badge containers (replacing selects)
-const fontSizeBadges = document.getElementById('fontSizeBadges');
-const layoutDensityBadges = document.getElementById('layoutDensityBadges');
-const dateFormatBadges = document.getElementById('dateFormatBadges');
-const timeFormatBadges = document.getElementById('timeFormatBadges');
-
-// Data management buttons
-const exportDataBtn = document.getElementById('exportDataBtn');
-const importDataBtn = document.getElementById('importDataBtn');
-const importFileInput = document.getElementById('importFileInput');
-const resetEverythingBtn = document.getElementById('resetEverythingBtn');
-
-// Default machines
-const DEFAULT_MACHINES = [
-  'Bench Press',
-  'Squat Rack',
-  'Leg Press',
-  'Lat Pulldown',
-  'Shoulder Press',
-  'Cable Rows',
-  'Leg Curl',
-  'Leg Extension',
-  'Chest Fly',
-  'Bicep Curl',
-  'Tricep Extension'
-];
-
 // ===== SETTINGS =====
 
-// Get settings from localStorage
+/**
+ * Get user settings from localStorage with defaults
+ * @returns {Object} Settings object with weightIncrement, defaultWeight, defaultReps, fontSize, layoutDensity, dateFormat, timeFormat, defaultTimerMinutes
+ */
 function getSettings() {
   const defaultSettings = {
     weightIncrement: 2.5,
@@ -248,7 +263,10 @@ function getSettings() {
   return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
 }
 
-// Save settings to localStorage
+/**
+ * Save settings to localStorage
+ * @param {Object} settings - Settings object to save
+ */
 function saveSettings(settings) {
   localStorage.setItem('fitnessSettings', JSON.stringify(settings));
   applySettings();
@@ -300,18 +318,28 @@ function getSelectedBadgeValue(container) {
 
 // ===== MACHINES =====
 
-// Get machines from localStorage
+/**
+ * Get exercise machines list from localStorage
+ * @returns {Array<string>} Array of machine names
+ */
 function getMachines() {
   const saved = localStorage.getItem('fitnessMachines');
   return saved ? JSON.parse(saved) : DEFAULT_MACHINES;
 }
 
-// Save machines to localStorage
+/**
+ * Save machines list to localStorage
+ * @param {Array<string>} machines - Array of machine names to save
+ */
 function saveMachines(machines) {
   localStorage.setItem('fitnessMachines', JSON.stringify(machines));
 }
 
-// Add a new machine
+/**
+ * Add a new exercise machine to the list
+ * @param {string} name - Name of the machine to add
+ * @returns {boolean} True if successful, false if invalid or duplicate
+ */
 function addMachine(name) {
   const machines = getMachines();
   const trimmed = name.trim();
@@ -331,7 +359,10 @@ function addMachine(name) {
   return true;
 }
 
-// Delete a machine
+/**
+ * Delete an exercise machine from the list
+ * @param {string} name - Name of the machine to delete
+ */
 function deleteMachine(name) {
   const machines = getMachines();
   const filtered = machines.filter(m => m !== name);
@@ -341,7 +372,11 @@ function deleteMachine(name) {
   renderMachineSelect();
 }
 
-// Rename a machine
+/**
+ * Rename an exercise machine
+ * @param {string} oldName - Current name of the machine
+ * @param {string} newName - New name for the machine
+ */
 function renameMachine(oldName, newName) {
   newName = newName.trim();
   
@@ -429,7 +464,11 @@ function renderMachineSelect() {
   }
 }
 
-// Render machine list for management
+/**
+ * Render machine list for management
+ * Displays machines with rename and delete options
+ * @param {HTMLElement|null} targetDiv - Optional target div, defaults to machineListDiv
+ */
 let currentEditingMachine = null;
 
 function renderMachineList(targetDiv = null) {
@@ -2646,18 +2685,8 @@ form.addEventListener('submit', (e) => {
     reps: parseInt(repsInput.value)
   });
   
-  // Reset form but keep the machine selected for quick consecutive sets
-  const currentMachine = machineSelect.value;
-  // Don't reset machine select - keep it for next set
-  // machineSelect.value = '';
-  // Keep weight and reps for quick repeats
-  // const settings = getSettings();
-  // weightInput.value = settings.defaultWeight;
-  // repsInput.value = settings.defaultReps;
-  
   renderHistory();
-  // Stay on tracker screen to see today's section
-  // showScreen('history'); 
+ 
 });
 
 // ===== TIMER/STOPWATCH FUNCTIONALITY =====
