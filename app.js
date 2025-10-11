@@ -966,7 +966,7 @@ function renderHomeWorkoutPlans() {
     const card = document.createElement('div');
     card.className = 'home-plan-card';
     
-    // Header with name and actions
+    // Header with name and dropdown menu
     const header = document.createElement('div');
     header.className = 'home-plan-header';
     
@@ -974,45 +974,82 @@ function renderHomeWorkoutPlans() {
     name.className = 'home-plan-name';
     name.textContent = plan.name;
     
-    const actions = document.createElement('div');
-    actions.className = 'home-plan-actions';
+    // Dropdown menu
+    const menuContainer = document.createElement('div');
+    menuContainer.className = 'home-plan-menu';
     
-    // Edit button
-    const editBtn = document.createElement('button');
-    editBtn.className = 'plan-action-btn';
-    editBtn.textContent = 'Edit';
-    editBtn.addEventListener('click', (e) => {
+    const menuBtn = document.createElement('button');
+    menuBtn.className = 'plan-menu-btn';
+    menuBtn.innerHTML = '⋮';
+    menuBtn.setAttribute('aria-label', 'Plan options');
+    
+    const dropdown = document.createElement('div');
+    dropdown.className = 'plan-menu-dropdown';
+    
+    // Edit option
+    const editItem = document.createElement('button');
+    editItem.className = 'plan-menu-item';
+    editItem.innerHTML = '<span>✏️</span><span>Edit</span>';
+    editItem.addEventListener('click', (e) => {
       e.stopPropagation();
+      dropdown.classList.remove('active');
+      menuBtn.classList.remove('active');
       editPlan(plan.id);
     });
     
-    // Duplicate button
-    const duplicateBtn = document.createElement('button');
-    duplicateBtn.className = 'plan-action-btn';
-    duplicateBtn.textContent = 'Duplicate';
-    duplicateBtn.addEventListener('click', (e) => {
+    // Duplicate option
+    const duplicateItem = document.createElement('button');
+    duplicateItem.className = 'plan-menu-item';
+    duplicateItem.innerHTML = '<span>📋</span><span>Duplicate</span>';
+    duplicateItem.addEventListener('click', (e) => {
       e.stopPropagation();
+      dropdown.classList.remove('active');
+      menuBtn.classList.remove('active');
       duplicatePlan(plan.id);
     });
     
-    // Delete button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'plan-action-btn';
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.addEventListener('click', (e) => {
+    // Delete option
+    const deleteItem = document.createElement('button');
+    deleteItem.className = 'plan-menu-item delete';
+    deleteItem.innerHTML = '<span>🗑️</span><span>Delete</span>';
+    deleteItem.addEventListener('click', (e) => {
       e.stopPropagation();
+      dropdown.classList.remove('active');
+      menuBtn.classList.remove('active');
       if (confirm(`Delete plan "${plan.name}"?`)) {
         deletePlan(plan.id);
-        renderHomeWorkoutPlans(); // Refresh the list
+        renderHomeWorkoutPlans();
       }
     });
     
-    actions.appendChild(editBtn);
-    actions.appendChild(duplicateBtn);
-    actions.appendChild(deleteBtn);
+    dropdown.appendChild(editItem);
+    dropdown.appendChild(duplicateItem);
+    dropdown.appendChild(deleteItem);
+    
+    // Toggle dropdown
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Close all other dropdowns
+      document.querySelectorAll('.plan-menu-dropdown.active').forEach(d => {
+        if (d !== dropdown) {
+          d.classList.remove('active');
+        }
+      });
+      document.querySelectorAll('.plan-menu-btn.active').forEach(b => {
+        if (b !== menuBtn) {
+          b.classList.remove('active');
+        }
+      });
+      
+      dropdown.classList.toggle('active');
+      menuBtn.classList.toggle('active');
+    });
+    
+    menuContainer.appendChild(menuBtn);
+    menuContainer.appendChild(dropdown);
     
     header.appendChild(name);
-    header.appendChild(actions);
+    header.appendChild(menuContainer);
     
     // Plan info
     const info = document.createElement('div');
@@ -1023,15 +1060,21 @@ function renderHomeWorkoutPlans() {
       return sum + (ex.sets ? ex.sets.length : 1);
     }, 0);
     
-    info.innerHTML = `
-      <span>📋 ${exerciseCount} exercise${exerciseCount !== 1 ? 's' : ''}</span>
-      <span>🔢 ${totalSets} set${totalSets !== 1 ? 's' : ''}</span>
-    `;
+    const exerciseItem = document.createElement('div');
+    exerciseItem.className = 'home-plan-info-item';
+    exerciseItem.innerHTML = `<span>📋</span><span>${exerciseCount} exercise${exerciseCount !== 1 ? 's' : ''}</span>`;
+    
+    const setsItem = document.createElement('div');
+    setsItem.className = 'home-plan-info-item';
+    setsItem.innerHTML = `<span>🔢</span><span>${totalSets} set${totalSets !== 1 ? 's' : ''}</span>`;
+    
+    info.appendChild(exerciseItem);
+    info.appendChild(setsItem);
     
     // Start button
     const startBtn = document.createElement('button');
     startBtn.className = 'home-plan-start';
-    startBtn.textContent = '▶️ Start Workout';
+    startBtn.innerHTML = '<span>▶️</span><span>Start Workout</span>';
     startBtn.addEventListener('click', () => {
       startWorkoutPlan(plan.id);
     });
@@ -2838,6 +2881,18 @@ if (workoutWidgetToggle && workoutWidgetContent) {
     workoutWidgetContent.classList.toggle('expanded');
   });
 }
+
+// Close plan menu dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.home-plan-menu')) {
+    document.querySelectorAll('.plan-menu-dropdown.active').forEach(dropdown => {
+      dropdown.classList.remove('active');
+    });
+    document.querySelectorAll('.plan-menu-btn.active').forEach(btn => {
+      btn.classList.remove('active');
+    });
+  }
+});
 
 // ===== SETTINGS NAVIGATION =====
 
