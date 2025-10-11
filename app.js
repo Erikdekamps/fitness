@@ -1658,6 +1658,11 @@ function showScreen(screen) {
     renderWeightChart();
   }
   
+  // Render active program on home screen
+  if (screen === 'home') {
+    renderActiveProgramWidget();
+  }
+  
   // Set default timer value when navigating to timer screen
   if (screen === 'timer') {
     const settings = getSettings();
@@ -2099,7 +2104,7 @@ function renderPlansList() {
   plansListDiv.innerHTML = '';
   
   if (plans.length === 0) {
-    plansListDiv.innerHTML = '<div class="empty-state">No workout plans yet. Create your first plan!</div>';
+    plansListDiv.innerHTML = '<div class="empty-state">No workouts yet. Create your first workout!</div>';
     return;
   }
   
@@ -2161,6 +2166,284 @@ function renderPlansList() {
     planItem.appendChild(header);
     planItem.appendChild(exercises);
     plansListDiv.appendChild(planItem);
+  });
+}
+
+// Render active program widget on home screen
+function renderActiveProgramWidget() {
+  const container = document.getElementById('activeProgramWidget');
+  if (!container) return;
+  
+  const activeProgram = getActiveProgram();
+  
+  // Hide if no active program
+  if (!activeProgram) {
+    container.style.display = 'none';
+    return;
+  }
+  
+  // Get program details
+  const programs = getPrograms();
+  const program = programs.find(p => p.id === activeProgram.programId);
+  
+  if (!program || !program.weeks || !Array.isArray(program.weeks)) {
+    container.style.display = 'none';
+    return;
+  }
+  
+  // Get current week
+  const currentWeek = program.weeks[activeProgram.currentWeek];
+  if (!currentWeek || !currentWeek.days || !Array.isArray(currentWeek.days)) {
+    container.style.display = 'none';
+    return;
+  }
+  
+  // Calculate progress
+  const totalWeeks = program.weeks.length;
+  const totalDays = totalWeeks * 7;
+  const completedDays = (activeProgram.currentWeek * 7) + activeProgram.currentDay;
+  const progressPercentage = Math.round((completedDays / totalDays) * 100);
+  
+  // Get all plans for reference
+  const plans = getPlans();
+  
+  // Build daily schedule HTML
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  let daysHtml = '';
+  
+  currentWeek.days.forEach((day, index) => {
+    const isCurrentDay = index === activeProgram.currentDay;
+    const isPastDay = index < activeProgram.currentDay;
+    
+    // Support both planId and workoutPlanId property names
+    const planId = day.planId || day.workoutPlanId;
+    const isRestDay = !planId || planId === 'rest';
+    
+    const dayName = day.name || dayNames[index] || `Day ${index + 1}`;
+    let workoutInfo = '';
+    let actionBtn = '';
+    
+    if (isRestDay) {
+      workoutInfo = `
+        <div class="program-day-workout-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/>
+            <line x1="8" y1="16" x2="8.01" y2="16"/>
+            <line x1="8" y1="20" x2="8.01" y2="20"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+            <line x1="12" y1="22" x2="12.01" y2="22"/>
+            <line x1="16" y1="16" x2="16.01" y2="16"/>
+            <line x1="16" y1="20" x2="16.01" y2="20"/>
+          </svg>
+          <span class="program-day-rest-label">Rest & Recovery</span>
+        </div>
+      `;
+    } else {
+      // Try to find the workout plan (use == for type coercion string/number)
+      const workoutPlan = plans.find(p => p.id == planId);
+      const workoutName = workoutPlan ? workoutPlan.name : `Workout Not Found (ID: ${planId})`;
+      const exerciseCount = workoutPlan && workoutPlan.exercises ? workoutPlan.exercises.length : 0;
+      
+      workoutInfo = `
+        <div class="program-day-workout-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          <div class="program-day-workout-details">
+            <span class="program-day-workout-name">${workoutName}</span>
+            <span class="program-day-workout-exercises">${exerciseCount} exercise${exerciseCount !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+      `;
+      
+      // Add start button only for current day (not completed or upcoming)
+      if (isCurrentDay && workoutPlan) {
+        actionBtn = `
+          <button class="program-day-start-btn primary" data-plan-id="${planId}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span>Start</span>
+          </button>
+        `;
+      }
+    }
+    
+    const statusClass = isPastDay ? 'completed' : (isCurrentDay ? 'current' : 'upcoming');
+    const statusIcon = isPastDay ? `
+      <svg class="program-day-status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    ` : '';
+    
+    daysHtml += `
+      <div class="program-day-item ${statusClass}">
+        <div class="program-day-header">
+          <div class="program-day-info">
+            ${statusIcon}
+            <span class="program-day-name">${dayName}</span>
+          </div>
+          ${actionBtn}
+        </div>
+        ${workoutInfo}
+      </div>
+    `;
+  });
+  
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div class="active-program-card-redesign">
+      <div class="program-header-main">
+        <div class="program-header-left">
+          <div class="program-icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="program-header-info">
+            <h3 class="program-header-title">${program.name}</h3>
+            <p class="program-header-meta">Week ${activeProgram.currentWeek + 1}/${totalWeeks} • Day ${activeProgram.currentDay + 1}/7 • ${progressPercentage}% Complete</p>
+          </div>
+        </div>
+        <div class="program-header-right">
+          <span class="program-status-badge">ACTIVE</span>
+          <div class="program-menu-wrapper">
+            <button class="program-menu-trigger" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="12" cy="5" r="1"/>
+                <circle cx="12" cy="19" r="1"/>
+              </svg>
+            </button>
+            <div class="program-menu-panel">
+              <button class="program-menu-option" data-action="skip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 4 15 12 5 20 5 4"/>
+                  <line x1="19" y1="5" x2="19" y2="19"/>
+                </svg>
+                Skip Today
+              </button>
+              <button class="program-menu-option danger" data-action="stop">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                </svg>
+                Stop Program
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="program-progress-section">
+        <div class="program-progress-header">
+          <span class="program-progress-label">Progress</span>
+          <span class="program-progress-value">${progressPercentage}%</span>
+        </div>
+        <div class="program-progress-track">
+          <div class="program-progress-fill" style="width: ${progressPercentage}%"></div>
+        </div>
+      </div>
+      
+      <div class="program-schedule-wrapper">
+        <button class="program-schedule-toggle" type="button">
+          <span class="program-schedule-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            This Week's Schedule
+          </span>
+          <svg class="program-schedule-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="program-schedule-content">
+          ${daysHtml}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  
+  // Add menu dropdown toggle
+  const menuTrigger = container.querySelector('.program-menu-trigger');
+  const menuPanel = container.querySelector('.program-menu-panel');
+  
+  if (menuTrigger && menuPanel) {
+    menuTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuPanel.classList.toggle('show');
+    });
+    
+    // Close dropdown when clicking outside
+    const closeMenu = (e) => {
+      if (!e.target.closest('.program-menu-wrapper')) {
+        menuPanel.classList.remove('show');
+      }
+    };
+    document.addEventListener('click', closeMenu);
+  }
+  
+  // Add schedule toggle functionality
+  const scheduleToggle = container.querySelector('.program-schedule-toggle');
+  const scheduleContent = container.querySelector('.program-schedule-content');
+  
+  if (scheduleToggle && scheduleContent) {
+    scheduleToggle.addEventListener('click', () => {
+      const isOpen = scheduleContent.classList.contains('open');
+      if (isOpen) {
+        scheduleContent.classList.remove('open');
+        scheduleToggle.classList.remove('active');
+      } else {
+        scheduleContent.classList.add('open');
+        scheduleToggle.classList.add('active');
+      }
+    });
+    
+    // Open by default
+    scheduleContent.classList.add('open');
+    scheduleToggle.classList.add('active');
+  }
+  
+  // Add action button listeners
+  const skipBtn = container.querySelector('[data-action="skip"]');
+  const stopBtn = container.querySelector('[data-action="stop"]');
+  
+  if (skipBtn) {
+    skipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuPanel?.classList.remove('show');
+      if (confirm('Skip today\'s workout and move to the next day?')) {
+        advanceActiveProgram();
+        renderActiveProgramWidget();
+      }
+    });
+  }
+  
+  if (stopBtn) {
+    stopBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuPanel?.classList.remove('show');
+      if (confirm('Are you sure you want to stop this program? Your progress will be lost.')) {
+        stopProgram();
+      }
+    });
+  }
+  
+  // Add event listeners to all Start buttons
+  const startBtns = container.querySelectorAll('.program-day-start-btn');
+  console.log('Found', startBtns.length, 'start buttons');
+  startBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const planId = btn.dataset.planId;
+      console.log('Start button clicked for plan ID:', planId);
+      startWorkoutPlan(planId);
+    });
   });
 }
 
@@ -2314,7 +2597,7 @@ function duplicatePlan(planId) {
   if (!originalPlan) return;
   
   const newPlan = {
-    id: Date.now(),
+    id: Date.now().toString(), // Convert to string to match savePlan format
     name: `${originalPlan.name} (Copy)`,
     exercises: JSON.parse(JSON.stringify(originalPlan.exercises)), // Deep copy
     createdAt: new Date().toISOString()
@@ -2400,7 +2683,7 @@ function importExamplePlan(template) {
   
   // Convert template format to app format
   const newPlan = {
-    id: Date.now(),
+    id: Date.now().toString(), // Convert to string to match savePlan format
     name: planName,
     exercises: [],
     createdAt: new Date().toISOString()
@@ -2465,9 +2748,13 @@ function importExamplePlan(template) {
 // Start a workout plan from home screen
 function startWorkoutPlan(planId) {
   const plans = getPlans();
-  const plan = plans.find(p => p.id === planId);
+  const plan = plans.find(p => p.id == planId); // Use == for type coercion
   
-  if (!plan) return;
+  if (!plan) {
+    console.error('Workout plan not found:', planId);
+    alert('Workout plan not found. Please check your program setup.');
+    return;
+  }
   
   // Set as current workout plan
   currentWorkoutPlan = JSON.parse(JSON.stringify(plan));
@@ -5839,6 +6126,90 @@ function deleteProgram(programId) {
   const programs = getPrograms();
   const filtered = programs.filter(p => p.id !== programId);
   savePrograms(filtered);
+  
+  // If deleting active program, stop it
+  const activeProgram = getActiveProgram();
+  if (activeProgram && activeProgram.programId === programId) {
+    stopProgram();
+  }
+}
+
+// Get active program from localStorage
+function getActiveProgram() {
+  const saved = localStorage.getItem('fitnessActiveProgram');
+  return saved ? JSON.parse(saved) : null;
+}
+
+// Save active program to localStorage
+function saveActiveProgram(activeProgram) {
+  if (activeProgram) {
+    localStorage.setItem('fitnessActiveProgram', JSON.stringify(activeProgram));
+  } else {
+    localStorage.removeItem('fitnessActiveProgram');
+  }
+}
+
+// Start a program
+function startProgram(programId) {
+  const programs = getPrograms();
+  const program = programs.find(p => p.id === programId);
+  
+  if (!program) {
+    alert('Program not found');
+    return;
+  }
+  
+  const activeProgram = {
+    programId: program.id,
+    programName: program.name,
+    currentWeek: 0,
+    currentDay: 0,
+    startedAt: new Date().toISOString(),
+    completedWorkouts: []
+  };
+  
+  saveActiveProgram(activeProgram);
+  renderProgramsList();
+  renderActiveProgramWidget();
+}
+
+// Stop active program
+function stopProgram() {
+  saveActiveProgram(null);
+  renderProgramsList();
+  renderActiveProgramWidget();
+}
+
+// Advance to next day in active program
+function advanceActiveProgram() {
+  const activeProgram = getActiveProgram();
+  if (!activeProgram) return;
+  
+  const programs = getPrograms();
+  const program = programs.find(p => p.id === activeProgram.programId);
+  
+  if (!program) {
+    stopProgram();
+    return;
+  }
+  
+  // Move to next day
+  activeProgram.currentDay++;
+  
+  // If we've completed all 7 days, move to next week
+  if (activeProgram.currentDay >= 7) {
+    activeProgram.currentDay = 0;
+    activeProgram.currentWeek++;
+    
+    // If we've completed all weeks, finish the program
+    if (activeProgram.currentWeek > program.weeks.length) {
+      alert(`Congratulations! You've completed the "${program.name}" program! 🎉`);
+      stopProgram();
+      return;
+    }
+  }
+  
+  saveActiveProgram(activeProgram);
 }
 
 // Render programs list
@@ -5855,9 +6226,16 @@ function renderProgramsList() {
   
   programsList.innerHTML = '';
   
+  const activeProgram = getActiveProgram();
+  
   programs.forEach(program => {
     const programCard = document.createElement('div');
     programCard.className = 'program-card';
+    
+    const isActive = activeProgram && activeProgram.programId === program.id;
+    if (isActive) {
+      programCard.classList.add('program-card-active');
+    }
     
     // Ensure weeks array exists
     if (!program.weeks || !Array.isArray(program.weeks)) {
@@ -5882,12 +6260,25 @@ function renderProgramsList() {
     const totalDays = program.weeks.length * 7;
     const workoutPercentage = totalDays > 0 ? Math.round((totalWorkouts / totalDays) * 100) : 0;
     
+    // Build active program status
+    let activeProgramBadge = '';
+    let activeProgramInfo = '';
+    if (isActive) {
+      const currentWeek = activeProgram.currentWeek || 1;
+      const currentDay = activeProgram.currentDay || 0;
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      activeProgramBadge = `<div class="program-active-badge">🎯 Active Program</div>`;
+      activeProgramInfo = `<div class="program-active-info">Week ${currentWeek} • ${dayNames[currentDay]}</div>`;
+    }
+    
     programCard.innerHTML = `
+      ${activeProgramBadge}
       <div class="program-card-header">
         <div class="program-card-icon">📚</div>
         <div class="program-card-title-section">
           <h3 class="program-card-title">${program.name || 'Untitled Program'}</h3>
           <div class="program-card-subtitle">${program.weeks.length} ${program.weeks.length === 1 ? 'Week' : 'Weeks'} • ${totalDays} Days</div>
+          ${activeProgramInfo}
         </div>
       </div>
       
@@ -5922,6 +6313,17 @@ function renderProgramsList() {
       </div>
       
       <div class="program-card-actions">
+        ${isActive ? `
+          <button type="button" class="program-btn program-btn-stop" data-program-id="${program.id}">
+            <span class="program-btn-icon">⏹️</span>
+            <span class="program-btn-text">Stop Program</span>
+          </button>
+        ` : `
+          <button type="button" class="program-btn program-btn-start" data-program-id="${program.id}">
+            <span class="program-btn-icon">▶️</span>
+            <span class="program-btn-text">Start Program</span>
+          </button>
+        `}
         <button type="button" class="program-btn program-btn-edit" data-program-id="${program.id}">
           <span class="program-btn-icon">✏️</span>
           <span class="program-btn-text">Edit</span>
@@ -5933,6 +6335,23 @@ function renderProgramsList() {
       </div>
     `;
     
+    // Start/Stop button
+    const startBtn = programCard.querySelector('.program-btn-start');
+    const stopBtn = programCard.querySelector('.program-btn-stop');
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', () => {
+        startProgram(program.id);
+      });
+    }
+    
+    if (stopBtn) {
+      stopBtn.addEventListener('click', () => {
+        if (confirm(`Stop program "${program.name}"? Your progress will be saved.`)) {
+          stopProgram();
+        }
+      });
+    }
     // Edit button
     programCard.querySelector('.program-btn-edit').addEventListener('click', () => {
       editProgram(program.id);
@@ -5991,12 +6410,20 @@ function renderProgramSchedule() {
   if (!durationInput) return;
   
   const duration = parseInt(durationInput.value) || 4;
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const plans = getPlans();
   
   // Initialize weeks if needed
   while (currentProgramWeeks.length < duration) {
     currentProgramWeeks.push({
       weekNumber: currentProgramWeeks.length + 1,
-      days: Array(7).fill(null).map((_, i) => ({ dayOfWeek: i, workoutPlanId: null, customWorkout: null }))
+      days: Array(7).fill(null).map((_, i) => ({ 
+        name: dayNames[i],
+        dayOfWeek: i, 
+        workoutPlanId: null, 
+        planId: null,
+        customWorkout: null 
+      }))
     });
   }
   
@@ -6005,13 +6432,16 @@ function renderProgramSchedule() {
   
   scheduleDiv.innerHTML = '';
   
-  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const plans = getPlans();
-  
   currentProgramWeeks.forEach((week, weekIndex) => {
     // Ensure week has proper structure
     if (!week.days || !Array.isArray(week.days)) {
-      week.days = Array(7).fill(null).map((_, i) => ({ dayOfWeek: i, workoutPlanId: null, customWorkout: null }));
+      week.days = Array(7).fill(null).map((_, i) => ({ 
+        name: dayNames[i],
+        dayOfWeek: i, 
+        workoutPlanId: null, 
+        planId: null,
+        customWorkout: null 
+      }));
     }
     
     const weekCard = document.createElement('div');
@@ -6041,12 +6471,16 @@ function renderProgramSchedule() {
         const option = document.createElement('option');
         option.value = plan.id;
         option.textContent = plan.name || 'Untitled Plan';
-        if (day.workoutPlanId === plan.id) option.selected = true;
+        // Use == for type coercion in case of string/number mismatch
+        if (day.workoutPlanId == plan.id || day.planId == plan.id) option.selected = true;
         workoutSelect.appendChild(option);
       });
       
       workoutSelect.addEventListener('change', (e) => {
-        currentProgramWeeks[weekIndex].days[dayIndex].workoutPlanId = e.target.value || null;
+        const selectedPlanId = e.target.value || null;
+        currentProgramWeeks[weekIndex].days[dayIndex].workoutPlanId = selectedPlanId;
+        currentProgramWeeks[weekIndex].days[dayIndex].planId = selectedPlanId;
+        currentProgramWeeks[weekIndex].days[dayIndex].name = dayNames[dayIndex];
       });
       
       dayCard.appendChild(dayName);

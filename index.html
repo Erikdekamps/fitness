@@ -18,6 +18,11 @@
     </div>
     
     <div class="machine-container">
+      <!-- Active Program Widget -->
+      <div id="activeProgramWidget" class="active-program-widget" style="display: none;">
+        <!-- Active program will be rendered here -->
+      </div>
+      
       <!-- Quick Start Section -->
       <div class="home-section">
         <h2 class="home-section-title">Quick Start</h2>
@@ -33,7 +38,7 @@
           <div class="widget-header-content">
             <div class="widget-title">
               <span class="widget-icon">📋</span>
-              <span>Workout Plans</span>
+              <span>Workouts</span>
             </div>
             <span class="widget-arrow">▼</span>
           </div>
@@ -44,8 +49,8 @@
             <!-- Workout plan cards will be rendered here -->
           </div>
           <div class="widget-empty" id="workoutWidgetEmpty" style="display: none;">
-            <p>No workout plans yet</p>
-            <button type="button" class="btn-secondary" data-nav="settingsPlans">Create Your First Plan</button>
+            <p>No workouts yet</p>
+            <button type="button" class="btn-secondary" data-nav="settingsPlans">Create Your First Workout</button>
           </div>
         </div>
       </div>
@@ -358,13 +363,13 @@
       <div class="settings-menu">
         <button type="button" class="settings-menu-item" data-setting-page="programs">
           <span class="settings-menu-icon">📚</span>
-          <span class="settings-menu-text">Workout Programs</span>
+          <span class="settings-menu-text">Programs</span>
           <span class="settings-menu-arrow">›</span>
         </button>
         
         <button type="button" class="settings-menu-item" data-setting-page="plans">
           <span class="settings-menu-icon">📋</span>
-          <span class="settings-menu-text">Workout Plans</span>
+          <span class="settings-menu-text">Workouts</span>
           <span class="settings-menu-arrow">›</span>
         </button>
         
@@ -403,11 +408,11 @@
   
   <!-- Settings Sub-Pages -->
   
-  <!-- Workout Programs Settings Page -->
+  <!-- Programs Settings Page -->
   <div id="settingsProgramsScreen" class="screen-hidden">
     <div class="header">
       <button type="button" class="btn-icon-header back-to-settings" title="Back">←</button>
-      <h1>📚 Workout Programs</h1>
+      <h1>📚 Programs</h1>
       <div class="header-spacer"></div>
     </div>
     
@@ -429,11 +434,11 @@
     </div>
   </div>
   
-  <!-- Workout Plans Settings Page -->
+  <!-- Workouts Settings Page -->
   <div id="settingsPlansScreen" class="screen-hidden">
     <div class="header">
       <button type="button" class="btn-icon-header back-to-settings" title="Back">←</button>
-      <h1>📋 Workout Plans</h1>
+      <h1>📋 Workouts</h1>
       <div class="header-spacer"></div>
     </div>
     
@@ -464,7 +469,7 @@
         </button>
         <div class="stats-section-content">
           <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md); font-size: 0.9rem;">
-            Browse and import pre-made workout plans
+            Browse and import pre-made workouts
           </p>
           <div id="examplePlansList"></div>
         </div>
