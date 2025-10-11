@@ -1304,6 +1304,8 @@ select:focus {
   transition: all 0.15s ease;
   cursor: move;
   user-select: none;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .exercise-item:hover {
@@ -1377,12 +1379,16 @@ select:focus {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  width: 100%;
+  max-width: 100%;
 }
 
 .form-group-inline {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  width: 100%;
+  max-width: 100%;
 }
 
 .form-group-inline label {
@@ -1420,6 +1426,8 @@ select:focus {
   display: flex;
   gap: var(--spacing-sm);
   align-items: center;
+  width: 100%;
+  max-width: 100%;
 }
 
 .form-group-inline .spinner-input input {
@@ -2418,7 +2426,9 @@ main,
   #activeWorkoutScreen,
   #historyScreen,
   #timerScreen,
-  #workoutDetailScreen {
+  #workoutDetailScreen,
+  #homeScreen,
+  #profileScreen {
     padding: var(--spacing-sm);
     padding-bottom: 100px;
   }
@@ -2436,13 +2446,74 @@ main,
   }
   
   .machine-container {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm);
+  }
+  
+  /* Fix spinner buttons on mobile */
+  .spinner-input {
+    gap: var(--spacing-xs);
   }
   
   .spinner-btn {
+    min-width: 2.5rem;
     width: 2.5rem;
     height: 2.5rem;
+    min-height: 2.5rem;
     font-size: 1.25rem;
+  }
+  
+  .spinner-input input {
+    height: 2.5rem;
+    line-height: 2.5rem;
+    font-size: 1rem;
+    padding: 0 var(--spacing-sm);
+  }
+  
+  /* Workout plan cards on mobile */
+  .home-plan-card {
+    padding: var(--spacing-md);
+  }
+  
+  .home-plan-name {
+    font-size: 1.1rem;
+  }
+  
+  .home-plan-info {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .home-plan-start {
+    padding: var(--spacing-sm);
+    font-size: 0.95rem;
+  }
+  
+  /* Widget spacing on mobile */
+  .workout-widget {
+    margin: var(--spacing-sm);
+  }
+  
+  .widget-header {
+    padding: var(--spacing-sm);
+  }
+  
+  .widget-title {
+    font-size: 1.1rem;
+  }
+  
+  .home-workout-plans {
+    padding: var(--spacing-sm);
+    padding-top: var(--spacing-md);
+  }
+  
+  /* Form groups on mobile */
+  .form-group-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .form-group-inline label {
+    margin-bottom: var(--spacing-xs);
   }
 }
 
