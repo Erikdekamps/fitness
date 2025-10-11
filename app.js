@@ -5403,76 +5403,160 @@ function renderPeriodChart(period) {
     }
     
     const ctx = canvas.getContext('2d');
-  const history = getHistory();
-  
-  // Set canvas size
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * window.devicePixelRatio;
-  canvas.height = rect.height * window.devicePixelRatio;
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-  
-  const width = rect.width;
-  const height = rect.height;
-  
-  // Clear canvas
-  ctx.clearRect(0, 0, width, height);
-  
-  // Get data for period
-  const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
-  const barData = [];
-  
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dateKey = date.toISOString().split('T')[0];
-    const dayEntries = history[dateKey] || [];
+    const history = getHistory();
     
-    // Count unique workouts
-    const workoutIds = new Set();
-    dayEntries.forEach(entry => {
-      workoutIds.add(entry.workoutId || entry.timestamp || 'default');
+    // Set canvas size
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    
+    const width = rect.width;
+    const height = rect.height;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Get data for period
+    const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
+    const barData = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split('T')[0];
+      const dayEntries = history[dateKey] || [];
+      
+      // Count unique workouts
+      const workoutIds = new Set();
+      dayEntries.forEach(entry => {
+        workoutIds.add(entry.workoutId || entry.timestamp || 'default');
+      });
+      
+      barData.push({
+        date: dateKey,
+        dateObj: new Date(date),
+        workouts: workoutIds.size
+      });
+    }
+    
+    if (barData.every(d => d.workouts === 0)) {
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+      ctx.font = '14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('No workouts in this period', width / 2, height / 2);
+      return;
+    }
+    
+    const maxWorkouts = Math.max(...barData.map(d => d.workouts), 1);
+    
+    // Chart area
+    const chartPadding = { top: 20, right: 15, bottom: 35, left: 35 };
+    const chartWidth = width - chartPadding.left - chartPadding.right;
+    const chartHeight = height - chartPadding.top - chartPadding.bottom;
+    
+    // Draw horizontal grid lines
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+    ctx.lineWidth = 1;
+    
+    for (let i = 0; i <= 4; i++) {
+      const y = chartPadding.top + (chartHeight / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(chartPadding.left, y);
+      ctx.lineTo(width - chartPadding.right, y);
+      ctx.stroke();
+      
+      // Draw y-axis labels
+      const value = maxWorkouts - (maxWorkouts / 4) * i;
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'right';
+      ctx.fillText(Math.round(value).toString(), chartPadding.left - 5, y + 4);
+    }
+    
+    // Calculate bar dimensions
+    const barWidth = chartWidth / barData.length;
+    const barPadding = Math.max(1, barWidth * 0.15);
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    const bgTertiaryColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-tertiary').trim();
+    
+    // Draw bars
+    barData.forEach((point, i) => {
+      const x = chartPadding.left + barWidth * i;
+      const actualBarWidth = barWidth - barPadding * 2;
+      const barHeight = (point.workouts / maxWorkouts) * chartHeight;
+      const y = chartPadding.top + chartHeight - barHeight;
+      
+      // Draw bar with rounded top
+      ctx.fillStyle = point.workouts > 0 ? accentColor : bgTertiaryColor;
+      
+      if (point.workouts > 0) {
+        const radius = Math.min(3, actualBarWidth / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + barPadding, y + radius);
+        ctx.arcTo(x + barPadding, y, x + barPadding + radius, y, radius);
+        ctx.lineTo(x + barPadding + actualBarWidth - radius, y);
+        ctx.arcTo(x + barPadding + actualBarWidth, y, x + barPadding + actualBarWidth, y + radius, radius);
+        ctx.lineTo(x + barPadding + actualBarWidth, chartPadding.top + chartHeight);
+        ctx.lineTo(x + barPadding, chartPadding.top + chartHeight);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        // Draw empty state bar
+        ctx.fillRect(x + barPadding, chartPadding.top + chartHeight - 2, actualBarWidth, 2);
+      }
+      
+      // Highlight today's bar
+      const today = new Date().toISOString().split('T')[0];
+      if (point.date === today) {
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x + barPadding - 1, chartPadding.top - 1, actualBarWidth + 2, chartHeight + 2);
+      }
     });
     
-    barData.push({
-      date: dateKey,
-      workouts: workoutIds.size
-    });
-  }
-  
-  if (barData.every(d => d.workouts === 0)) {
+    // Draw x-axis labels (show day labels for appropriate periods)
     ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
-    ctx.font = '14px system-ui';
+    ctx.font = '10px system-ui';
     ctx.textAlign = 'center';
-    ctx.fillText('No workouts in this period', width / 2, height / 2);
-    return;
-  }
-  
-  const maxWorkouts = Math.max(...barData.map(d => d.workouts), 1);
-  
-  // Chart area
-  const chartPadding = { top: 20, right: 10, bottom: 30, left: 30 };
-  const chartWidth = width - chartPadding.left - chartPadding.right;
-  const chartHeight = height - chartPadding.top - chartPadding.bottom;
-  
-  const barWidth = chartWidth / barData.length;
-  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-  
-  // Draw bars
-  barData.forEach((point, i) => {
-    const x = chartPadding.left + barWidth * i;
-    const barHeight = (point.workouts / maxWorkouts) * chartHeight;
-    const y = chartPadding.top + chartHeight - barHeight;
     
-    ctx.fillStyle = point.workouts > 0 ? accentColor : getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
-    ctx.fillRect(x + 1, y, barWidth - 2, barHeight);
-  });
-  
-  // Draw y-axis labels
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
-  ctx.font = '11px system-ui';
-  ctx.textAlign = 'right';
-  ctx.fillText('0', chartPadding.left - 5, chartPadding.top + chartHeight + 4);
-  ctx.fillText(maxWorkouts.toString(), chartPadding.left - 5, chartPadding.top + 4);
+    if (period === 'week') {
+      // Show all 7 days
+      const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      barData.forEach((point, i) => {
+        const x = chartPadding.left + barWidth * i + barWidth / 2;
+        const dayLabel = dayLabels[point.dateObj.getDay()];
+        ctx.fillText(dayLabel, x, chartPadding.top + chartHeight + 15);
+      });
+    } else if (period === 'month') {
+      // Show every 5th day
+      barData.forEach((point, i) => {
+        if (i % 5 === 0 || i === barData.length - 1) {
+          const x = chartPadding.left + barWidth * i + barWidth / 2;
+          const day = point.dateObj.getDate();
+          ctx.fillText(day.toString(), x, chartPadding.top + chartHeight + 15);
+        }
+      });
+    } else {
+      // Year view - show months
+      const monthLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+      const monthStarts = [];
+      let lastMonth = -1;
+      
+      barData.forEach((point, i) => {
+        const month = point.dateObj.getMonth();
+        if (month !== lastMonth) {
+          monthStarts.push({ index: i, month });
+          lastMonth = month;
+        }
+      });
+      
+      monthStarts.forEach(start => {
+        const x = chartPadding.left + barWidth * start.index + barWidth / 2;
+        ctx.fillText(monthLabels[start.month], x, chartPadding.top + chartHeight + 15);
+      });
+    }
+    
   } catch (error) {
     console.error('Error rendering period chart:', error);
   }

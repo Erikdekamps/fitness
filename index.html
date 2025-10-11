@@ -243,30 +243,6 @@
     </div>
     
     <div class="machine-container">
-      <!-- Body Weight Section - Collapsible -->
-      <div class="stats-collapsible-section">
-        <button type="button" class="stats-section-header">
-          <div class="stats-section-title">
-            <span class="stats-section-icon">⚖️</span>
-            <span>Body Weight</span>
-          </div>
-          <span class="stats-section-toggle">▼</span>
-        </button>
-        <div class="stats-section-content">
-          <div class="stat-card weight-tracker-card">
-            <div class="stat-card-header">
-              <button type="button" id="addWeightBtn" class="btn-icon" title="Add weight entry">+</button>
-            </div>
-            <div id="currentWeightDisplay" class="current-weight">
-              <span class="weight-value">--</span>
-              <span class="weight-unit">kg</span>
-            </div>
-            <div id="weightChangeDisplay" class="weight-change"></div>
-            <canvas id="weightChart" class="stat-chart"></canvas>
-          </div>
-        </div>
-      </div>
-      
       <!-- Workout Stats Section - Collapsible -->
       <div class="stats-collapsible-section">
         <button type="button" class="stats-section-header">
@@ -342,6 +318,30 @@
             </div>
             
             <canvas id="periodChart" class="stat-chart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Body Weight Section - Collapsible -->
+      <div class="stats-collapsible-section">
+        <button type="button" class="stats-section-header">
+          <div class="stats-section-title">
+            <span class="stats-section-icon">⚖️</span>
+            <span>Body Weight</span>
+          </div>
+          <span class="stats-section-toggle">▼</span>
+        </button>
+        <div class="stats-section-content">
+          <div class="stat-card weight-tracker-card">
+            <div class="stat-card-header">
+              <button type="button" id="addWeightBtn" class="btn-icon" title="Add weight entry">+</button>
+            </div>
+            <div id="currentWeightDisplay" class="current-weight">
+              <span class="weight-value">--</span>
+              <span class="weight-unit">kg</span>
+            </div>
+            <div id="weightChangeDisplay" class="weight-change"></div>
+            <canvas id="weightChart" class="stat-chart"></canvas>
           </div>
         </div>
       </div>
