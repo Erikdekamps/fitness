@@ -1677,7 +1677,11 @@ function showScreen(screen) {
   workoutDetailScreen.classList.toggle('screen-hidden', screen !== 'workoutDetail');
   
   // Store current screen (but not edit screens or detail screens)
-  const persistableScreens = ['home', 'profile', 'tracker', 'history', 'settings', 'activeWorkout', 'timer'];
+  const persistableScreens = [
+    'home', 'profile', 'tracker', 'history', 'settings', 'activeWorkout', 'timer',
+    'settingsPrograms', 'settingsPlans', 'settingsExercises', 'settingsCardio',
+    'settingsDefaults', 'settingsAppearance', 'settingsData'
+  ];
   if (persistableScreens.includes(screen)) {
     saveActiveScreen(screen);
   }
@@ -4514,11 +4518,29 @@ function createEditForm(date, entry) {
 function renderHistory() {
   const history = getHistory();
   
-  // Render based on current view
-  const activeView = document.querySelector('.view-toggle-btn.active');
-  if (activeView && activeView.dataset.view === 'list') {
+  // Restore saved view preference
+  const savedView = localStorage.getItem('fitnessHistoryView') || 'calendar';
+  const viewButtons = document.querySelectorAll('.view-toggle-btn');
+  const calendarView = document.getElementById('historyCalendarView');
+  const listView = document.getElementById('historyListView');
+  
+  // Update button states
+  viewButtons.forEach(btn => {
+    if (btn.dataset.view === savedView) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  
+  // Render based on saved view
+  if (savedView === 'list') {
+    if (calendarView) calendarView.style.display = 'none';
+    if (listView) listView.style.display = 'block';
     renderHistoryList();
   } else {
+    if (calendarView) calendarView.style.display = 'block';
+    if (listView) listView.style.display = 'none';
     renderCalendar();
   }
 }
@@ -5362,6 +5384,9 @@ document.addEventListener('click', (e) => {
     document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     
+    // Save view preference
+    localStorage.setItem('fitnessHistoryView', view);
+    
     // Update view visibility
     const calendarView = document.getElementById('historyCalendarView');
     const listView = document.getElementById('historyListView');
@@ -6175,6 +6200,10 @@ window.addEventListener('DOMContentLoaded', () => {
   renderTodaySection(); // Show today's workout on load
   renderActivePlanSelect();
   renderHomeWorkoutPlans(); // Render home screen workout plans
+  renderPlansList(); // Render plans list in settings
+  renderMachineList(machineListDivExercises); // Render exercises list
+  renderCardioList(); // Render cardio list
+  renderProgramsList(); // Render programs list
   restoreCollapsibleStates(); // Restore collapsible section states
   
   // Restore active workout if one exists
