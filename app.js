@@ -56,6 +56,7 @@ const startEmptyWorkoutBtn = document.getElementById('startEmptyWorkoutBtn');
 const addMachineBtnExercises = document.getElementById('addMachineBtnExercises');
 const newMachineNameInputExercises = document.getElementById('newMachineNameExercises');
 const machineListDivExercises = document.getElementById('machineListExercises');
+const sortExercisesBtn = document.getElementById('sortExercisesBtn');
 
 // Plan elements
 const planSelector = document.getElementById('planSelector');
@@ -723,6 +724,27 @@ newMachineNameInputExercises.addEventListener('keypress', (e) => {
       }
     }
   }
+});
+
+// Sort exercises alphabetically
+sortExercisesBtn.addEventListener('click', () => {
+  const machines = getMachines();
+  machines.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  saveMachines(machines);
+  renderMachineList(machineListDivExercises);
+  renderMachineSelect();
+  
+  // Show feedback
+  const originalText = sortExercisesBtn.textContent;
+  sortExercisesBtn.textContent = '✓ Sorted!';
+  sortExercisesBtn.style.background = 'var(--success)';
+  sortExercisesBtn.style.color = 'var(--bg-primary)';
+  
+  setTimeout(() => {
+    sortExercisesBtn.textContent = originalText;
+    sortExercisesBtn.style.background = '';
+    sortExercisesBtn.style.color = '';
+  }, 1500);
 });
 
 // Auto-save settings when inputs change
