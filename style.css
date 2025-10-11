@@ -420,10 +420,14 @@ label {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-sm);
+  width: 100%;
+  justify-content: space-between;
 }
 
 .setting-badge {
-  padding: var(--spacing-sm) var(--spacing-lg);
+  flex: 1 1 auto;
+  min-width: 0; /* Allow shrinking */
+  padding: var(--spacing-md) var(--spacing-sm);
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: 2rem;
@@ -433,7 +437,7 @@ label {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-  flex-shrink: 0;
+  text-align: center;
 }
 
 .setting-badge:hover {
@@ -478,21 +482,22 @@ select:focus {
   display: flex;
   gap: var(--spacing-sm);
   align-items: stretch; /* Changed from center to stretch */
+  width: 100%;
 }
 
 .spinner-input input {
   flex: 1;
   font-size: 1.25rem;
   font-weight: 600;
-  padding: var(--spacing-md);
+  padding: 0 var(--spacing-md); /* Remove vertical padding, keep horizontal */
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background: var(--bg-tertiary);
   color: var(--text-primary);
   text-align: center;
-  min-height: 3rem; /* Match spinner button height */
-  display: flex;
-  align-items: center;
+  height: 3rem; /* Fixed height matching buttons exactly */
+  line-height: 3rem; /* Center text vertically */
+  box-sizing: border-box; /* Include border in height calculation */
   /* Using global number input styles */
 }
 
@@ -503,7 +508,9 @@ select:focus {
 
 .spinner-btn {
   min-width: 3rem;
-  height: 3rem;
+  width: 3rem; /* Fixed width for consistency */
+  height: 100%; /* Match parent container height */
+  min-height: 3rem; /* Minimum height fallback */
   font-size: 1.5rem;
   font-weight: 600;
   border: 1px solid var(--border);
@@ -516,6 +523,8 @@ select:focus {
   align-items: center;
   justify-content: center;
   user-select: none;
+  flex-shrink: 0; /* Prevent shrinking */
+  box-sizing: border-box; /* Include border in height calculation */
 }
 
 .spinner-btn:hover {
@@ -2173,4 +2182,33 @@ main,
 
 .settings-section .form-group:last-child {
   margin-bottom: 0;
+}
+
+/* Ensure setting badges container takes full width within settings */
+.settings-section .setting-badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+/* For date/time format badges with longer text, use fewer columns */
+.settings-section #dateFormatBadges,
+.settings-section #timeFormatBadges {
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+.settings-section .setting-badge {
+  padding: var(--spacing-md) var(--spacing-sm);
+  justify-content: center;
+  text-align: center;
+}
+
+/* Ensure spinner inputs are properly aligned in settings */
+.settings-section .spinner-input {
+  max-width: 100%;
+}
+
+.settings-section .spinner-input input {
+  text-align: center;
 }
