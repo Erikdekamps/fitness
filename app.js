@@ -124,6 +124,9 @@ let completedExercises = new Set();
 let expandedExerciseIndex = null;
 let workoutTimerInterval = null;
 
+// Cardio timer state tracking
+let cardioTimerStates = {}; // { globalIndex: { elapsed: number, isRunning: boolean, startTimestamp: number } }
+
 // Track current workout detail for refreshing when settings change
 let currentWorkoutDetail = null;
 
@@ -167,7 +170,8 @@ function saveActiveWorkout() {
       plan: currentWorkoutPlan,
       completedExercises: Array.from(completedExercises),
       startTime: currentWorkoutPlan.startTime,
-      endTime: currentWorkoutPlan.endTime
+      endTime: currentWorkoutPlan.endTime,
+      cardioTimerStates: cardioTimerStates
     };
     localStorage.setItem('activeWorkout', JSON.stringify(workoutState));
   } else {
@@ -183,6 +187,8 @@ function loadActiveWorkout() {
       const workoutState = JSON.parse(saved);
       currentWorkoutPlan = workoutState.plan;
       completedExercises = new Set(workoutState.completedExercises || []);
+      cardioTimerStates = workoutState.cardioTimerStates || {};
+      
       // Restore start and end times
       if (workoutState.startTime) {
         currentWorkoutPlan.startTime = workoutState.startTime;
@@ -204,6 +210,7 @@ function loadActiveWorkout() {
 function clearActiveWorkout() {
   currentWorkoutPlan = null;
   completedExercises.clear();
+  cardioTimerStates = {};
   localStorage.removeItem('activeWorkout');
   
   // Stop workout timer
@@ -1598,16 +1605,40 @@ function renderCardioExercise(exercise, isCurrent) {
   
   const timerDisplay = document.createElement('div');
   timerDisplay.className = 'cardio-timer-display';
-  timerDisplay.textContent = `${exercise.duration}:00`;
   timerDisplay.dataset.duration = exercise.duration * 60; // Store in seconds
-  timerDisplay.dataset.elapsed = '0';
   
   const timerBar = document.createElement('div');
   timerBar.className = 'cardio-timer-bar';
   
   const timerBarFill = document.createElement('div');
   timerBarFill.className = 'cardio-timer-bar-fill';
-  timerBarFill.style.width = '0%';
+  
+  // Check if there's saved timer state for this exercise
+  const savedState = cardioTimerStates[exercise.globalIndex];
+  if (savedState && !isCompleted) {
+    // Restore from saved state
+    timerDisplay.dataset.elapsed = savedState.elapsed.toString();
+    const duration = exercise.duration * 60;
+    const remaining = duration - savedState.elapsed;
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    timerDisplay.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    
+    const percent = (savedState.elapsed / duration) * 100;
+    timerBarFill.style.width = `${percent}%`;
+    
+    // If it was running, resume the timer
+    if (savedState.isRunning && isCurrent) {
+      setTimeout(() => {
+        startCardioTimerFromElapsed(exercise.globalIndex, exercise.duration * 60, savedState.elapsed, exercise.exercise, exercise.duration);
+      }, 100); // Small delay to ensure DOM is ready
+    }
+  } else {
+    // Fresh start
+    timerDisplay.dataset.elapsed = '0';
+    timerDisplay.textContent = `${exercise.duration}:00`;
+    timerBarFill.style.width = '0%';
+  }
   
   timerBar.appendChild(timerBarFill);
   
@@ -1626,8 +1657,29 @@ function renderCardioExercise(exercise, isCurrent) {
     
     const startBtn = document.createElement('button');
     startBtn.className = 'btn-cardio-control btn-cardio-start';
-    startBtn.textContent = '▶️ Start';
-    startBtn.addEventListener('click', () => startCardioTimer(exercise.globalIndex, exercise.duration * 60));
+    
+    // Check if timer is already running from saved state
+    const isRunning = savedState && savedState.isRunning;
+    startBtn.textContent = isRunning ? '⏸️ Pause' : '▶️ Start';
+    if (isRunning) {
+      startBtn.classList.remove('btn-cardio-start');
+      startBtn.classList.add('btn-cardio-pause');
+    }
+    
+    startBtn.addEventListener('click', () => {
+      if (savedState && savedState.isRunning) {
+        // Pause logic is handled in the timer function itself
+        // This button just needs to trigger startCardioTimer which detects running state
+        startCardioTimer(exercise.globalIndex, exercise.duration * 60, exercise.exercise, exercise.duration);
+      } else {
+        const elapsed = parseInt(timerDisplay.dataset.elapsed || '0');
+        if (elapsed > 0) {
+          startCardioTimerFromElapsed(exercise.globalIndex, exercise.duration * 60, elapsed, exercise.exercise, exercise.duration);
+        } else {
+          startCardioTimer(exercise.globalIndex, exercise.duration * 60, exercise.exercise, exercise.duration);
+        }
+      }
+    });
     
     const skipBtn = document.createElement('button');
     skipBtn.className = 'btn-cardio-control btn-cardio-skip';
@@ -1801,15 +1853,44 @@ function renderStrengthExercise(bundle, isCurrent) {
 // Start cardio timer
 let cardioTimerInterval = null;
 
-function startCardioTimer(globalIndex, durationSeconds) {
+function startCardioTimer(globalIndex, durationSeconds, exerciseName = null, exerciseDuration = null) {
   const card = document.querySelector(`[data-cardio-index="${globalIndex}"]`);
   if (!card) return;
+  
+  // If exercise info not provided, try to find it
+  if (!exerciseName || !exerciseDuration) {
+    // Rebuild processedExercises to find the exercise
+    let tempGlobalIndex = 0;
+    for (const exercise of currentWorkoutPlan.exercises) {
+      if (exercise.type === 'cardio') {
+        if (tempGlobalIndex === globalIndex) {
+          exerciseName = exercise.exercise;
+          exerciseDuration = exercise.duration;
+          break;
+        }
+        tempGlobalIndex++;
+      } else {
+        const sets = exercise.sets || [{ weight: exercise.weight, reps: exercise.reps }];
+        tempGlobalIndex += sets.length;
+      }
+    }
+  }
   
   const timerDisplay = card.querySelector('.cardio-timer-display');
   const timerBarFill = card.querySelector('.cardio-timer-bar-fill');
   const controls = card.querySelector('.cardio-controls');
   
   let elapsed = 0;
+  
+  // Initialize state
+  cardioTimerStates[globalIndex] = {
+    elapsed: 0,
+    isRunning: true,
+    startTimestamp: Date.now(),
+    exerciseName: exerciseName,
+    exerciseDuration: exerciseDuration
+  };
+  saveActiveWorkout();
   
   // Update UI to show pause button
   controls.innerHTML = '';
@@ -1827,6 +1908,13 @@ function startCardioTimer(globalIndex, durationSeconds) {
   // Start timer
   cardioTimerInterval = setInterval(() => {
     elapsed++;
+    
+    // Update state
+    cardioTimerStates[globalIndex].elapsed = elapsed;
+    if (elapsed % 5 === 0) { // Save every 5 seconds to reduce overhead
+      saveActiveWorkout();
+    }
+    
     const remaining = durationSeconds - elapsed;
     
     if (remaining <= 0) {
@@ -1836,8 +1924,20 @@ function startCardioTimer(globalIndex, durationSeconds) {
       timerDisplay.textContent = '0:00';
       timerBarFill.style.width = '100%';
       
-      // Mark as complete
+      // Mark as complete and add to history
       completedExercises.add(globalIndex);
+      
+      // Get exercise info from state and add to history
+      const exerciseInfo = cardioTimerStates[globalIndex];
+      if (exerciseInfo && exerciseInfo.exerciseName) {
+        addEntry({
+          type: 'cardio',
+          exercise: exerciseInfo.exerciseName,
+          duration: exerciseInfo.exerciseDuration
+        });
+      }
+      
+      delete cardioTimerStates[globalIndex];
       saveActiveWorkout();
       renderActiveWorkout();
       
@@ -1867,6 +1967,10 @@ function startCardioTimer(globalIndex, durationSeconds) {
     clearInterval(cardioTimerInterval);
     cardioTimerInterval = null;
     
+    // Update state
+    cardioTimerStates[globalIndex].isRunning = false;
+    saveActiveWorkout();
+    
     // Show resume button
     controls.innerHTML = '';
     const resumeBtn = document.createElement('button');
@@ -1891,15 +1995,50 @@ function startCardioTimer(globalIndex, durationSeconds) {
   stopBtn.addEventListener('click', () => stopCardioTimer(globalIndex, durationSeconds));
 }
 
-function startCardioTimerFromElapsed(globalIndex, durationSeconds, startElapsed) {
+function startCardioTimerFromElapsed(globalIndex, durationSeconds, startElapsed, exerciseName = null, exerciseDuration = null) {
   const card = document.querySelector(`[data-cardio-index="${globalIndex}"]`);
   if (!card) return;
+  
+  // If exercise info not provided, try to find it or get from existing state
+  if (!exerciseName || !exerciseDuration) {
+    const existingState = cardioTimerStates[globalIndex];
+    if (existingState) {
+      exerciseName = existingState.exerciseName;
+      exerciseDuration = existingState.exerciseDuration;
+    } else {
+      // Rebuild processedExercises to find the exercise
+      let tempGlobalIndex = 0;
+      for (const exercise of currentWorkoutPlan.exercises) {
+        if (exercise.type === 'cardio') {
+          if (tempGlobalIndex === globalIndex) {
+            exerciseName = exercise.exercise;
+            exerciseDuration = exercise.duration;
+            break;
+          }
+          tempGlobalIndex++;
+        } else {
+          const sets = exercise.sets || [{ weight: exercise.weight, reps: exercise.reps }];
+          tempGlobalIndex += sets.length;
+        }
+      }
+    }
+  }
   
   const timerDisplay = card.querySelector('.cardio-timer-display');
   const timerBarFill = card.querySelector('.cardio-timer-bar-fill');
   const controls = card.querySelector('.cardio-controls');
   
   let elapsed = startElapsed;
+  
+  // Update state
+  cardioTimerStates[globalIndex] = {
+    elapsed: elapsed,
+    isRunning: true,
+    startTimestamp: Date.now(),
+    exerciseName: exerciseName,
+    exerciseDuration: exerciseDuration
+  };
+  saveActiveWorkout();
   
   // Update UI
   controls.innerHTML = '';
@@ -1916,6 +2055,13 @@ function startCardioTimerFromElapsed(globalIndex, durationSeconds, startElapsed)
   
   cardioTimerInterval = setInterval(() => {
     elapsed++;
+    
+    // Update state
+    cardioTimerStates[globalIndex].elapsed = elapsed;
+    if (elapsed % 5 === 0) {
+      saveActiveWorkout();
+    }
+    
     const remaining = durationSeconds - elapsed;
     
     if (remaining <= 0) {
@@ -1925,6 +2071,18 @@ function startCardioTimerFromElapsed(globalIndex, durationSeconds, startElapsed)
       timerBarFill.style.width = '100%';
       
       completedExercises.add(globalIndex);
+      
+      // Get exercise info from state and add to history
+      const exerciseInfo = cardioTimerStates[globalIndex];
+      if (exerciseInfo && exerciseInfo.exerciseName) {
+        addEntry({
+          type: 'cardio',
+          exercise: exerciseInfo.exerciseName,
+          duration: exerciseInfo.exerciseDuration
+        });
+      }
+      
+      delete cardioTimerStates[globalIndex];
       saveActiveWorkout();
       renderActiveWorkout();
       
@@ -1949,6 +2107,10 @@ function startCardioTimerFromElapsed(globalIndex, durationSeconds, startElapsed)
   pauseBtn.addEventListener('click', () => {
     clearInterval(cardioTimerInterval);
     cardioTimerInterval = null;
+    
+    // Update state
+    cardioTimerStates[globalIndex].isRunning = false;
+    saveActiveWorkout();
     
     controls.innerHTML = '';
     const resumeBtn = document.createElement('button');
@@ -1975,6 +2137,11 @@ function stopCardioTimer(globalIndex, durationSeconds) {
     clearInterval(cardioTimerInterval);
     cardioTimerInterval = null;
   }
+  
+  // Clear state
+  delete cardioTimerStates[globalIndex];
+  saveActiveWorkout();
+  
   renderActiveWorkout();
 }
 
@@ -2669,11 +2836,20 @@ function renderTodaySection() {
     
     const infoDiv = document.createElement('div');
     infoDiv.className = 'today-entry-info';
-    infoDiv.innerHTML = `
-      <div class="today-entry-machine">${entry.machine}</div>
-      <div class="today-entry-details">${entry.reps} reps × ${entry.weight} kg</div>
-      <div class="today-entry-time">${time}</div>
-    `;
+    
+    if (entry.type === 'cardio') {
+      infoDiv.innerHTML = `
+        <div class="today-entry-machine">🏃 ${entry.exercise}</div>
+        <div class="today-entry-details">${entry.duration} min</div>
+        <div class="today-entry-time">${time}</div>
+      `;
+    } else {
+      infoDiv.innerHTML = `
+        <div class="today-entry-machine">🏋️ ${entry.machine}</div>
+        <div class="today-entry-details">${entry.reps} reps × ${entry.weight} kg</div>
+        <div class="today-entry-time">${time}</div>
+      `;
+    }
     
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'btn-icon delete';
@@ -2790,7 +2966,7 @@ function renderHistory() {
       totalWorkouts++;
       totalSetsAllTime += entries.length;
       
-      const exercisesInWorkout = [...new Set(entries.map(e => e.machine))];
+      const exercisesInWorkout = [...new Set(entries.map(e => e.machine || e.exercise))];
       exercisesInWorkout.forEach(exercise => uniqueExercisesAllTime.add(exercise));
       
       const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
@@ -2918,8 +3094,9 @@ function showDayDetails(dateStr, entries) {
   header.appendChild(closeBtn);
   
   // Calculate stats
-  const totalSets = entries.length;
-  const uniqueExercises = [...new Set(entries.map(e => e.machine))].length;
+  const totalSets = entries.filter(e => e.type !== 'cardio').length;
+  const totalCardio = entries.filter(e => e.type === 'cardio').length;
+  const uniqueExercises = [...new Set(entries.map(e => e.machine || e.exercise))].length;
   
   const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
   let timeSpentSeconds = 0;
@@ -2939,51 +3116,82 @@ function showDayDetails(dateStr, entries) {
   stats.className = 'day-detail-stats';
   stats.innerHTML = `
     <span class="detail-stat">🏋️ ${uniqueExercises} exercises</span>
-    <span class="detail-stat">📊 ${totalSets} sets</span>
+    ${totalSets > 0 ? `<span class="detail-stat">📊 ${totalSets} sets</span>` : ''}
+    ${totalCardio > 0 ? `<span class="detail-stat">🏃 ${totalCardio} cardio</span>` : ''}
     ${timeSpentSeconds > 0 ? `<span class="detail-stat">⏱️ ${formattedTime}</span>` : ''}
   `;
   
   // Group entries by exercise
   const exerciseGroups = {};
   entries.forEach(entry => {
-    if (!exerciseGroups[entry.machine]) {
-      exerciseGroups[entry.machine] = [];
+    const key = entry.machine || entry.exercise;
+    if (!exerciseGroups[key]) {
+      exerciseGroups[key] = {
+        name: key,
+        type: entry.type || 'strength',
+        entries: []
+      };
     }
-    exerciseGroups[entry.machine].push(entry);
+    exerciseGroups[key].entries.push(entry);
   });
   
   // Exercises container
   const exercisesContainer = document.createElement('div');
   exercisesContainer.className = 'day-detail-exercises';
   
-  Object.keys(exerciseGroups).forEach(exercise => {
-    const sets = exerciseGroups[exercise];
+  Object.keys(exerciseGroups).forEach(exerciseKey => {
+    const group = exerciseGroups[exerciseKey];
     
     const exerciseCard = document.createElement('div');
     exerciseCard.className = 'detail-exercise-card';
     
     const exerciseHeader = document.createElement('div');
     exerciseHeader.className = 'detail-exercise-header';
-    exerciseHeader.innerHTML = `
-      <span class="detail-exercise-name">${exercise}</span>
-      <span class="detail-exercise-count">${sets.length} set${sets.length > 1 ? 's' : ''}</span>
-    `;
     
-    const setsContainer = document.createElement('div');
-    setsContainer.className = 'detail-exercise-sets';
-    
-    sets.forEach((set, index) => {
-      const setItem = document.createElement('div');
-      setItem.className = 'detail-set-item';
-      setItem.innerHTML = `
-        <span class="detail-set-number">Set ${index + 1}</span>
-        <span class="detail-set-details">${set.weight} kg × ${set.reps} reps</span>
+    if (group.type === 'cardio') {
+      exerciseHeader.innerHTML = `
+        <span class="detail-exercise-name">🏃 ${group.name}</span>
+        <span class="detail-exercise-count">${group.entries.length} session${group.entries.length > 1 ? 's' : ''}</span>
       `;
-      setsContainer.appendChild(setItem);
-    });
+      
+      const setsContainer = document.createElement('div');
+      setsContainer.className = 'detail-exercise-sets';
+      
+      group.entries.forEach((entry, index) => {
+        const setItem = document.createElement('div');
+        setItem.className = 'detail-set-item';
+        setItem.innerHTML = `
+          <span class="detail-set-number">Session ${index + 1}</span>
+          <span class="detail-set-details">${entry.duration} min</span>
+        `;
+        setsContainer.appendChild(setItem);
+      });
+      
+      exerciseCard.appendChild(exerciseHeader);
+      exerciseCard.appendChild(setsContainer);
+    } else {
+      exerciseHeader.innerHTML = `
+        <span class="detail-exercise-name">🏋️ ${group.name}</span>
+        <span class="detail-exercise-count">${group.entries.length} set${group.entries.length > 1 ? 's' : ''}</span>
+      `;
+      
+      const setsContainer = document.createElement('div');
+      setsContainer.className = 'detail-exercise-sets';
+      
+      group.entries.forEach((entry, index) => {
+        const setItem = document.createElement('div');
+        setItem.className = 'detail-set-item';
+        setItem.innerHTML = `
+          <span class="detail-set-number">Set ${index + 1}</span>
+          <span class="detail-set-details">${entry.weight} kg × ${entry.reps} reps</span>
+        `;
+        setsContainer.appendChild(setItem);
+      });
+      
+      exerciseCard.appendChild(exerciseHeader);
+      exerciseCard.appendChild(setsContainer);
+    }
     
-    exerciseCard.appendChild(exerciseHeader);
-    exerciseCard.appendChild(setsContainer);
     exercisesContainer.appendChild(exerciseCard);
   });
   
