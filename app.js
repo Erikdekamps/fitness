@@ -271,6 +271,369 @@ const DEFAULT_CARDIO = [
   'Walking'
 ];
 
+// ===== DEFAULT WORKOUT PLAN TEMPLATES =====
+const DEFAULT_WORKOUT_PLANS = [
+  {
+    name: 'Upper/Lower 4 Day',
+    description: 'Classic 4-day upper/lower split for balanced muscle development',
+    workouts: [
+      {
+        name: 'Upper Body A',
+        exercises: [
+          { name: 'Bench Press', sets: 4, reps: 8, weight: 0 },
+          { name: 'Lat Pulldown', sets: 4, reps: 10, weight: 0 },
+          { name: 'Shoulder Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Seated Cable Row', sets: 3, reps: 10, weight: 0 },
+          { name: 'Bicep Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Tricep Pushdown', sets: 3, reps: 12, weight: 0 }
+        ]
+      },
+      {
+        name: 'Lower Body A',
+        exercises: [
+          { name: 'Squat', sets: 4, reps: 8, weight: 0 },
+          { name: 'Romanian Deadlift', sets: 3, reps: 10, weight: 0 },
+          { name: 'Leg Press', sets: 3, reps: 12, weight: 0 },
+          { name: 'Leg Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Calf Raise', sets: 4, reps: 15, weight: 0 },
+          { name: 'Plank', sets: 3, reps: 60, weight: 0 }
+        ]
+      },
+      {
+        name: 'Upper Body B',
+        exercises: [
+          { name: 'Incline Bench Press', sets: 4, reps: 8, weight: 0 },
+          { name: 'Pull-ups', sets: 4, reps: 8, weight: 0 },
+          { name: 'Overhead Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Bent Over Row', sets: 3, reps: 10, weight: 0 },
+          { name: 'Hammer Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Overhead Tricep Extension', sets: 3, reps: 12, weight: 0 }
+        ]
+      },
+      {
+        name: 'Lower Body B',
+        exercises: [
+          { name: 'Deadlift', sets: 4, reps: 6, weight: 0 },
+          { name: 'Front Squat', sets: 3, reps: 10, weight: 0 },
+          { name: 'Lunges', sets: 3, reps: 12, weight: 0 },
+          { name: 'Leg Extension', sets: 3, reps: 12, weight: 0 },
+          { name: 'Seated Calf Raise', sets: 4, reps: 15, weight: 0 },
+          { name: 'Russian Twist', sets: 3, reps: 20, weight: 0 }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Push/Pull/Legs',
+    description: '6-day PPL split for maximum volume',
+    workouts: [
+      {
+        name: 'Push Day',
+        exercises: [
+          { name: 'Bench Press', sets: 4, reps: 8, weight: 0 },
+          { name: 'Incline Bench Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Shoulder Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Lateral Raise', sets: 3, reps: 12, weight: 0 },
+          { name: 'Tricep Pushdown', sets: 3, reps: 12, weight: 0 },
+          { name: 'Overhead Tricep Extension', sets: 3, reps: 12, weight: 0 }
+        ]
+      },
+      {
+        name: 'Pull Day',
+        exercises: [
+          { name: 'Deadlift', sets: 4, reps: 6, weight: 0 },
+          { name: 'Lat Pulldown', sets: 3, reps: 10, weight: 0 },
+          { name: 'Seated Cable Row', sets: 3, reps: 10, weight: 0 },
+          { name: 'Face Pulls', sets: 3, reps: 15, weight: 0 },
+          { name: 'Bicep Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Hammer Curl', sets: 3, reps: 12, weight: 0 }
+        ]
+      },
+      {
+        name: 'Leg Day',
+        exercises: [
+          { name: 'Squat', sets: 4, reps: 8, weight: 0 },
+          { name: 'Leg Press', sets: 3, reps: 12, weight: 0 },
+          { name: 'Romanian Deadlift', sets: 3, reps: 10, weight: 0 },
+          { name: 'Leg Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Leg Extension', sets: 3, reps: 12, weight: 0 },
+          { name: 'Calf Raise', sets: 4, reps: 15, weight: 0 }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Full Body 3 Day',
+    description: 'Efficient 3-day full body routine',
+    workouts: [
+      {
+        name: 'Full Body A',
+        exercises: [
+          { name: 'Squat', sets: 4, reps: 8, weight: 0 },
+          { name: 'Bench Press', sets: 4, reps: 8, weight: 0 },
+          { name: 'Lat Pulldown', sets: 3, reps: 10, weight: 0 },
+          { name: 'Shoulder Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Bicep Curl', sets: 2, reps: 12, weight: 0 },
+          { name: 'Tricep Pushdown', sets: 2, reps: 12, weight: 0 }
+        ]
+      },
+      {
+        name: 'Full Body B',
+        exercises: [
+          { name: 'Deadlift', sets: 4, reps: 6, weight: 0 },
+          { name: 'Incline Bench Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Pull-ups', sets: 3, reps: 8, weight: 0 },
+          { name: 'Leg Press', sets: 3, reps: 12, weight: 0 },
+          { name: 'Lateral Raise', sets: 3, reps: 12, weight: 0 },
+          { name: 'Plank', sets: 3, reps: 60, weight: 0 }
+        ]
+      },
+      {
+        name: 'Full Body C',
+        exercises: [
+          { name: 'Front Squat', sets: 3, reps: 10, weight: 0 },
+          { name: 'Overhead Press', sets: 3, reps: 8, weight: 0 },
+          { name: 'Bent Over Row', sets: 3, reps: 10, weight: 0 },
+          { name: 'Romanian Deadlift', sets: 3, reps: 10, weight: 0 },
+          { name: 'Hammer Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Cable Crunch', sets: 3, reps: 15, weight: 0 }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Strength 5x5',
+    description: 'Classic 5x5 strength building program',
+    workouts: [
+      {
+        name: 'Workout A',
+        exercises: [
+          { name: 'Squat', sets: 5, reps: 5, weight: 0 },
+          { name: 'Bench Press', sets: 5, reps: 5, weight: 0 },
+          { name: 'Bent Over Row', sets: 5, reps: 5, weight: 0 },
+          { name: 'Plank', sets: 3, reps: 60, weight: 0 }
+        ]
+      },
+      {
+        name: 'Workout B',
+        exercises: [
+          { name: 'Squat', sets: 5, reps: 5, weight: 0 },
+          { name: 'Overhead Press', sets: 5, reps: 5, weight: 0 },
+          { name: 'Deadlift', sets: 5, reps: 5, weight: 0 },
+          { name: 'Pull-ups', sets: 3, reps: 8, weight: 0 }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Dumbbell Only',
+    description: 'Complete dumbbell-only workout program',
+    workouts: [
+      {
+        name: 'Upper Body',
+        exercises: [
+          { name: 'Dumbbell Fly', sets: 3, reps: 12, weight: 0 },
+          { name: 'Bent Over Row', sets: 3, reps: 10, weight: 0 },
+          { name: 'Arnold Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Lateral Raise', sets: 3, reps: 12, weight: 0 },
+          { name: 'Bicep Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Overhead Tricep Extension', sets: 3, reps: 12, weight: 0 }
+        ]
+      },
+      {
+        name: 'Lower Body',
+        exercises: [
+          { name: 'Bulgarian Split Squat', sets: 3, reps: 12, weight: 0 },
+          { name: 'Romanian Deadlift', sets: 3, reps: 10, weight: 0 },
+          { name: 'Lunges', sets: 3, reps: 12, weight: 0 },
+          { name: 'Calf Raise', sets: 4, reps: 15, weight: 0 },
+          { name: 'Russian Twist', sets: 3, reps: 20, weight: 0 }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Fat Loss Circuit',
+    description: 'High-intensity fat burning workout',
+    workouts: [
+      {
+        name: 'Circuit Workout',
+        exercises: [
+          { name: 'Burpees', duration: 30 },
+          { name: 'Kettlebell Swings', sets: 3, reps: 15, weight: 0 },
+          { name: 'Mountain Climbers', duration: 30 },
+          { name: 'Jump Rope', duration: 60 },
+          { name: 'Battle Ropes', duration: 30 },
+          { name: 'Box Jumps', sets: 3, reps: 12, weight: 0 },
+          { name: 'Running', duration: 300 }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Beginner Full Body',
+    description: 'Perfect starting point for beginners',
+    workouts: [
+      {
+        name: 'Day 1',
+        exercises: [
+          { name: 'Squat', sets: 3, reps: 10, weight: 0 },
+          { name: 'Bench Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Lat Pulldown', sets: 3, reps: 10, weight: 0 },
+          { name: 'Plank', sets: 3, reps: 30, weight: 0 }
+        ]
+      },
+      {
+        name: 'Day 2',
+        exercises: [
+          { name: 'Leg Press', sets: 3, reps: 12, weight: 0 },
+          { name: 'Shoulder Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Seated Cable Row', sets: 3, reps: 10, weight: 0 },
+          { name: 'Bicycle Crunches', sets: 3, reps: 15, weight: 0 }
+        ]
+      },
+      {
+        name: 'Day 3',
+        exercises: [
+          { name: 'Romanian Deadlift', sets: 3, reps: 10, weight: 0 },
+          { name: 'Incline Bench Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Pull-ups', sets: 3, reps: 5, weight: 0 },
+          { name: 'Russian Twist', sets: 3, reps: 20, weight: 0 }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Powerlifting',
+    description: 'Focus on the big three lifts',
+    workouts: [
+      {
+        name: 'Squat Day',
+        exercises: [
+          { name: 'Squat', sets: 5, reps: 3, weight: 0 },
+          { name: 'Front Squat', sets: 3, reps: 8, weight: 0 },
+          { name: 'Leg Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Leg Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Cable Crunch', sets: 3, reps: 15, weight: 0 }
+        ]
+      },
+      {
+        name: 'Bench Day',
+        exercises: [
+          { name: 'Bench Press', sets: 5, reps: 3, weight: 0 },
+          { name: 'Incline Bench Press', sets: 3, reps: 8, weight: 0 },
+          { name: 'Close Grip Bench Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Tricep Pushdown', sets: 3, reps: 12, weight: 0 },
+          { name: 'Lateral Raise', sets: 3, reps: 12, weight: 0 }
+        ]
+      },
+      {
+        name: 'Deadlift Day',
+        exercises: [
+          { name: 'Deadlift', sets: 5, reps: 3, weight: 0 },
+          { name: 'Romanian Deadlift', sets: 3, reps: 8, weight: 0 },
+          { name: 'Bent Over Row', sets: 3, reps: 10, weight: 0 },
+          { name: 'Lat Pulldown', sets: 3, reps: 12, weight: 0 },
+          { name: 'Bicep Curl', sets: 3, reps: 12, weight: 0 }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Bodybuilding Split',
+    description: '5-day bodybuilding muscle building split',
+    workouts: [
+      {
+        name: 'Chest Day',
+        exercises: [
+          { name: 'Bench Press', sets: 4, reps: 8, weight: 0 },
+          { name: 'Incline Bench Press', sets: 4, reps: 10, weight: 0 },
+          { name: 'Chest Fly Machine', sets: 3, reps: 12, weight: 0 },
+          { name: 'Cable Chest Fly', sets: 3, reps: 12, weight: 0 },
+          { name: 'Dips', sets: 3, reps: 10, weight: 0 }
+        ]
+      },
+      {
+        name: 'Back Day',
+        exercises: [
+          { name: 'Deadlift', sets: 4, reps: 6, weight: 0 },
+          { name: 'Lat Pulldown', sets: 4, reps: 10, weight: 0 },
+          { name: 'Bent Over Row', sets: 4, reps: 10, weight: 0 },
+          { name: 'Seated Cable Row', sets: 3, reps: 12, weight: 0 },
+          { name: 'Face Pulls', sets: 3, reps: 15, weight: 0 }
+        ]
+      },
+      {
+        name: 'Shoulder Day',
+        exercises: [
+          { name: 'Overhead Press', sets: 4, reps: 8, weight: 0 },
+          { name: 'Arnold Press', sets: 3, reps: 10, weight: 0 },
+          { name: 'Lateral Raise', sets: 4, reps: 12, weight: 0 },
+          { name: 'Front Raise', sets: 3, reps: 12, weight: 0 },
+          { name: 'Rear Delt Fly', sets: 3, reps: 12, weight: 0 }
+        ]
+      },
+      {
+        name: 'Arm Day',
+        exercises: [
+          { name: 'Bicep Curl', sets: 4, reps: 10, weight: 0 },
+          { name: 'Hammer Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Preacher Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Tricep Pushdown', sets: 4, reps: 10, weight: 0 },
+          { name: 'Overhead Tricep Extension', sets: 3, reps: 12, weight: 0 },
+          { name: 'Skull Crushers', sets: 3, reps: 12, weight: 0 }
+        ]
+      },
+      {
+        name: 'Leg Day',
+        exercises: [
+          { name: 'Squat', sets: 4, reps: 8, weight: 0 },
+          { name: 'Leg Press', sets: 4, reps: 12, weight: 0 },
+          { name: 'Romanian Deadlift', sets: 3, reps: 10, weight: 0 },
+          { name: 'Leg Curl', sets: 3, reps: 12, weight: 0 },
+          { name: 'Leg Extension', sets: 3, reps: 12, weight: 0 },
+          { name: 'Calf Raise', sets: 4, reps: 15, weight: 0 }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Athlete Performance',
+    description: 'Athletic performance and explosive power',
+    workouts: [
+      {
+        name: 'Power Day',
+        exercises: [
+          { name: 'Box Jumps', sets: 5, reps: 5, weight: 0 },
+          { name: 'Power Clean', sets: 5, reps: 3, weight: 0 },
+          { name: 'Jump Squat', sets: 4, reps: 6, weight: 0 },
+          { name: 'Battle Ropes', duration: 30 },
+          { name: 'Sled Push', sets: 5, reps: 10, weight: 0 }
+        ]
+      },
+      {
+        name: 'Strength Day',
+        exercises: [
+          { name: 'Squat', sets: 5, reps: 5, weight: 0 },
+          { name: 'Deadlift', sets: 5, reps: 5, weight: 0 },
+          { name: 'Bench Press', sets: 4, reps: 6, weight: 0 },
+          { name: 'Pull-ups', sets: 4, reps: 8, weight: 0 }
+        ]
+      },
+      {
+        name: 'Conditioning',
+        exercises: [
+          { name: 'Burpees', duration: 30 },
+          { name: 'Kettlebell Swings', sets: 4, reps: 15, weight: 0 },
+          { name: 'Battle Ropes', duration: 30 },
+          { name: 'Rowing Machine', duration: 300 },
+          { name: 'Mountain Climbers', duration: 30 }
+        ]
+      }
+    ]
+  }
+];
+
 
 // ===== ACTIVE WORKOUT PERSISTENCE =====
 
@@ -1123,6 +1486,11 @@ function showScreen(screen) {
   historyScreen.classList.toggle('screen-hidden', screen !== 'history');
   workoutDetailScreen.classList.toggle('screen-hidden', screen !== 'workoutDetail');
   
+  // Render example plans when showing settingsPlans screen
+  if (screen === 'settingsPlans') {
+    renderExamplePlans();
+  }
+  
   // Set default timer value when navigating to timer screen
   if (screen === 'timer') {
     const settings = getSettings();
@@ -1767,6 +2135,141 @@ function duplicatePlan(planId) {
   renderHomeWorkoutPlans();
   renderPlansList();
   renderActivePlanSelect();
+}
+
+// Render example workout plans
+function renderExamplePlans() {
+  const examplePlansContainer = document.getElementById('examplePlansList');
+  if (!examplePlansContainer) return;
+  
+  examplePlansContainer.innerHTML = '';
+  
+  DEFAULT_WORKOUT_PLANS.forEach(template => {
+    const planCard = document.createElement('div');
+    planCard.className = 'example-plan-card';
+    
+    const header = document.createElement('div');
+    header.className = 'example-plan-header';
+    
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'example-plan-name';
+    nameDiv.textContent = template.name;
+    
+    const importBtn = document.createElement('button');
+    importBtn.className = 'btn-icon-small';
+    importBtn.innerHTML = '📥';
+    importBtn.title = 'Import Plan';
+    importBtn.addEventListener('click', () => importExamplePlan(template));
+    
+    header.appendChild(nameDiv);
+    header.appendChild(importBtn);
+    
+    const description = document.createElement('div');
+    description.className = 'example-plan-description';
+    description.textContent = template.description;
+    
+    const workoutsInfo = document.createElement('div');
+    workoutsInfo.className = 'example-plan-info';
+    
+    const workoutCount = template.workouts.length;
+    const totalExercises = template.workouts.reduce((sum, w) => sum + w.exercises.length, 0);
+    
+    workoutsInfo.innerHTML = `
+      <span>📋 ${workoutCount} workout${workoutCount !== 1 ? 's' : ''}</span>
+      <span>•</span>
+      <span>🏋️ ${totalExercises} exercises</span>
+    `;
+    
+    // Show first few exercises as preview
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'example-plan-preview';
+    const firstWorkout = template.workouts[0];
+    const previewExercises = firstWorkout.exercises.slice(0, 3);
+    previewDiv.innerHTML = `<strong>${firstWorkout.name}:</strong> ${previewExercises.map(e => e.name).join(', ')}${firstWorkout.exercises.length > 3 ? '...' : ''}`;
+    
+    planCard.appendChild(header);
+    planCard.appendChild(description);
+    planCard.appendChild(workoutsInfo);
+    planCard.appendChild(previewDiv);
+    
+    examplePlansContainer.appendChild(planCard);
+  });
+}
+
+// Import an example workout plan
+function importExamplePlan(template) {
+  const plans = getPlans();
+  
+  // Check if a plan with this name already exists
+  let planName = template.name;
+  let counter = 1;
+  while (plans.some(p => p.name === planName)) {
+    planName = `${template.name} (${counter})`;
+    counter++;
+  }
+  
+  // Convert template format to app format
+  const newPlan = {
+    id: Date.now(),
+    name: planName,
+    exercises: [],
+    createdAt: new Date().toISOString()
+  };
+  
+  // Convert each workout's exercises
+  template.workouts.forEach((workout, workoutIndex) => {
+    workout.exercises.forEach((exercise, exerciseIndex) => {
+      // Check if exercise has duration (cardio) or sets/reps (strength)
+      if (exercise.duration) {
+        // Cardio exercise
+        newPlan.exercises.push({
+          type: 'cardio',
+          exercise: exercise.name,
+          duration: exercise.duration / 60, // Convert seconds to minutes
+          order: workoutIndex * 1000 + exerciseIndex
+        });
+      } else {
+        // Strength exercise - create sets array
+        const sets = [];
+        for (let i = 0; i < (exercise.sets || 3); i++) {
+          sets.push({
+            reps: exercise.reps || 10,
+            weight: exercise.weight || 0
+          });
+        }
+        
+        newPlan.exercises.push({
+          type: 'strength',
+          machine: exercise.name,
+          sets: sets,
+          order: workoutIndex * 1000 + exerciseIndex
+        });
+      }
+    });
+  });
+  
+  plans.push(newPlan);
+  savePlans(plans);
+  renderHomeWorkoutPlans();
+  renderPlansList();
+  renderActivePlanSelect();
+  
+  // Highlight the newly imported plan and scroll to it
+  setTimeout(() => {
+    const plansList = document.getElementById('plansList');
+    if (plansList && plansList.lastElementChild) {
+      const newPlanElement = plansList.lastElementChild;
+      // Add highlight animation
+      newPlanElement.style.backgroundColor = 'var(--primary-light)';
+      newPlanElement.style.transition = 'background-color 1s ease';
+      newPlanElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      
+      // Remove highlight after animation
+      setTimeout(() => {
+        newPlanElement.style.backgroundColor = '';
+      }, 1500);
+    }
+  }, 100);
 }
 
 // Start a workout plan from home screen
@@ -2809,13 +3312,18 @@ function renderPlanExercises() {
         const machineSelect = document.createElement('select');
         machineSelect.innerHTML = '<option value="">Select machine</option>';
         
-        // Sort machines alphabetically
-        const sortedMachines = [...machines].sort((a, b) => a.localeCompare(b));
+        // Sort machines alphabetically by name
+        const sortedMachines = [...machines].sort((a, b) => {
+          const nameA = typeof a === 'string' ? a : a.name;
+          const nameB = typeof b === 'string' ? b : b.name;
+          return nameA.localeCompare(nameB);
+        });
         sortedMachines.forEach(m => {
+          const machineName = typeof m === 'string' ? m : m.name;
           const opt = document.createElement('option');
-          opt.value = m;
-          opt.textContent = m;
-          if (m === exercise.machine) opt.selected = true;
+          opt.value = machineName;
+          opt.textContent = machineName;
+          if (machineName === exercise.machine) opt.selected = true;
           machineSelect.appendChild(opt);
         });
         machineSelect.addEventListener('change', (e) => {

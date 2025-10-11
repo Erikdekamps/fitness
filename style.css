@@ -1771,6 +1771,88 @@ select:focus {
   border-left: 2px solid var(--border);
 }
 
+/* Example Plan Cards */
+.example-plan-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.example-plan-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.example-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.example-plan-name {
+  font-weight: 600;
+  font-size: var(--font-base);
+  color: var(--text-primary);
+}
+
+.example-plan-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.5;
+}
+
+.example-plan-info {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.example-plan-preview {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--primary);
+  margin-top: var(--spacing-sm);
+  line-height: 1.4;
+}
+
+.example-plan-preview strong {
+  color: var(--text-primary);
+}
+
+.btn-icon-small {
+  background: var(--primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon-small:hover {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+.btn-icon-small:active {
+  transform: scale(0.95);
+}
+
 /* Exercise Group Headers */
 .exercise-group-header {
   display: flex;
