@@ -62,33 +62,67 @@
       <h1>💪 Fitness Tracker</h1>
     </div>
     
+    <!-- Workout Type Selector -->
+    <div class="workout-type-selector">
+      <button type="button" class="workout-type-btn active" data-type="strength">
+        <span class="type-icon">🏋️</span>
+        <span>Strength</span>
+      </button>
+      <button type="button" class="workout-type-btn" data-type="cardio">
+        <span class="type-icon">🏃</span>
+        <span>Cardio</span>
+      </button>
+    </div>
+    
     <form id="entryForm">
-      <div class="form-group">
-        <label for="machine">Machine</label>
-        <select id="machine" required>
-          <option value="">Select machine</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="weight">Weight (kg)</label>
-        <div class="spinner-input">
-          <button type="button" class="spinner-btn" data-action="decrease" data-target="weight">−</button>
-          <input type="text" pattern="\d*\.?\d*" id="weight" min="0" max="500" step="2.5" value="20" required>
-          <button type="button" class="spinner-btn" data-action="increase" data-target="weight">+</button>
+      <!-- Strength Exercise Fields -->
+      <div id="strengthFields">
+        <div class="form-group">
+          <label for="machine">Machine</label>
+          <select id="machine" required>
+            <option value="">Select machine</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="weight">Weight (kg)</label>
+          <div class="spinner-input">
+            <button type="button" class="spinner-btn" data-action="decrease" data-target="weight">−</button>
+            <input type="text" pattern="\d*\.?\d*" id="weight" min="0" max="500" step="2.5" value="20" required>
+            <button type="button" class="spinner-btn" data-action="increase" data-target="weight">+</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="reps">Reps</label>
+          <div class="spinner-input">
+            <button type="button" class="spinner-btn" data-action="decrease" data-target="reps">−</button>
+            <input type="text" pattern="\d*" id="reps" min="1" max="100" step="1" value="10" required>
+            <button type="button" class="spinner-btn" data-action="increase" data-target="reps">+</button>
+          </div>
         </div>
       </div>
       
-      <div class="form-group">
-        <label for="reps">Reps</label>
-        <div class="spinner-input">
-          <button type="button" class="spinner-btn" data-action="decrease" data-target="reps">−</button>
-          <input type="text" pattern="\d*" id="reps" min="1" max="100" step="1" value="10" required>
-          <button type="button" class="spinner-btn" data-action="increase" data-target="reps">+</button>
+      <!-- Cardio Exercise Fields -->
+      <div id="cardioFields" style="display: none;">
+        <div class="form-group">
+          <label for="cardioExercise">Cardio Exercise</label>
+          <select id="cardioExercise">
+            <option value="">Select cardio exercise</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="cardioDuration">Duration (minutes)</label>
+          <div class="spinner-input">
+            <button type="button" class="spinner-btn" data-action="decrease" data-target="cardioDuration">−</button>
+            <input type="text" pattern="\d*\.?\d*" id="cardioDuration" min="1" max="180" step="1" value="10">
+            <button type="button" class="spinner-btn" data-action="increase" data-target="cardioDuration">+</button>
+          </div>
         </div>
       </div>
       
-    <button type="submit" class="btn-primary">Add Set</button>
+    <button type="submit" class="btn-primary" id="submitBtn">Add Set</button>
   </form>
   
   <!-- Today's Workout Section -->
@@ -106,13 +140,20 @@
       <div style="width: 2.5rem;"></div>
     </div>
     
-    <!-- Total Stats Summary -->
-    <section id="historyStatsSummary" class="history-stats-section">
-      <!-- Will be populated dynamically -->
-    </section>
+    <!-- View Toggle -->
+    <div class="history-view-toggle">
+      <button type="button" class="view-toggle-btn active" data-view="calendar">
+        <span class="view-icon">📅</span>
+        <span>Calendar</span>
+      </button>
+      <button type="button" class="view-toggle-btn" data-view="list">
+        <span class="view-icon">📋</span>
+        <span>List</span>
+      </button>
+    </div>
     
     <!-- Calendar View -->
-    <section id="historyCalendarSection" class="history-section">
+    <section id="historyCalendarView" class="history-view-section">
       <div class="calendar-header">
         <button type="button" id="calendarPrevMonth" class="calendar-nav-btn">←</button>
         <h2 id="calendarMonthYear">📅 Calendar</h2>
@@ -120,6 +161,11 @@
       </div>
       <div id="historyCalendar" class="calendar-grid"></div>
       <div id="selectedDayDetails" class="selected-day-details"></div>
+    </section>
+    
+    <!-- List View -->
+    <section id="historyListView" class="history-view-section" style="display: none;">
+      <div id="historyWorkoutsList"></div>
     </section>
   </div>
   
@@ -193,83 +239,110 @@
   <!-- Profile Screen -->
   <div id="profileScreen" class="screen-hidden">
     <div class="header">
-      <h1>👤 Profile</h1>
+      <h1>� Stats</h1>
     </div>
     
     <div class="machine-container">
-      <!-- Personal Stats Section -->
-      <div class="profile-stats-section">
-        <h2>📊 Your Statistics</h2>
-        
-        <!-- Body Weight Tracker -->
-        <div class="stat-card weight-tracker-card">
-          <div class="stat-card-header">
-            <h3>⚖️ Body Weight</h3>
-            <button type="button" id="addWeightBtn" class="btn-icon" title="Add weight entry">+</button>
+      <!-- Body Weight Section - Collapsible -->
+      <div class="stats-collapsible-section">
+        <button type="button" class="stats-section-header">
+          <div class="stats-section-title">
+            <span class="stats-section-icon">⚖️</span>
+            <span>Body Weight</span>
           </div>
-          <div id="currentWeightDisplay" class="current-weight">
-            <span class="weight-value">--</span>
-            <span class="weight-unit">kg</span>
-          </div>
-          <div id="weightChangeDisplay" class="weight-change"></div>
-          <canvas id="weightChart" class="stat-chart"></canvas>
-        </div>
-        
-        <!-- Workout Statistics Grid -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">🏋️</div>
-            <div class="stat-value" id="statTotalWorkouts">0</div>
-            <div class="stat-label">Total Workouts</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon">⏱️</div>
-            <div class="stat-value" id="statTotalTime">0h</div>
-            <div class="stat-label">Total Time</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon">📈</div>
-            <div class="stat-value" id="statAvgTime">0m</div>
-            <div class="stat-label">Avg Duration</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon">🔥</div>
-            <div class="stat-value" id="statStreak">0</div>
-            <div class="stat-label">Day Streak</div>
+          <span class="stats-section-toggle">▼</span>
+        </button>
+        <div class="stats-section-content">
+          <div class="stat-card weight-tracker-card">
+            <div class="stat-card-header">
+              <button type="button" id="addWeightBtn" class="btn-icon" title="Add weight entry">+</button>
+            </div>
+            <div id="currentWeightDisplay" class="current-weight">
+              <span class="weight-value">--</span>
+              <span class="weight-unit">kg</span>
+            </div>
+            <div id="weightChangeDisplay" class="weight-change"></div>
+            <canvas id="weightChart" class="stat-chart"></canvas>
           </div>
         </div>
-        
-        <!-- Period Statistics -->
-        <div class="period-stats">
-          <div class="period-tabs">
-            <button type="button" class="period-tab active" data-period="week">Week</button>
-            <button type="button" class="period-tab" data-period="month">Month</button>
-            <button type="button" class="period-tab" data-period="year">Year</button>
+      </div>
+      
+      <!-- Workout Stats Section - Collapsible -->
+      <div class="stats-collapsible-section">
+        <button type="button" class="stats-section-header">
+          <div class="stats-section-title">
+            <span class="stats-section-icon">🏋️</span>
+            <span>Workout Statistics</span>
           </div>
-          
-          <div class="period-content">
-            <div class="period-stat-row">
-              <span class="period-stat-label">Workouts:</span>
-              <span class="period-stat-value" id="periodWorkouts">0</span>
+          <span class="stats-section-toggle">▼</span>
+        </button>
+        <div class="stats-section-content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">🏋️</div>
+              <div class="stat-value" id="statTotalWorkouts">0</div>
+              <div class="stat-label">Total Workouts</div>
             </div>
-            <div class="period-stat-row">
-              <span class="period-stat-label">Total Time:</span>
-              <span class="period-stat-value" id="periodTime">0h 0m</span>
+            
+            <div class="stat-card">
+              <div class="stat-icon">⏱️</div>
+              <div class="stat-value" id="statTotalTime">0h</div>
+              <div class="stat-label">Total Time</div>
             </div>
-            <div class="period-stat-row">
-              <span class="period-stat-label">Avg per Workout:</span>
-              <span class="period-stat-value" id="periodAvgTime">0m</span>
+            
+            <div class="stat-card">
+              <div class="stat-icon">📈</div>
+              <div class="stat-value" id="statAvgTime">0m</div>
+              <div class="stat-label">Avg Duration</div>
             </div>
-            <div class="period-stat-row">
-              <span class="period-stat-label">Weight Change:</span>
-              <span class="period-stat-value" id="periodWeightChange">--</span>
+            
+            <div class="stat-card">
+              <div class="stat-icon">🔥</div>
+              <div class="stat-value" id="statStreak">0</div>
+              <div class="stat-label">Day Streak</div>
             </div>
           </div>
-          
-          <canvas id="periodChart" class="stat-chart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Period Statistics Section - Collapsible -->
+      <div class="stats-collapsible-section">
+        <button type="button" class="stats-section-header">
+          <div class="stats-section-title">
+            <span class="stats-section-icon">📈</span>
+            <span>Period Analysis</span>
+          </div>
+          <span class="stats-section-toggle">▼</span>
+        </button>
+        <div class="stats-section-content">
+          <div class="period-stats">
+            <div class="period-tabs">
+              <button type="button" class="period-tab active" data-period="week">Week</button>
+              <button type="button" class="period-tab" data-period="month">Month</button>
+              <button type="button" class="period-tab" data-period="year">Year</button>
+            </div>
+            
+            <div class="period-content">
+              <div class="period-stat-row">
+                <span class="period-stat-label">Workouts:</span>
+                <span class="period-stat-value" id="periodWorkouts">0</span>
+              </div>
+              <div class="period-stat-row">
+                <span class="period-stat-label">Total Time:</span>
+                <span class="period-stat-value" id="periodTime">0h 0m</span>
+              </div>
+              <div class="period-stat-row">
+                <span class="period-stat-label">Avg per Workout:</span>
+                <span class="period-stat-value" id="periodAvgTime">0m</span>
+              </div>
+              <div class="period-stat-row">
+                <span class="period-stat-label">Weight Change:</span>
+                <span class="period-stat-value" id="periodWeightChange">--</span>
+              </div>
+            </div>
+            
+            <canvas id="periodChart" class="stat-chart"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -428,6 +501,18 @@
             </div>
           </div>
         </div>
+      </div>
+      
+      <!-- Exercise Display Toggle -->
+      <div class="exercise-display-toggle">
+        <button type="button" class="display-toggle-btn active" data-display="category">
+          <span class="toggle-icon">📂</span>
+          <span>By Category</span>
+        </button>
+        <button type="button" class="display-toggle-btn" data-display="alphabetical">
+          <span class="toggle-icon">🔤</span>
+          <span>Alphabetical</span>
+        </button>
       </div>
       
       <div class="machine-list-container">
@@ -598,10 +683,10 @@
   
   <!-- Create/Edit Plan Screen -->
   <div id="editPlanScreen" class="screen-hidden">
-    <div class="header">
+    <div class="header sticky-header">
       <button type="button" id="backFromEditPlanBtn" class="btn-icon-header" title="Back">←</button>
       <h1 id="editPlanTitle">✏️ Create Plan</h1>
-      <div style="width: 2.5rem;"></div>
+      <button type="button" id="savePlanBtnTop" class="btn-icon-header save-btn" title="Save">✓</button>
     </div>
     
     <div class="machine-container">

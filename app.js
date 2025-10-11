@@ -9,6 +9,11 @@ const form = document.getElementById('entryForm');
 const machineSelect = document.getElementById('machine');
 const weightInput = document.getElementById('weight');
 const repsInput = document.getElementById('reps');
+const cardioExerciseSelect = document.getElementById('cardioExercise');
+const cardioDurationInput = document.getElementById('cardioDuration');
+const strengthFields = document.getElementById('strengthFields');
+const cardioFields = document.getElementById('cardioFields');
+const submitBtn = document.getElementById('submitBtn');
 const historyCalendar = document.getElementById('historyCalendar');
 const calendarPrevMonth = document.getElementById('calendarPrevMonth');
 const calendarNextMonth = document.getElementById('calendarNextMonth');
@@ -1091,6 +1096,88 @@ function renderMachineSelect() {
   }
 }
 
+// Render cardio select dropdown
+function renderCardioSelect() {
+  const cardioExercises = getMachines().filter(m => m.category === 'cardio');
+  const currentValue = cardioExerciseSelect.value;
+  
+  // Sort alphabetically
+  const sortedCardio = [...cardioExercises].sort((a, b) => a.name.localeCompare(b.name));
+  
+  cardioExerciseSelect.innerHTML = '<option value="">Select cardio exercise</option>';
+  sortedCardio.forEach(exercise => {
+    const option = document.createElement('option');
+    option.value = exercise.name;
+    option.textContent = exercise.name;
+    cardioExerciseSelect.appendChild(option);
+  });
+  
+  // Restore selection if it still exists
+  if (currentValue && cardioExercises.some(c => c.name === currentValue)) {
+    cardioExerciseSelect.value = currentValue;
+  }
+}
+
+// Workout type toggle state
+let currentWorkoutType = 'strength';
+
+// Handle workout type toggle
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.workout-type-btn')) {
+    const btn = e.target.closest('.workout-type-btn');
+    const type = btn.dataset.type;
+    
+    // Update button states
+    document.querySelectorAll('.workout-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Update form fields
+    currentWorkoutType = type;
+    if (type === 'strength') {
+      strengthFields.style.display = 'block';
+      cardioFields.style.display = 'none';
+      submitBtn.textContent = 'Add Set';
+      // Make strength fields required
+      machineSelect.required = true;
+      weightInput.required = true;
+      repsInput.required = true;
+      // Make cardio fields not required
+      cardioExerciseSelect.required = false;
+      cardioDurationInput.required = false;
+    } else {
+      strengthFields.style.display = 'none';
+      cardioFields.style.display = 'block';
+      submitBtn.textContent = 'Add Cardio';
+      // Make cardio fields required
+      cardioExerciseSelect.required = true;
+      cardioDurationInput.required = true;
+      // Make strength fields not required
+      machineSelect.required = false;
+      weightInput.required = false;
+      repsInput.required = false;
+    }
+  }
+});
+
+// Exercise display mode toggle state
+let currentExerciseDisplayMode = 'category';
+
+// Handle exercise display toggle
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.display-toggle-btn')) {
+    const btn = e.target.closest('.display-toggle-btn');
+    const displayMode = btn.dataset.display;
+    
+    // Update button states
+    document.querySelectorAll('.display-toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Update display mode and re-render
+    currentExerciseDisplayMode = displayMode;
+    renderMachineList(machineListDivExercises);
+  }
+});
+
 /**
  * Render machine list for management
  * Displays machines with rename and delete options
@@ -1109,7 +1196,64 @@ function renderMachineList(targetDiv = null) {
     return;
   }
   
-  // Group by muscle group, then sort by name within groups
+  // Check if we should render alphabetically (only for exercise settings screen)
+  const isExercisesScreen = container === machineListDivExercises;
+  const useAlphabetical = isExercisesScreen && currentExerciseDisplayMode === 'alphabetical';
+  
+  if (useAlphabetical) {
+    // Alphabetical display
+    const sortedMachines = [...machines].sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Group by first letter
+    const alphabetGroups = {};
+    sortedMachines.forEach(machine => {
+      const firstLetter = machine.name.charAt(0).toUpperCase();
+      if (!alphabetGroups[firstLetter]) {
+        alphabetGroups[firstLetter] = [];
+      }
+      alphabetGroups[firstLetter].push(machine);
+    });
+    
+    // Render alphabetical groups
+    Object.keys(alphabetGroups).sort().forEach(letter => {
+      const groupHeader = document.createElement('div');
+      groupHeader.className = 'exercise-group-header';
+      groupHeader.style.cursor = 'pointer';
+      groupHeader.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="group-toggle">▼</span>
+          <span class="exercise-group-name">${letter}</span>
+        </div>
+        <span class="exercise-group-count">${alphabetGroups[letter].length} exercise${alphabetGroups[letter].length !== 1 ? 's' : ''}</span>
+      `;
+      
+      const groupContainer = document.createElement('div');
+      groupContainer.className = 'exercise-group-content';
+      groupContainer.style.display = 'block';
+      
+      alphabetGroups[letter].forEach(machine => {
+        renderMachineItem(machine, groupContainer, targetDiv);
+      });
+      
+      groupHeader.addEventListener('click', () => {
+        const toggle = groupHeader.querySelector('.group-toggle');
+        if (groupContainer.style.display === 'none') {
+          groupContainer.style.display = 'block';
+          toggle.textContent = '▼';
+        } else {
+          groupContainer.style.display = 'none';
+          toggle.textContent = '▶';
+        }
+      });
+      
+      container.appendChild(groupHeader);
+      container.appendChild(groupContainer);
+    });
+    
+    return;
+  }
+  
+  // Category/muscle group display (original behavior)
   const groupedMachines = {};
   machines.forEach(machine => {
     const group = machine.muscleGroup || 'Other';
@@ -3606,7 +3750,18 @@ createPlanBtn.addEventListener('click', () => {
 // Save plan form
 editPlanForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  
+  savePlanData();
+});
+
+// Top save button
+const savePlanBtnTop = document.getElementById('savePlanBtnTop');
+if (savePlanBtnTop) {
+  savePlanBtnTop.addEventListener('click', () => {
+    savePlanData();
+  });
+}
+
+function savePlanData() {
   const name = planNameInput.value.trim();
   if (!name) {
     alert('Please enter a plan name');
@@ -3662,7 +3817,7 @@ editPlanForm.addEventListener('submit', (e) => {
   savePlan(plan);
   renderHomeWorkoutPlans();
   showScreen('settingsPlans');
-});
+}
 
 // Start plan button (deprecated - now using home screen widget)
 // startPlanBtn.addEventListener('click', startPlan);
@@ -3921,41 +4076,94 @@ function createEditForm(date, entry) {
 // Render history
 function renderHistory() {
   const history = getHistory();
-  const historyStatsSummary = document.getElementById('historyStatsSummary');
   
-  historyStatsSummary.innerHTML = '';
+  // Render based on current view
+  const activeView = document.querySelector('.view-toggle-btn.active');
+  if (activeView && activeView.dataset.view === 'list') {
+    renderHistoryList();
+  } else {
+    renderCalendar();
+  }
+}
+
+// Render history list view
+function renderHistoryList() {
+  const history = getHistory();
+  const listContainer = document.getElementById('historyWorkoutsList');
+  
+  if (!listContainer) return;
+  
+  listContainer.innerHTML = '';
   
   const days = Object.keys(history).sort().reverse();
   
-  // Calculate overall stats
-  let totalWorkouts = 0;
-  let totalSetsAllTime = 0;
-  let totalMinutesAllTime = 0;
-  let uniqueExercisesAllTime = new Set();
+  if (days.length === 0) {
+    listContainer.innerHTML = '<div class="empty-state">No workout history yet. Start logging your workouts!</div>';
+    return;
+  }
   
-  Object.keys(history).forEach(day => {
-    const entries = history[day];
-    if (entries && entries.length > 0) {
-      totalWorkouts++;
-      totalSetsAllTime += entries.length;
-      
-      const exercisesInWorkout = [...new Set(entries.map(e => e.machine || e.exercise))];
-      exercisesInWorkout.forEach(exercise => uniqueExercisesAllTime.add(exercise));
-      
-      const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
-      if (timestamps.length > 1) {
-        const earliest = new Date(Math.min(...timestamps));
-        const latest = new Date(Math.max(...timestamps));
-        totalMinutesAllTime += Math.round((latest - earliest) / 1000 / 60);
-      }
+  days.forEach(date => {
+    const entries = history[date];
+    if (!entries || entries.length === 0) return;
+    
+    // Create workout summary card (same as calendar day detail but always shown)
+    const card = document.createElement('div');
+    card.className = 'workout-summary-card';
+    card.style.cursor = 'pointer';
+    
+    // Calculate stats
+    const totalSets = entries.filter(e => e.type !== 'cardio').length;
+    const totalCardio = entries.filter(e => e.type === 'cardio').length;
+    const uniqueExercises = [...new Set(entries.map(e => e.machine || e.exercise))];
+    
+    const timestamps = entries.map(e => new Date(e.timestamp)).filter(d => !isNaN(d));
+    let timeSpentSeconds = 0;
+    if (timestamps.length > 1) {
+      const earliest = new Date(Math.min(...timestamps));
+      const latest = new Date(Math.max(...timestamps));
+      timeSpentSeconds = Math.round((latest - earliest) / 1000);
     }
+    
+    const hours = Math.floor(timeSpentSeconds / 3600);
+    const minutes = Math.floor((timeSpentSeconds % 3600) / 60);
+    const formattedTime = hours > 0 
+      ? `${hours}h ${minutes}m`
+      : `${minutes}m`;
+    
+    card.innerHTML = `
+      <div class="workout-summary-date">
+        <span class="workout-summary-date-icon">📅</span>
+        <span>${formatDate(date)}</span>
+      </div>
+      ${timeSpentSeconds > 0 ? `
+        <div class="workout-summary-duration">
+          <span class="workout-summary-duration-icon">⏱️</span>
+          <span>${formattedTime}</span>
+        </div>
+      ` : ''}
+      <div class="workout-summary-exercises">
+        <div class="workout-summary-exercises-title">
+          <span class="workout-summary-exercises-icon">🏋️</span>
+          <span>Exercises (${uniqueExercises.length})</span>
+        </div>
+        <div class="workout-summary-badges">
+          ${uniqueExercises.map(ex => `<span class="exercise-badge">${ex}</span>`).join('')}
+        </div>
+      </div>
+      <div class="workout-summary-stats">
+        ${totalSets > 0 ? `<span class="workout-summary-stat">💪 ${totalSets} sets</span>` : ''}
+        ${totalCardio > 0 ? `<span class="workout-summary-stat">🏃 ${totalCardio} cardio</span>` : ''}
+      </div>
+      <div class="view-details-indicator">›</div>
+    `;
+    
+    // Click to view details
+    card.addEventListener('click', () => {
+      showWorkoutDetail(date, entries);
+    });
+    
+    listContainer.appendChild(card);
   });
-  
-  // Render total stats
-  renderTotalStats(totalWorkouts, totalSetsAllTime, uniqueExercisesAllTime.size, totalMinutesAllTime);
-  
-  // Render calendar
-  renderCalendar();
 }
 
 function renderCalendar() {
@@ -4339,15 +4547,27 @@ machineSelect.addEventListener('change', () => {
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   
-  if (!machineSelect.value || !weightInput.value || !repsInput.value) {
-    return;
+  if (currentWorkoutType === 'strength') {
+    if (!machineSelect.value || !weightInput.value || !repsInput.value) {
+      return;
+    }
+    
+    addEntry({
+      machine: machineSelect.value,
+      weight: parseFloat(weightInput.value),
+      reps: parseInt(repsInput.value)
+    });
+  } else {
+    if (!cardioExerciseSelect.value || !cardioDurationInput.value) {
+      return;
+    }
+    
+    addEntry({
+      type: 'cardio',
+      exercise: cardioExerciseSelect.value,
+      duration: parseFloat(cardioDurationInput.value)
+    });
   }
-  
-  addEntry({
-    machine: machineSelect.value,
-    weight: parseFloat(weightInput.value),
-    reps: parseInt(repsInput.value)
-  });
   
   renderHistory();
  
@@ -4686,6 +4906,41 @@ document.addEventListener('click', (e) => {
     document.querySelectorAll('.plan-menu-btn.active').forEach(btn => {
       btn.classList.remove('active');
     });
+  }
+});
+
+// History view toggle
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.view-toggle-btn')) {
+    const btn = e.target.closest('.view-toggle-btn');
+    const view = btn.dataset.view;
+    
+    // Update button states
+    document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Update view visibility
+    const calendarView = document.getElementById('historyCalendarView');
+    const listView = document.getElementById('historyListView');
+    
+    if (view === 'calendar') {
+      calendarView.style.display = 'block';
+      listView.style.display = 'none';
+      renderCalendar();
+    } else {
+      calendarView.style.display = 'none';
+      listView.style.display = 'block';
+      renderHistoryList();
+    }
+  }
+});
+
+// Stats section collapsible toggle
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.stats-section-header')) {
+    const header = e.target.closest('.stats-section-header');
+    const section = header.parentElement;
+    section.classList.toggle('collapsed');
   }
 });
 
@@ -5332,6 +5587,7 @@ console.log('Debug mode: Type addSampleStatsData() in console to add sample data
 window.addEventListener('DOMContentLoaded', () => {
   applySettings();
   renderMachineSelect();
+  renderCardioSelect();
   renderHistory();
   renderTodaySection(); // Show today's workout on load
   renderActivePlanSelect();
