@@ -1491,6 +1491,12 @@ function showScreen(screen) {
     renderExamplePlans();
   }
   
+  // Update profile statistics when showing profile screen
+  if (screen === 'profile') {
+    updateProfileStats();
+    renderWeightChart();
+  }
+  
   // Set default timer value when navigating to timer screen
   if (screen === 'timer') {
     const settings = getSettings();
@@ -4717,6 +4723,580 @@ document.querySelectorAll('.back-to-profile').forEach(btn => {
 // ===== INITIALIZATION =====
 
 // Initialize app
+// ==========================================
+// Weight Tracking & Statistics
+// ==========================================
+
+// Get weight data from localStorage
+function getWeightData() {
+  return JSON.parse(localStorage.getItem('fitnessWeightData') || '[]');
+}
+
+// Save weight data to localStorage
+function saveWeightData(data) {
+  localStorage.setItem('fitnessWeightData', JSON.stringify(data));
+}
+
+// Add weight entry
+function addWeightEntry(weight, date) {
+  const weightData = getWeightData();
+  const entry = {
+    weight: parseFloat(weight),
+    date: date,
+    timestamp: new Date(date).getTime()
+  };
+  
+  // Remove any existing entry for this date
+  const filtered = weightData.filter(w => w.date !== date);
+  filtered.push(entry);
+  
+  // Sort by date
+  filtered.sort((a, b) => a.timestamp - b.timestamp);
+  
+  saveWeightData(filtered);
+  updateProfileStats();
+  renderWeightChart();
+}
+
+// Calculate workout statistics
+function calculateWorkoutStats() {
+  const history = getHistory();
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const weekMs = 7 * dayMs;
+  const monthMs = 30 * dayMs;
+  const yearMs = 365 * dayMs;
+  
+  let totalWorkouts = 0;
+  let totalTimeMs = 0;
+  let workoutDates = new Set();
+  let weekWorkouts = 0;
+  let weekTimeMs = 0;
+  let monthWorkouts = 0;
+  let monthTimeMs = 0;
+  let yearWorkouts = 0;
+  let yearTimeMs = 0;
+  
+  Object.keys(history).forEach(dateKey => {
+    const entries = history[dateKey];
+    if (!entries || entries.length === 0) return;
+    
+    // Count unique workout sessions by checking timestamps
+    const sessions = {};
+    entries.forEach(entry => {
+      const sessionId = entry.workoutId || entry.timestamp || 'default';
+      if (!sessions[sessionId]) {
+        sessions[sessionId] = {
+          duration: 0,
+          timestamp: entry.timestamp
+        };
+      }
+      // Add duration if it exists
+      if (entry.duration) {
+        sessions[sessionId].duration = Math.max(sessions[sessionId].duration, entry.duration);
+      }
+    });
+    
+    Object.values(sessions).forEach(session => {
+      const sessionTime = session.timestamp ? new Date(session.timestamp).getTime() : 0;
+      const age = now - sessionTime;
+      
+      totalWorkouts++;
+      totalTimeMs += session.duration || 0;
+      workoutDates.add(dateKey);
+      
+      if (age <= weekMs) {
+        weekWorkouts++;
+        weekTimeMs += session.duration || 0;
+      }
+      if (age <= monthMs) {
+        monthWorkouts++;
+        monthTimeMs += session.duration || 0;
+      }
+      if (age <= yearMs) {
+        yearWorkouts++;
+        yearTimeMs += session.duration || 0;
+      }
+    });
+  });
+  
+  // Calculate streak
+  let streak = 0;
+  let checkDate = new Date();
+  checkDate.setHours(0, 0, 0, 0);
+  
+  while (true) {
+    const dateKey = checkDate.toISOString().split('T')[0];
+    if (workoutDates.has(dateKey)) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else if (streak === 0) {
+      // Allow today to not have a workout yet
+      checkDate.setDate(checkDate.getDate() - 1);
+      const yesterdayKey = checkDate.toISOString().split('T')[0];
+      if (workoutDates.has(yesterdayKey)) {
+        streak = 1;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+  
+  return {
+    total: {
+      workouts: totalWorkouts,
+      timeMs: totalTimeMs,
+      avgTimeMs: totalWorkouts > 0 ? totalTimeMs / totalWorkouts : 0
+    },
+    week: {
+      workouts: weekWorkouts,
+      timeMs: weekTimeMs,
+      avgTimeMs: weekWorkouts > 0 ? weekTimeMs / weekWorkouts : 0
+    },
+    month: {
+      workouts: monthWorkouts,
+      timeMs: monthTimeMs,
+      avgTimeMs: monthWorkouts > 0 ? monthTimeMs / monthWorkouts : 0
+    },
+    year: {
+      workouts: yearWorkouts,
+      timeMs: yearTimeMs,
+      avgTimeMs: yearWorkouts > 0 ? yearTimeMs / yearWorkouts : 0
+    },
+    streak: streak
+  };
+}
+
+// Format time duration
+function formatDuration(ms) {
+  const hours = Math.floor(ms / (1000 * 60 * 60));
+  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes}m`;
+}
+
+// Update profile statistics
+function updateProfileStats() {
+  try {
+    const stats = calculateWorkoutStats();
+    const weightData = getWeightData();
+    
+    console.log('Profile Stats Debug:', {
+      stats,
+      weightData,
+      totalWorkouts: stats.total.workouts,
+      hasWeightData: weightData.length > 0
+    });
+    
+    // Update total stats
+    const totalWorkoutsEl = document.getElementById('statTotalWorkouts');
+    const totalTimeEl = document.getElementById('statTotalTime');
+    const avgTimeEl = document.getElementById('statAvgTime');
+    const streakEl = document.getElementById('statStreak');
+    
+    if (totalWorkoutsEl) totalWorkoutsEl.textContent = stats.total.workouts;
+    if (totalTimeEl) totalTimeEl.textContent = formatDuration(stats.total.timeMs);
+    if (avgTimeEl) avgTimeEl.textContent = formatDuration(stats.total.avgTimeMs);
+    if (streakEl) streakEl.textContent = stats.streak;
+    
+    // Update current weight
+    const currentWeightDisplay = document.getElementById('currentWeightDisplay');
+    const weightChangeDisplay = document.getElementById('weightChangeDisplay');
+    
+    if (!currentWeightDisplay || !weightChangeDisplay) {
+      console.error('Weight display elements not found');
+      return;
+    }
+    
+    if (weightData.length > 0) {
+      const latest = weightData[weightData.length - 1];
+      const weightValueEl = currentWeightDisplay.querySelector('.weight-value');
+      if (weightValueEl) {
+        weightValueEl.textContent = latest.weight.toFixed(1);
+      }
+      
+      // Calculate weight change from first entry
+      if (weightData.length > 1) {
+        const first = weightData[0];
+        const change = latest.weight - first.weight;
+        const changeText = change > 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
+        const changeClass = change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral';
+        weightChangeDisplay.textContent = `${changeText} kg from start`;
+        weightChangeDisplay.className = `weight-change ${changeClass}`;
+      } else {
+        weightChangeDisplay.textContent = '';
+        weightChangeDisplay.className = 'weight-change';
+      }
+    } else {
+      const weightValueEl = currentWeightDisplay.querySelector('.weight-value');
+      if (weightValueEl) {
+        weightValueEl.textContent = '--';
+      }
+      weightChangeDisplay.textContent = '';
+    }
+    
+    // Update period stats (default to week)
+    updatePeriodStats('week');
+  } catch (error) {
+    console.error('Error updating profile stats:', error);
+  }
+}
+
+// Update period-specific statistics
+function updatePeriodStats(period) {
+  try {
+    const stats = calculateWorkoutStats();
+    const weightData = getWeightData();
+    const periodData = stats[period];
+    
+    console.log('Period Stats Debug:', { period, periodData, weightDataLength: weightData.length });
+    
+    const periodWorkoutsEl = document.getElementById('periodWorkouts');
+    const periodTimeEl = document.getElementById('periodTime');
+    const periodAvgTimeEl = document.getElementById('periodAvgTime');
+    const periodWeightChangeEl = document.getElementById('periodWeightChange');
+    
+    if (periodWorkoutsEl) periodWorkoutsEl.textContent = periodData.workouts;
+    if (periodTimeEl) periodTimeEl.textContent = formatDuration(periodData.timeMs);
+    if (periodAvgTimeEl) periodAvgTimeEl.textContent = formatDuration(periodData.avgTimeMs);
+    
+    // Calculate weight change for period
+    const now = Date.now();
+    const periodMs = period === 'week' ? 7 * 24 * 60 * 60 * 1000 :
+                     period === 'month' ? 30 * 24 * 60 * 60 * 1000 :
+                     365 * 24 * 60 * 60 * 1000;
+    
+    const periodStart = now - periodMs;
+    const periodWeights = weightData.filter(w => w.timestamp >= periodStart);
+    
+    if (periodWeightChangeEl) {
+      if (periodWeights.length >= 2) {
+        const change = periodWeights[periodWeights.length - 1].weight - periodWeights[0].weight;
+        const changeText = change > 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
+        periodWeightChangeEl.textContent = `${changeText} kg`;
+      } else if (weightData.length > 0 && periodWeights.length === 1) {
+        periodWeightChangeEl.textContent = 'No change';
+      } else {
+        periodWeightChangeEl.textContent = '--';
+      }
+    }
+    
+    renderPeriodChart(period);
+  } catch (error) {
+    console.error('Error updating period stats:', error);
+  }
+}
+
+// Render weight chart
+function renderWeightChart() {
+  try {
+    const canvas = document.getElementById('weightChart');
+    if (!canvas) {
+      console.warn('Weight chart canvas not found');
+      return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    const weightData = getWeightData();
+    
+    console.log('Rendering weight chart with data:', weightData);
+    
+    // Set canvas size
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    
+    const width = rect.width;
+    const height = rect.height;
+  
+  // Clear canvas
+  ctx.clearRect(0, 0, width, height);
+  
+  if (weightData.length === 0) {
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+    ctx.font = '14px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('No weight data yet', width / 2, height / 2);
+    return;
+  }
+  
+  // Get last 30 entries or all if less
+  const dataToShow = weightData.slice(-30);
+  
+  // Find min/max for scaling
+  const weights = dataToShow.map(d => d.weight);
+  const minWeight = Math.min(...weights);
+  const maxWeight = Math.max(...weights);
+  const range = maxWeight - minWeight || 1;
+  
+  // Add padding to range
+  const padding = range * 0.1;
+  const yMin = minWeight - padding;
+  const yMax = maxWeight + padding;
+  const yRange = yMax - yMin;
+  
+  // Chart area
+  const chartPadding = { top: 20, right: 20, bottom: 30, left: 40 };
+  const chartWidth = width - chartPadding.left - chartPadding.right;
+  const chartHeight = height - chartPadding.top - chartPadding.bottom;
+  
+  // Draw grid lines
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  ctx.lineWidth = 1;
+  
+  for (let i = 0; i <= 4; i++) {
+    const y = chartPadding.top + (chartHeight / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(chartPadding.left, y);
+    ctx.lineTo(width - chartPadding.right, y);
+    ctx.stroke();
+    
+    // Draw y-axis labels
+    const value = yMax - (yRange / 4) * i;
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+    ctx.font = '11px system-ui';
+    ctx.textAlign = 'right';
+    ctx.fillText(value.toFixed(1), chartPadding.left - 5, y + 4);
+  }
+  
+  // Draw line
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  
+  dataToShow.forEach((point, i) => {
+    const x = chartPadding.left + (chartWidth / (dataToShow.length - 1 || 1)) * i;
+    const y = chartPadding.top + chartHeight - ((point.weight - yMin) / yRange) * chartHeight;
+    
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+  
+  ctx.stroke();
+  
+  // Draw points
+  ctx.fillStyle = accentColor;
+  dataToShow.forEach((point, i) => {
+    const x = chartPadding.left + (chartWidth / (dataToShow.length - 1 || 1)) * i;
+    const y = chartPadding.top + chartHeight - ((point.weight - yMin) / yRange) * chartHeight;
+    
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  } catch (error) {
+    console.error('Error rendering weight chart:', error);
+  }
+}
+
+// Render period chart (workout frequency)
+function renderPeriodChart(period) {
+  try {
+    const canvas = document.getElementById('periodChart');
+    if (!canvas) {
+      console.warn('Period chart canvas not found');
+      return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+  const history = getHistory();
+  
+  // Set canvas size
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  
+  const width = rect.width;
+  const height = rect.height;
+  
+  // Clear canvas
+  ctx.clearRect(0, 0, width, height);
+  
+  // Get data for period
+  const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
+  const barData = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateKey = date.toISOString().split('T')[0];
+    const dayEntries = history[dateKey] || [];
+    
+    // Count unique workouts
+    const workoutIds = new Set();
+    dayEntries.forEach(entry => {
+      workoutIds.add(entry.workoutId || entry.timestamp || 'default');
+    });
+    
+    barData.push({
+      date: dateKey,
+      workouts: workoutIds.size
+    });
+  }
+  
+  if (barData.every(d => d.workouts === 0)) {
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+    ctx.font = '14px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('No workouts in this period', width / 2, height / 2);
+    return;
+  }
+  
+  const maxWorkouts = Math.max(...barData.map(d => d.workouts), 1);
+  
+  // Chart area
+  const chartPadding = { top: 20, right: 10, bottom: 30, left: 30 };
+  const chartWidth = width - chartPadding.left - chartPadding.right;
+  const chartHeight = height - chartPadding.top - chartPadding.bottom;
+  
+  const barWidth = chartWidth / barData.length;
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  
+  // Draw bars
+  barData.forEach((point, i) => {
+    const x = chartPadding.left + barWidth * i;
+    const barHeight = (point.workouts / maxWorkouts) * chartHeight;
+    const y = chartPadding.top + chartHeight - barHeight;
+    
+    ctx.fillStyle = point.workouts > 0 ? accentColor : getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+    ctx.fillRect(x + 1, y, barWidth - 2, barHeight);
+  });
+  
+  // Draw y-axis labels
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'right';
+  ctx.fillText('0', chartPadding.left - 5, chartPadding.top + chartHeight + 4);
+  ctx.fillText(maxWorkouts.toString(), chartPadding.left - 5, chartPadding.top + 4);
+  } catch (error) {
+    console.error('Error rendering period chart:', error);
+  }
+}
+
+// Initialize weight modal
+const weightEntryModal = document.getElementById('weightEntryModal');
+const addWeightBtn = document.getElementById('addWeightBtn');
+const closeWeightModal = document.getElementById('closeWeightModal');
+const cancelWeightBtn = document.getElementById('cancelWeightBtn');
+const saveWeightBtn = document.getElementById('saveWeightBtn');
+const bodyWeightInput = document.getElementById('weightInput');
+const weightDateInput = document.getElementById('weightDateInput');
+
+if (addWeightBtn) {
+  addWeightBtn.addEventListener('click', () => {
+    bodyWeightInput.value = '';
+    weightDateInput.value = new Date().toISOString().split('T')[0];
+    weightEntryModal.classList.add('show');
+    setTimeout(() => bodyWeightInput.focus(), 100);
+  });
+}
+
+if (closeWeightModal) {
+  closeWeightModal.addEventListener('click', () => {
+    weightEntryModal.classList.remove('show');
+  });
+}
+
+if (cancelWeightBtn) {
+  cancelWeightBtn.addEventListener('click', () => {
+    weightEntryModal.classList.remove('show');
+  });
+}
+
+if (saveWeightBtn) {
+  saveWeightBtn.addEventListener('click', () => {
+    const weight = parseFloat(bodyWeightInput.value);
+    const date = weightDateInput.value;
+    
+    if (weight > 0 && date) {
+      addWeightEntry(weight, date);
+      weightEntryModal.classList.remove('show');
+    } else {
+      alert('Please enter a valid weight and date');
+    }
+  });
+}
+
+// Close modal on background click
+if (weightEntryModal) {
+  weightEntryModal.addEventListener('click', (e) => {
+    if (e.target === weightEntryModal) {
+      weightEntryModal.classList.remove('show');
+    }
+  });
+}
+
+// Period tab switching
+document.querySelectorAll('.period-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    updatePeriodStats(tab.dataset.period);
+  });
+});
+
+// DEBUG: Add sample data function (for testing)
+window.addSampleStatsData = function() {
+  // Add sample weight data
+  const today = new Date();
+  const weightData = [];
+  for (let i = 30; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    weightData.push({
+      weight: 75 + Math.random() * 3 - 1.5, // Random weight around 75kg
+      date: date.toISOString().split('T')[0],
+      timestamp: date.getTime()
+    });
+  }
+  saveWeightData(weightData);
+  
+  // Add sample workout history
+  const history = {};
+  for (let i = 20; i >= 0; i -= 2) { // Every other day
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dateKey = date.toISOString().split('T')[0];
+    const timestamp = date.getTime();
+    
+    history[dateKey] = [
+      {
+        machine: 'Bench Press',
+        sets: [{weight: 80, reps: 10}, {weight: 85, reps: 8}],
+        timestamp: new Date(timestamp).toISOString(),
+        workoutId: `workout-${dateKey}`,
+        duration: 45 * 60 * 1000 // 45 minutes
+      },
+      {
+        machine: 'Squat',
+        sets: [{weight: 100, reps: 10}, {weight: 110, reps: 8}],
+        timestamp: new Date(timestamp + 10000).toISOString(),
+        workoutId: `workout-${dateKey}`,
+        duration: 45 * 60 * 1000
+      }
+    ];
+  }
+  
+  saveHistory(history);
+  
+  console.log('Sample data added! Refresh the profile screen.');
+  alert('Sample data added! Navigate to Profile to see the statistics.');
+};
+
+console.log('Debug mode: Type addSampleStatsData() in console to add sample data');
+
 window.addEventListener('DOMContentLoaded', () => {
   applySettings();
   renderMachineSelect();
@@ -4744,4 +5324,19 @@ window.addEventListener('DOMContentLoaded', () => {
   timerSecondsInput.value = 0;
   const defaultDurationMs = settings.defaultTimerMinutes * 60 * 1000;
   timerDisplay.textContent = formatTimerTime(defaultDurationMs);
+  
+  // Redraw charts on window resize
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      if (!profileScreen.classList.contains('screen-hidden')) {
+        renderWeightChart();
+        const activeTab = document.querySelector('.period-tab.active');
+        if (activeTab) {
+          renderPeriodChart(activeTab.dataset.period);
+        }
+      }
+    }, 250);
+  });
 });

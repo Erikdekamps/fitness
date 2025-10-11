@@ -49,45 +49,6 @@
   </div>
 
   <!-- Profile Screen -->
-  <div id="profileScreen" class="screen-hidden">
-    <div class="header">
-      <h1>👤 Profile</h1>
-    </div>
-    
-    <div class="machine-container">
-      <div class="home-grid">
-        <button type="button" class="home-card" data-nav="settingsPlans">
-          <div class="home-card-icon">📋</div>
-          <div class="home-card-title">Plans</div>
-          <div class="home-card-description">Manage routines</div>
-        </button>
-        
-        <button type="button" class="home-card" data-nav="settingsExercises">
-          <div class="home-card-icon">🏋️</div>
-          <div class="home-card-title">Exercises</div>
-          <div class="home-card-description">Weight & cardio</div>
-        </button>
-        
-        <button type="button" class="home-card" data-nav="timer">
-          <div class="home-card-icon">⏱️</div>
-          <div class="home-card-title">Timer</div>
-          <div class="home-card-description">Rest timer</div>
-        </button>
-        
-        <button type="button" class="home-card" data-nav="history">
-          <div class="home-card-icon">📊</div>
-          <div class="home-card-title">History</div>
-          <div class="home-card-description">View progress</div>
-        </button>
-        
-        <button type="button" class="home-card" data-nav="settingsMenu">
-          <div class="home-card-icon">⚙️</div>
-          <div class="home-card-title">Settings</div>
-          <div class="home-card-description">Preferences</div>
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- Main Tracker Screen -->
 
@@ -232,6 +193,83 @@
     </div>
     
     <div class="machine-container">
+      <!-- Personal Stats Section -->
+      <div class="profile-stats-section">
+        <h2>📊 Your Statistics</h2>
+        
+        <!-- Body Weight Tracker -->
+        <div class="stat-card weight-tracker-card">
+          <div class="stat-card-header">
+            <h3>⚖️ Body Weight</h3>
+            <button type="button" id="addWeightBtn" class="btn-icon" title="Add weight entry">+</button>
+          </div>
+          <div id="currentWeightDisplay" class="current-weight">
+            <span class="weight-value">--</span>
+            <span class="weight-unit">kg</span>
+          </div>
+          <div id="weightChangeDisplay" class="weight-change"></div>
+          <canvas id="weightChart" class="stat-chart"></canvas>
+        </div>
+        
+        <!-- Workout Statistics Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">🏋️</div>
+            <div class="stat-value" id="statTotalWorkouts">0</div>
+            <div class="stat-label">Total Workouts</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-value" id="statTotalTime">0h</div>
+            <div class="stat-label">Total Time</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value" id="statAvgTime">0m</div>
+            <div class="stat-label">Avg Duration</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-value" id="statStreak">0</div>
+            <div class="stat-label">Day Streak</div>
+          </div>
+        </div>
+        
+        <!-- Period Statistics -->
+        <div class="period-stats">
+          <div class="period-tabs">
+            <button type="button" class="period-tab active" data-period="week">Week</button>
+            <button type="button" class="period-tab" data-period="month">Month</button>
+            <button type="button" class="period-tab" data-period="year">Year</button>
+          </div>
+          
+          <div class="period-content">
+            <div class="period-stat-row">
+              <span class="period-stat-label">Workouts:</span>
+              <span class="period-stat-value" id="periodWorkouts">0</span>
+            </div>
+            <div class="period-stat-row">
+              <span class="period-stat-label">Total Time:</span>
+              <span class="period-stat-value" id="periodTime">0h 0m</span>
+            </div>
+            <div class="period-stat-row">
+              <span class="period-stat-label">Avg per Workout:</span>
+              <span class="period-stat-value" id="periodAvgTime">0m</span>
+            </div>
+            <div class="period-stat-row">
+              <span class="period-stat-label">Weight Change:</span>
+              <span class="period-stat-value" id="periodWeightChange">--</span>
+            </div>
+          </div>
+          
+          <canvas id="periodChart" class="stat-chart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
       <div class="home-grid">
         <button type="button" class="home-card" data-nav="history">
           <div class="home-card-icon">📊</div>
@@ -250,6 +288,30 @@
           <div class="home-card-title">Settings</div>
           <div class="home-card-description">Manage preferences</div>
         </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Weight Entry Modal -->
+  <div id="weightEntryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚖️ Add Weight Entry</h2>
+        <button type="button" class="modal-close" id="closeWeightModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="weightInput" class="form-label">Weight (kg)</label>
+          <input type="number" id="weightInput" step="0.1" min="0" placeholder="e.g., 75.5" autofocus>
+        </div>
+        <div class="form-group">
+          <label for="weightDateInput" class="form-label">Date</label>
+          <input type="date" id="weightDateInput">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelWeightBtn">Cancel</button>
+        <button type="button" class="btn-primary" id="saveWeightBtn">Save</button>
       </div>
     </div>
   </div>
