@@ -10,6 +10,8 @@ const todaySection = document.getElementById('todaySection');
 const todayList = document.getElementById('todayList');
 
 // Screens
+const homeScreen = document.getElementById('homeScreen');
+const profileScreen = document.getElementById('profileScreen');
 const trackerScreen = document.getElementById('trackerScreen');
 const machineScreen = document.getElementById('machineScreen');
 const settingsScreen = document.getElementById('settingsScreen');
@@ -32,14 +34,12 @@ const backFromDetailBtn = document.getElementById('backFromDetailBtn');
 
 // Bottom Navigation
 const bottomNav = document.getElementById('bottomNav');
-// Home tab removed; Workout is default
 
 // Track current workout detail for refreshing when settings change
 let currentWorkoutDetail = null;
+const navHome = document.getElementById('navHome');
 const navWorkout = document.getElementById('navWorkout');
-const navHistory = document.getElementById('navHistory');
-const navTimer = document.getElementById('navTimer');
-const navSettings = document.getElementById('navSettings');
+const navProfile = document.getElementById('navProfile');
 const addMachineBtn = document.getElementById('addMachineBtn');
 const newMachineNameInput = document.getElementById('newMachineName');
 const machineListDiv = document.getElementById('machineList');
@@ -543,6 +543,8 @@ function renderMachineList() {
 // ===== SCREEN NAVIGATION =====
 
 function showScreen(screen) {
+  homeScreen.classList.toggle('screen-hidden', screen !== 'home');
+  profileScreen.classList.toggle('screen-hidden', screen !== 'profile');
   trackerScreen.classList.toggle('screen-hidden', screen !== 'tracker');
   machineScreen.classList.toggle('screen-hidden', screen !== 'machines');
   settingsScreen.classList.toggle('screen-hidden', screen !== 'settings');
@@ -572,32 +574,28 @@ function showScreen(screen) {
 // Update bottom navigation active state
 function updateNavActiveState(screen) {
   // Clear current active state
-  [navTimer, navWorkout, navHistory, navSettings].forEach(btn => btn.classList.remove('active'));
+  [navHome, navWorkout, navProfile].forEach(btn => btn.classList.remove('active'));
 
   // Screens that conceptually belong to the workout flow
   const workoutScreens = new Set(['tracker', 'activeWorkout', 'editPlan']);
   
-  // Screens that belong to settings
-  const settingsScreens = new Set(['settings', 'settingsPlans', 'settingsExercises', 'settingsDefaults', 'settingsAppearance', 'settingsData', 'machines']);
+  // Screens that belong to profile (settings, history, timer, etc.)
+  const profileScreens = new Set(['profile', 'settings', 'settingsPlans', 'settingsExercises', 'settingsDefaults', 'settingsAppearance', 'settingsData', 'machines', 'history', 'workoutDetail', 'timer']);
+
+  // Home screen
+  if (screen === 'home') {
+    navHome.classList.add('active');
+    return;
+  }
 
   if (workoutScreens.has(screen)) {
     navWorkout.classList.add('active');
     return;
   }
   
-  if (settingsScreens.has(screen)) {
-    navSettings.classList.add('active');
+  if (profileScreens.has(screen)) {
+    navProfile.classList.add('active');
     return;
-  }
-
-  switch (screen) {
-    case 'history':
-    case 'workoutDetail':
-      navHistory.classList.add('active');
-      break;
-    case 'timer':
-      navTimer.classList.add('active');
-      break;
   }
 }
 
@@ -845,10 +843,12 @@ function savePlan(plan) {
     const index = plans.findIndex(p => p.id === plan.id);
     if (index !== -1) {
       plans[index] = plan;
+      plans[index].updatedAt = new Date().toISOString();
     }
   } else {
     // Create new plan
     plan.id = Date.now().toString();
+    plan.createdAt = new Date().toISOString();
     plans.push(plan);
   }
   
@@ -864,6 +864,7 @@ function deletePlan(planId) {
   savePlans(filtered);
   renderPlansList();
   renderActivePlanSelect();
+  renderHomeWorkoutPlans();
 }
 
 // Render plans list
@@ -935,23 +936,165 @@ function renderPlansList() {
   });
 }
 
-// Render active plan selector
-function renderActivePlanSelect() {
+// Render home screen workout plans
+function renderHomeWorkoutPlans() {
   const plans = getPlans();
-  activePlanSelect.innerHTML = '<option value="">No plan selected</option>';
+  const container = document.getElementById('homeWorkoutPlans');
+  const emptyState = document.getElementById('workoutWidgetEmpty');
   
-  plans.forEach(plan => {
-    const option = document.createElement('option');
-    option.value = plan.id;
-    option.textContent = plan.name;
-    activePlanSelect.appendChild(option);
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (plans.length === 0) {
+    container.style.display = 'none';
+    emptyState.style.display = 'block';
+    return;
+  }
+  
+  container.style.display = 'flex';
+  emptyState.style.display = 'none';
+  
+  // Sort plans by creation date descending (newest first)
+  const sortedPlans = [...plans].sort((a, b) => {
+    const dateA = new Date(a.createdAt || 0);
+    const dateB = new Date(b.createdAt || 0);
+    return dateB - dateA;
   });
   
-  // Show/hide plan selector based on whether plans exist
-  planSelector.style.display = plans.length > 0 ? 'block' : 'none';
+  sortedPlans.forEach(plan => {
+    const card = document.createElement('div');
+    card.className = 'home-plan-card';
+    
+    // Header with name and actions
+    const header = document.createElement('div');
+    header.className = 'home-plan-header';
+    
+    const name = document.createElement('div');
+    name.className = 'home-plan-name';
+    name.textContent = plan.name;
+    
+    const actions = document.createElement('div');
+    actions.className = 'home-plan-actions';
+    
+    // Edit button
+    const editBtn = document.createElement('button');
+    editBtn.className = 'plan-action-btn';
+    editBtn.textContent = 'Edit';
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      editPlan(plan.id);
+    });
+    
+    // Duplicate button
+    const duplicateBtn = document.createElement('button');
+    duplicateBtn.className = 'plan-action-btn';
+    duplicateBtn.textContent = 'Duplicate';
+    duplicateBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      duplicatePlan(plan.id);
+    });
+    
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'plan-action-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm(`Delete plan "${plan.name}"?`)) {
+        deletePlan(plan.id);
+        renderHomeWorkoutPlans(); // Refresh the list
+      }
+    });
+    
+    actions.appendChild(editBtn);
+    actions.appendChild(duplicateBtn);
+    actions.appendChild(deleteBtn);
+    
+    header.appendChild(name);
+    header.appendChild(actions);
+    
+    // Plan info
+    const info = document.createElement('div');
+    info.className = 'home-plan-info';
+    
+    const exerciseCount = plan.exercises.length;
+    const totalSets = plan.exercises.reduce((sum, ex) => {
+      return sum + (ex.sets ? ex.sets.length : 1);
+    }, 0);
+    
+    info.innerHTML = `
+      <span>📋 ${exerciseCount} exercise${exerciseCount !== 1 ? 's' : ''}</span>
+      <span>🔢 ${totalSets} set${totalSets !== 1 ? 's' : ''}</span>
+    `;
+    
+    // Start button
+    const startBtn = document.createElement('button');
+    startBtn.className = 'home-plan-start';
+    startBtn.textContent = '▶️ Start Workout';
+    startBtn.addEventListener('click', () => {
+      startWorkoutPlan(plan.id);
+    });
+    
+    card.appendChild(header);
+    card.appendChild(info);
+    card.appendChild(startBtn);
+    
+    container.appendChild(card);
+  });
 }
 
-// Start a workout plan
+// Duplicate a workout plan
+function duplicatePlan(planId) {
+  const plans = getPlans();
+  const originalPlan = plans.find(p => p.id === planId);
+  
+  if (!originalPlan) return;
+  
+  const newPlan = {
+    id: Date.now(),
+    name: `${originalPlan.name} (Copy)`,
+    exercises: JSON.parse(JSON.stringify(originalPlan.exercises)), // Deep copy
+    createdAt: new Date().toISOString()
+  };
+  
+  plans.push(newPlan);
+  savePlans(plans);
+  renderHomeWorkoutPlans();
+  renderPlansList();
+  renderActivePlanSelect();
+}
+
+// Start a workout plan from home screen
+function startWorkoutPlan(planId) {
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === planId);
+  
+  if (!plan) return;
+  
+  // Set as current workout plan
+  currentWorkoutPlan = JSON.parse(JSON.stringify(plan));
+  currentWorkoutPlan.startTime = Date.now();
+  currentExerciseIndex = 0;
+  
+  // Save active workout to localStorage
+  saveActiveWorkout();
+  
+  // Navigate to active workout screen
+  activeWorkoutTitle.textContent = `🏋️ ${plan.name}`;
+  renderActiveWorkout();
+  startWorkoutTimer();
+  showScreen('activeWorkout');
+}
+
+// Render active plan selector (deprecated - plans now start from home screen)
+function renderActivePlanSelect() {
+  // No longer needed - quick start removed from tracker screen
+  return;
+}
+
+// Start a workout plan (deprecated - now using startWorkoutPlan from home screen)
+/*
 function startPlan() {
   const planId = activePlanSelect.value;
   if (!planId) return;
@@ -978,6 +1121,7 @@ function startPlan() {
   renderActiveWorkout();
   showScreen('activeWorkout');
 }
+*/
 
 // Render active workout screen
 function renderActiveWorkout() {
@@ -1220,7 +1364,7 @@ finishWorkoutBtn.addEventListener('click', () => {
     currentWorkoutPlan.endTime = new Date().toISOString();
   }
   clearActiveWorkout();
-  activePlanSelect.value = '';
+  // activePlanSelect.value = ''; // No longer needed
   renderHistory();
   showScreen('history'); // Show history screen instead of home screen
 });
@@ -1655,11 +1799,12 @@ editPlanForm.addEventListener('submit', (e) => {
   }
   
   savePlan(plan);
-  showScreen('plans');
+  renderHomeWorkoutPlans();
+  showScreen('settingsPlans');
 });
 
-// Start plan button
-startPlanBtn.addEventListener('click', startPlan);
+// Start plan button (deprecated - now using home screen widget)
+// startPlanBtn.addEventListener('click', startPlan);
 
 // ===== HISTORY =====
 
@@ -2615,6 +2760,11 @@ timerResetBtn.addEventListener('click', () => {
 // ===== BOTTOM NAVIGATION =====
 
 // Bottom navigation event listeners
+navHome.addEventListener('click', () => {
+  renderHomeWorkoutPlans();
+  showScreen('home');
+});
+
 navWorkout.addEventListener('click', () => {
   // Check if there's an active workout
   if (currentWorkoutPlan) {
@@ -2631,28 +2781,70 @@ navWorkout.addEventListener('click', () => {
     showScreen('tracker');
   }
 });
-navHistory.addEventListener('click', () => {
-  showScreen('history');
-  renderHistory(); // Refresh history when switching to history tab
-});
-navTimer.addEventListener('click', () => {
-  showScreen('timer');
-  
-  // If timer is not running and is at 0:00, set to default duration
-  if (!timerRunning && timerMinutesInput.value === '0' && timerSecondsInput.value === '0') {
-    const settings = getSettings();
-    timerMinutesInput.value = settings.defaultTimerMinutes;
-    timerSecondsInput.value = 0;
-    const defaultDurationMs = settings.defaultTimerMinutes * 60 * 1000;
-    timerDisplay.textContent = formatTimerTime(defaultDurationMs);
-  }
-});
-navSettings.addEventListener('click', () => {
-  showScreen('settings');
-  applySettings();
+
+navProfile.addEventListener('click', () => {
+  showScreen('profile');
 });
 
+// Home screen card navigation
+document.addEventListener('click', (e) => {
+  const homeCard = e.target.closest('.home-card');
+  if (homeCard && homeCard.dataset.nav) {
+    const target = homeCard.dataset.nav;
+    
+    // Handle special cases
+    if (target === 'history') {
+      renderHistory();
+      showScreen('history');
+    } else if (target === 'timer') {
+      // If timer is not running and is at 0:00, set to default duration
+      if (!timerRunning && timerMinutesInput.value === '0' && timerSecondsInput.value === '0') {
+        const settings = getSettings();
+        timerMinutesInput.value = settings.defaultTimerMinutes;
+        timerSecondsInput.value = 0;
+        const defaultDurationMs = settings.defaultTimerMinutes * 60 * 1000;
+        timerDisplay.textContent = formatTimerTime(defaultDurationMs);
+      }
+      showScreen('timer');
+    } else if (target === 'settingsPlans') {
+      plansScreenContext = 'profile';
+      renderPlansList();
+      showScreen('settingsPlans');
+    } else if (target === 'settingsExercises') {
+      machinesScreenContext = 'profile';
+      renderMachineList();
+      showScreen('settingsExercises');
+    } else if (target === 'settingsMenu') {
+      showSettingsScreen();
+    } else if (target === 'settings') {
+      showSettingsScreen();
+    } else {
+      showScreen(target);
+    }
+  }
+});
+
+// Workout widget toggle on home screen
+const workoutWidgetToggle = document.getElementById('workoutWidgetToggle');
+const workoutWidgetContent = document.getElementById('workoutWidgetContent');
+
+if (workoutWidgetToggle && workoutWidgetContent) {
+  // Start expanded
+  workoutWidgetToggle.classList.add('expanded');
+  workoutWidgetContent.classList.add('expanded');
+  
+  workoutWidgetToggle.addEventListener('click', () => {
+    workoutWidgetToggle.classList.toggle('expanded');
+    workoutWidgetContent.classList.toggle('expanded');
+  });
+}
+
 // ===== SETTINGS NAVIGATION =====
+
+// Show settings main menu screen
+function showSettingsScreen() {
+  showScreen('settings');
+}
 
 // Settings menu navigation
 document.querySelectorAll('.settings-menu-item').forEach(item => {
@@ -2688,6 +2880,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderHistory();
   renderTodaySection(); // Show today's workout on load
   renderActivePlanSelect();
+  renderHomeWorkoutPlans(); // Render home screen workout plans
   
   // Restore active workout if one exists
   const hasActiveWorkout = loadActiveWorkout();
@@ -2698,8 +2891,8 @@ window.addEventListener('DOMContentLoaded', () => {
     startWorkoutTimer(); // Start the timer for the restored workout
     showScreen('activeWorkout');
   } else {
-    // Start at workout screen (formerly home)
-    showScreen('tracker');
+    // Start at home screen
+    showScreen('home');
   }
   
   // Set timer inputs and display to default timer duration

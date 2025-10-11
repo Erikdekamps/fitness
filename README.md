@@ -6,7 +6,19 @@
 
 ## ✨ Key Features
 
-### 🏋️ Quick Set Logging
+### � Home Dashboard
+- **Quick access cards** to all major features
+- 6 main shortcuts:
+  - 🏋️ Quick Add - Log a single set instantly
+  - 📋 Workout Plans - Manage training routines
+  - 📊 History - View workout progress
+  - ⏱️ Timer - Rest countdown timer
+  - 🏋️ Exercises - Manage exercise library
+  - ⚙️ Settings - App preferences
+- Clean grid layout optimized for mobile
+- iOS-style card design with hover effects
+
+### �🏋️ Quick Set Logging
 - **Smart number inputs** with mobile-optimized pattern attributes
 - **Spinner controls** for quick weight/rep adjustments
 - Automatically remembers your last used values per machine
@@ -124,9 +136,12 @@
 - **Dark mode optimized** for gym lighting conditions
 - **Mobile-first responsive design** fits all screen sizes
 - **Smooth animations** and intuitive controls throughout
-- **iOS-style bottom navigation** with 4 tabs:
-  - Timer, Workout (default), History, Settings
+- **iOS-style bottom navigation** with 3 main tabs:
+  - 🏠 **Home** - Dashboard with quick access to all features
+  - 💪 **Workout** - Active workout session or quick add tracker
+  - 👤 **Profile** - Access to history, timer, and settings
   - **Active tab highlighting** with background accent
+  - Smart context-aware navigation
 - **Multi-page settings** with drill-down navigation
 - **Consistent layout** with full-width design
 - **Touch-optimized** with appropriate tap targets
@@ -146,8 +161,15 @@
 
 ## 📖 Usage Guide
 
+### Getting Started
+1. App opens on **Home** screen with quick access cards
+2. Navigate using the bottom navigation:
+   - 🏠 **Home** - Main dashboard
+   - 💪 **Workout** - Training session
+   - 👤 **Profile** - History, timer, and settings
+
 ### Log a Single Set
-1. Open the **Workout** tab (default screen)
+1. From Home, tap **Quick Add** card (or use Workout tab)
 2. Select a machine from the dropdown
 3. Use **spinner buttons (+/−)** or type weight and reps
 4. Click **"Add Set"**
@@ -155,7 +177,7 @@
 6. Delete individual sets if needed
 
 ### Create a Training Plan
-1. Go to **Settings** tab (⚙️ icon in bottom nav)
+1. From Home, tap **Workout Plans** card (or go to Profile → Settings)
 2. Tap **"📋 Workout Plans"** from the settings menu
 3. Click **"📋 Manage Workout Plans"** button
 4. Click **"Create New Plan"**
@@ -182,7 +204,7 @@
 8. All sets are automatically saved to history
 
 ### View Workout History & Analytics
-1. Go to **History** tab
+1. From Home, tap **History** card (or use Profile tab)
 2. **Total Stats** at top show overall progress
 3. **Last Workout** section shows your most recent session
 4. **All Workouts** section lists all workout days
@@ -195,7 +217,7 @@
 7. Detail view shows complete workout breakdown
 
 ### Manage Machines/Exercises
-1. Go to **Settings** tab (⚙️ icon in bottom nav)
+1. From Home, tap **Exercises** card (or go to Profile → Settings)
 2. Tap **"🏋️ Exercises"** from the settings menu
 3. Click **"🏋️ Manage Exercises"** button to access the machine list
 4. **Add new machine**:
@@ -211,7 +233,7 @@
    - Machine removed from all history and plans
 
 ### Use the Timer
-1. Go to **Timer** tab (⏱️ icon in bottom nav)
+1. From Home, tap **Timer** card (or go to Profile tab)
 2. **Timer (default tab)**:
    - Shows default duration from settings
    - Adjust minutes/seconds if needed
@@ -224,7 +246,7 @@
    - Click **"Reset"** to clear
 
 ### Customize Settings
-1. Go to **Settings** tab (⚙️ icon in bottom nav)
+1. From Home, tap **Settings** card (or go to Profile → tap Settings card)
 2. Main settings menu shows 5 categories - tap any to open:
 
 **Workout Plans**:
@@ -370,12 +392,14 @@ Open source – feel free to use, modify, and distribute!
 ## 🎯 Version History
 
 ### Latest Version
+- 🏠 New Home dashboard with quick access cards
+- 👤 Profile screen consolidating History, Timer, and Settings
+- 📱 Simplified bottom navigation (3 tabs: Home, Workout, Profile)
 - ✨ Multi-page settings navigation with iOS-style menu
 - 📋 Separate settings pages for Workout Plans and Exercises
 - 🎨 Reorganized settings into 5 clear categories
 - 🏋️ Moved Exercises from bottom nav to Settings menu
-- 📱 Streamlined bottom navigation (4 tabs instead of 5)
-- 🎯 Improved settings discoverability and organization
+- 🎯 Improved navigation flow and discoverability
 - 🔧 Fixed spinner button alignment with text fields
 - ✨ Badge-style setting selectors for better UX
 - 📤 Data export/import functionality

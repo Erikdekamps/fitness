@@ -7,20 +7,85 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Main Tracker Screen -->
-  <main id="trackerScreen">
+    <!-- Home Screen -->
+  <div id="homeScreen" class="screen-hidden">
     <div class="header">
       <h1>💪 Fitness Tracker</h1>
     </div>
     
-    <div id="planSelector" class="plan-selector" style="display: none;">
-      <label for="activePlan">Quick Start Plan</label>
-      <div class="plan-select-group">
-        <select id="activePlan">
-          <option value="">No plan selected</option>
-        </select>
-        <button type="button" id="startPlanBtn" class="btn-start-plan">Start</button>
+    <div class="machine-container">
+      <!-- Existing Workouts Widget -->
+      <div class="workout-widget">
+        <button type="button" class="widget-header" id="workoutWidgetToggle">
+          <div class="widget-header-content">
+            <div class="widget-title">
+              <span class="widget-icon">📋</span>
+              <span>Existing Workouts</span>
+            </div>
+            <span class="widget-arrow">▼</span>
+          </div>
+        </button>
+        
+        <div class="widget-content" id="workoutWidgetContent">
+          <div id="homeWorkoutPlans" class="home-workout-plans">
+            <!-- Workout plan cards will be rendered here -->
+          </div>
+          <div class="widget-empty" id="workoutWidgetEmpty" style="display: none;">
+            <p>No workout plans yet</p>
+            <button type="button" class="btn-secondary" data-nav="settingsPlans">Create Your First Plan</button>
+          </div>
+        </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Profile Screen -->
+  <div id="profileScreen" class="screen-hidden">
+    <div class="header">
+      <h1>👤 Profile</h1>
+    </div>
+    
+    <div class="machine-container">
+      <div class="home-grid">
+        <button type="button" class="home-card" data-nav="settingsPlans">
+          <div class="home-card-icon">📋</div>
+          <div class="home-card-title">Workout Plans</div>
+          <div class="home-card-description">Manage routines</div>
+        </button>
+        
+        <button type="button" class="home-card" data-nav="history">
+          <div class="home-card-icon">📊</div>
+          <div class="home-card-title">History</div>
+          <div class="home-card-description">View progress</div>
+        </button>
+        
+        <button type="button" class="home-card" data-nav="timer">
+          <div class="home-card-icon">⏱️</div>
+          <div class="home-card-title">Timer</div>
+          <div class="home-card-description">Rest timer</div>
+        </button>
+        
+        <button type="button" class="home-card" data-nav="settingsExercises">
+          <div class="home-card-icon">🏋️</div>
+          <div class="home-card-title">Exercises</div>
+          <div class="home-card-description">Manage machines</div>
+        </button>
+        
+        <button type="button" class="home-card" data-nav="settingsMenu">
+          <div class="home-card-icon">⚙️</div>
+          <div class="home-card-title">Settings</div>
+          <div class="home-card-description">Preferences</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Tracker Screen -->
+
+  <!-- Main Tracker Screen -->
+  <main id="trackerScreen">
+    <div class="header">
+      <h1>💪 Fitness Tracker</h1>
     </div>
     
     <form id="entryForm">
@@ -119,6 +184,35 @@
     </div>
   </div>
   
+  <!-- Profile Screen -->
+  <div id="profileScreen" class="screen-hidden">
+    <div class="header">
+      <h1>👤 Profile</h1>
+    </div>
+    
+    <div class="machine-container">
+      <div class="home-grid">
+        <button type="button" class="home-card" data-nav="history">
+          <div class="home-card-icon">📊</div>
+          <div class="home-card-title">History</div>
+          <div class="home-card-description">View all workouts</div>
+        </button>
+        
+        <button type="button" class="home-card" data-nav="timer">
+          <div class="home-card-icon">⏱️</div>
+          <div class="home-card-title">Timer</div>
+          <div class="home-card-description">Rest countdown</div>
+        </button>
+        
+        <button type="button" class="home-card" data-nav="settings">
+          <div class="home-card-icon">⚙️</div>
+          <div class="home-card-title">Settings</div>
+          <div class="home-card-description">Manage preferences</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Settings Screen -->
   <div id="settingsScreen" class="screen-hidden">
     <div class="header">
@@ -128,18 +222,6 @@
     <div class="machine-container">
       <!-- Settings Menu List -->
       <div class="settings-menu">
-        <button type="button" class="settings-menu-item" data-setting-page="plans">
-          <span class="settings-menu-icon">📋</span>
-          <span class="settings-menu-text">Workout Plans</span>
-          <span class="settings-menu-arrow">›</span>
-        </button>
-        
-        <button type="button" class="settings-menu-item" data-setting-page="exercises">
-          <span class="settings-menu-icon">🏋️</span>
-          <span class="settings-menu-text">Exercises</span>
-          <span class="settings-menu-arrow">›</span>
-        </button>
-        
         <button type="button" class="settings-menu-item" data-setting-page="defaults">
           <span class="settings-menu-icon">🎯</span>
           <span class="settings-menu-text">Default Values</span>
@@ -446,21 +528,17 @@
   
   <!-- Bottom Navigation Bar (iOS Style) -->
   <nav id="bottomNav" class="bottom-nav">
-    <button type="button" id="navTimer" class="nav-btn" title="Timer">
-      <div class="nav-icon">⏱️</div>
-      <div class="nav-label">Timer</div>
+    <button type="button" id="navHome" class="nav-btn" title="Home">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
     </button>
     <button type="button" id="navWorkout" class="nav-btn active" title="Workout">
-      <div class="nav-icon">▶️</div>
+      <div class="nav-icon">💪</div>
       <div class="nav-label">Workout</div>
     </button>
-    <button type="button" id="navHistory" class="nav-btn" title="History">
-      <div class="nav-icon">📊</div>
-      <div class="nav-label">History</div>
-    </button>
-    <button type="button" id="navSettings" class="nav-btn" title="Settings" style="margin-left:auto;">
-      <div class="nav-icon">⚙️</div>
-      <div class="nav-label">Settings</div>
+    <button type="button" id="navProfile" class="nav-btn" title="Profile">
+      <div class="nav-icon">👤</div>
+      <div class="nav-label">Profile</div>
     </button>
   </nav>
   
