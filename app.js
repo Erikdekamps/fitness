@@ -3402,7 +3402,7 @@ function renderPlanExercises() {
     
     exerciseItem.className = 'exercise-item';
     
-    // Make item draggable
+    // Make draggable for mouse users (desktop)
     exerciseItem.draggable = true;
     exerciseItem.dataset.exerciseIndex = exerciseIndex;
     
@@ -3414,94 +3414,105 @@ function renderPlanExercises() {
     exerciseItem.addEventListener('dragleave', handleDragLeave);
     exerciseItem.addEventListener('dragend', handleDragEnd);
     
-    // Collapsed view
-    if (!isExpanded && isComplete) {
-      const header = document.createElement('div');
-      header.className = 'exercise-item-header';
-      
-      // Add drag handle
-      const dragHandle = document.createElement('div');
-      dragHandle.className = 'drag-handle';
-      dragHandle.innerHTML = '⋮⋮';
-      dragHandle.title = 'Drag to reorder';
-      
-      const info = document.createElement('div');
-      info.className = 'exercise-collapsed-info';
-      
-      let summary = '';
-      if (exercise.type === 'cardio') {
-        summary = `${exercise.exercise} - ${exercise.duration} min`;
-      } else {
-        const setsSummary = exercise.sets.map(s => `${s.reps}×${s.weight}kg`).join(', ');
-        summary = `${exercise.machine} - ${exercise.sets.length} set${exercise.sets.length > 1 ? 's' : ''}: ${setsSummary}`;
-      }
-      
-      const icon = exercise.type === 'cardio' ? '🏃' : '🏋️';
-      info.innerHTML = `
-        <div class="exercise-number">${icon} Exercise ${exerciseIndex + 1}</div>
-        <div class="exercise-summary">${summary}</div>
-      `;
-      
-      const actions = document.createElement('div');
-      actions.className = 'history-entry-actions';
-      
-      const editBtn = document.createElement('button');
-      editBtn.className = 'btn-icon edit';
-      editBtn.innerHTML = '✏️';
-      editBtn.title = 'Edit';
-      editBtn.type = 'button';
-      editBtn.addEventListener('click', () => {
-        expandedExerciseIndex = exerciseIndex;
-        renderPlanExercises();
-      });
-      
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'btn-icon delete';
-      deleteBtn.innerHTML = '🗑️';
-      deleteBtn.title = 'Remove';
-      deleteBtn.type = 'button';
-      deleteBtn.addEventListener('click', () => {
-        currentPlanExercises.splice(exerciseIndex, 1);
-        if (expandedExerciseIndex === exerciseIndex) {
-          expandedExerciseIndex = null;
-        } else if (expandedExerciseIndex > exerciseIndex) {
-          expandedExerciseIndex--;
-        }
-        renderPlanExercises();
-      });
-      
-      actions.appendChild(editBtn);
-      actions.appendChild(deleteBtn);
-      header.appendChild(dragHandle);
-      header.appendChild(info);
-      header.appendChild(actions);
-      exerciseItem.appendChild(header);
+    // Collapsed view (always show collapsed, expand on header click)
+    const header = document.createElement('div');
+    header.className = 'exercise-item-header';
+    
+    // Add expand/collapse indicator
+    const expandIcon = document.createElement('div');
+    expandIcon.className = 'expand-icon';
+    expandIcon.innerHTML = isExpanded ? '▼' : '▶';
+    
+    // Add drag handle (visible only on desktop)
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'drag-handle-icon';
+    dragHandle.innerHTML = '⋮⋮';
+    dragHandle.title = 'Drag to reorder';
+    
+    const info = document.createElement('div');
+    info.className = 'exercise-collapsed-info';
+    
+    let summary = '';
+    let title = '';
+    
+    if (exercise.type === 'cardio') {
+      const exerciseName = exercise.exercise || 'Select cardio exercise';
+      const duration = exercise.duration || 10;
+      title = exerciseName;
+      summary = `${duration} min`;
     } else {
-      // Expanded view
-      const header = document.createElement('div');
-      header.className = 'exercise-item-header';
+      const machineName = exercise.machine || 'Select machine';
+      title = machineName;
+      if (exercise.sets && exercise.sets.length > 0) {
+        const setsSummary = exercise.sets.map(s => `${s.reps}×${s.weight}kg`).join(', ');
+        summary = `${exercise.sets.length} set${exercise.sets.length !== 1 ? 's' : ''}: ${setsSummary}`;
+      } else {
+        summary = 'No sets';
+      }
+    }
+    
+    const icon = exercise.type === 'cardio' ? '🏃' : '🏋️';
+    info.innerHTML = `
+      <div class="exercise-number">${icon} ${title}</div>
+      <div class="exercise-summary">${summary}</div>
+    `;
+    
+    // Three-dot menu
+      const menuBtn = document.createElement('button');
+      menuBtn.className = 'btn-icon menu-btn';
+      menuBtn.innerHTML = '⋮';
+      menuBtn.title = 'Options';
+      menuBtn.type = 'button';
       
-      // Add drag handle
-      const dragHandle = document.createElement('div');
-      dragHandle.className = 'drag-handle';
-      dragHandle.innerHTML = '⋮⋮';
-      dragHandle.title = 'Drag to reorder';
+      const menuDropdown = document.createElement('div');
+      menuDropdown.className = 'exercise-menu-dropdown';
       
-      const icon = exercise.type === 'cardio' ? '🏃' : '🏋️';
-      const title = exercise.type === 'cardio' 
-        ? (exercise.exercise || `Cardio ${exerciseIndex + 1}`)
-        : (exercise.machine || `Exercise ${exerciseIndex + 1}`);
+      const moveUpOption = document.createElement('button');
+      moveUpOption.className = 'menu-option';
+      moveUpOption.innerHTML = '↑ Move Up';
+      moveUpOption.type = 'button';
+      moveUpOption.disabled = exerciseIndex === 0;
+      moveUpOption.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (exerciseIndex > 0) {
+          const temp = currentPlanExercises[exerciseIndex];
+          currentPlanExercises[exerciseIndex] = currentPlanExercises[exerciseIndex - 1];
+          currentPlanExercises[exerciseIndex - 1] = temp;
+          if (expandedExerciseIndex === exerciseIndex) {
+            expandedExerciseIndex--;
+          } else if (expandedExerciseIndex === exerciseIndex - 1) {
+            expandedExerciseIndex++;
+          }
+          renderPlanExercises();
+        }
+      });
       
-      const number = document.createElement('div');
-      number.className = 'exercise-number';
-      number.textContent = `${icon} ${title}`;
+      const moveDownOption = document.createElement('button');
+      moveDownOption.className = 'menu-option';
+      moveDownOption.innerHTML = '↓ Move Down';
+      moveDownOption.type = 'button';
+      moveDownOption.disabled = exerciseIndex === currentPlanExercises.length - 1;
+      moveDownOption.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (exerciseIndex < currentPlanExercises.length - 1) {
+          const temp = currentPlanExercises[exerciseIndex];
+          currentPlanExercises[exerciseIndex] = currentPlanExercises[exerciseIndex + 1];
+          currentPlanExercises[exerciseIndex + 1] = temp;
+          if (expandedExerciseIndex === exerciseIndex) {
+            expandedExerciseIndex++;
+          } else if (expandedExerciseIndex === exerciseIndex + 1) {
+            expandedExerciseIndex--;
+          }
+          renderPlanExercises();
+        }
+      });
       
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'btn-icon delete';
-      deleteBtn.innerHTML = '🗑️';
-      deleteBtn.title = 'Remove Exercise';
-      deleteBtn.type = 'button';
-      deleteBtn.addEventListener('click', () => {
+      const deleteOption = document.createElement('button');
+      deleteOption.className = 'menu-option delete-option';
+      deleteOption.innerHTML = '🗑️ Delete';
+      deleteOption.type = 'button';
+      deleteOption.addEventListener('click', (e) => {
+        e.stopPropagation();
         currentPlanExercises.splice(exerciseIndex, 1);
         if (expandedExerciseIndex === exerciseIndex) {
           expandedExerciseIndex = null;
@@ -3511,19 +3522,50 @@ function renderPlanExercises() {
         renderPlanExercises();
       });
       
+      menuDropdown.appendChild(moveUpOption);
+      menuDropdown.appendChild(moveDownOption);
+      menuDropdown.appendChild(deleteOption);
+      
+      const menuContainer = document.createElement('div');
+      menuContainer.className = 'exercise-menu-container';
+      menuContainer.appendChild(menuBtn);
+      menuContainer.appendChild(menuDropdown);
+      
+      // Toggle menu
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Close other menus
+        document.querySelectorAll('.exercise-menu-dropdown.active').forEach(m => {
+          if (m !== menuDropdown) m.classList.remove('active');
+        });
+        menuDropdown.classList.toggle('active');
+      });
+      
+      // Toggle expand/collapse on header click
+      header.addEventListener('click', (e) => {
+        if (!e.target.closest('.exercise-menu-container') && !e.target.closest('.drag-handle-icon')) {
+          expandedExerciseIndex = isExpanded ? null : exerciseIndex;
+          renderPlanExercises();
+        }
+      });
+      
       header.appendChild(dragHandle);
-      header.appendChild(number);
-      header.appendChild(deleteBtn);
+      header.appendChild(expandIcon);
+      header.appendChild(info);
+      header.appendChild(menuContainer);
+      exerciseItem.appendChild(header);
       
-      const fields = document.createElement('div');
-      fields.className = 'exercise-fields';
-      
-      if (exercise.type === 'cardio') {
-        // Cardio exercise fields
-        const cardioGroup = document.createElement('div');
-        cardioGroup.className = 'form-group-inline';
-        const cardioLabel = document.createElement('label');
-        cardioLabel.textContent = 'Cardio Exercise';
+      // If expanded, show the fields
+      if (isExpanded) {
+        const fields = document.createElement('div');
+        fields.className = 'exercise-fields';
+        
+        if (exercise.type === 'cardio') {
+          // Cardio exercise fields
+          const cardioGroup = document.createElement('div');
+          cardioGroup.className = 'form-group-inline';
+          const cardioLabel = document.createElement('label');
+          cardioLabel.textContent = 'Cardio Exercise';
         const cardioSelect = document.createElement('select');
         cardioSelect.innerHTML = '<option value="">Select cardio</option>';
         
@@ -3599,7 +3641,7 @@ function renderPlanExercises() {
         // Sets section
         const setsLabel = document.createElement('label');
         setsLabel.textContent = 'Sets';
-        setsLabel.style.marginTop = '1rem';
+        setsLabel.style.marginTop = 'var(--spacing-sm)';
         fields.appendChild(setsLabel);
         
         const setsContainer = document.createElement('div');
@@ -3701,7 +3743,6 @@ function renderPlanExercises() {
         fields.appendChild(addSetBtn);
       }
       
-      exerciseItem.appendChild(header);
       exerciseItem.appendChild(fields);
     }
     
@@ -4910,6 +4951,13 @@ document.addEventListener('click', (e) => {
     });
     document.querySelectorAll('.plan-menu-btn.active').forEach(btn => {
       btn.classList.remove('active');
+    });
+  }
+  
+  // Close exercise menu dropdowns
+  if (!e.target.closest('.exercise-menu-container')) {
+    document.querySelectorAll('.exercise-menu-dropdown.active').forEach(dropdown => {
+      dropdown.classList.remove('active');
     });
   }
 });
