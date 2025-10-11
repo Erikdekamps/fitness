@@ -5289,12 +5289,48 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// ===== COLLAPSIBLE SECTION STATE MANAGEMENT =====
+
+// Get collapsible states from localStorage
+function getCollapsibleStates() {
+  const saved = localStorage.getItem('fitnessCollapsibleStates');
+  return saved ? JSON.parse(saved) : {};
+}
+
+// Save collapsible state
+function saveCollapsibleState(sectionId, isCollapsed) {
+  const states = getCollapsibleStates();
+  states[sectionId] = isCollapsed;
+  localStorage.setItem('fitnessCollapsibleStates', JSON.stringify(states));
+}
+
+// Restore collapsible states on page load
+function restoreCollapsibleStates() {
+  const states = getCollapsibleStates();
+  Object.keys(states).forEach(sectionId => {
+    const section = document.querySelector(`[data-collapsible-id="${sectionId}"]`);
+    if (section) {
+      if (states[sectionId]) {
+        section.classList.add('collapsed');
+      } else {
+        section.classList.remove('collapsed');
+      }
+    }
+  });
+}
+
 // Stats section collapsible toggle
 document.addEventListener('click', (e) => {
   if (e.target.closest('.stats-section-header')) {
     const header = e.target.closest('.stats-section-header');
     const section = header.parentElement;
     section.classList.toggle('collapsed');
+    
+    // Save state if section has an ID
+    const sectionId = section.dataset.collapsibleId;
+    if (sectionId) {
+      saveCollapsibleState(sectionId, section.classList.contains('collapsed'));
+    }
   }
 });
 
@@ -6050,6 +6086,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderTodaySection(); // Show today's workout on load
   renderActivePlanSelect();
   renderHomeWorkoutPlans(); // Render home screen workout plans
+  restoreCollapsibleStates(); // Restore collapsible section states
   
   // Restore active workout if one exists
   const hasActiveWorkout = loadActiveWorkout();
