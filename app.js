@@ -2411,6 +2411,43 @@ function renderCardioExercise(exercise, isCurrent) {
   exerciseCard.className = `workout-exercise-card ${isCompleted ? 'completed' : ''} ${isCurrent && !isCompleted ? 'current' : ''}`;
   exerciseCard.dataset.cardioIndex = exercise.globalIndex;
   
+  // If completed, show collapsed view (expandable)
+  if (isCompleted) {
+    exerciseCard.className = 'workout-exercise-card completed collapsed';
+    
+    const collapsedHeader = document.createElement('div');
+    collapsedHeader.className = 'workout-exercise-collapsed';
+    collapsedHeader.innerHTML = `
+      <span class="collapsed-check">✓</span>
+      <span class="collapsed-text">Exercise ${exercise.exerciseIndex + 1} completed: ${exercise.exercise}</span>
+      <span class="collapsed-toggle">▼</span>
+    `;
+    
+    // Create expanded content (initially hidden)
+    const expandedContent = document.createElement('div');
+    expandedContent.className = 'workout-exercise-expanded';
+    expandedContent.style.display = 'none';
+    expandedContent.innerHTML = `
+      <div class="workout-exercise-machine" style="margin-top: var(--spacing-md); margin-bottom: var(--spacing-sm);">${exercise.exercise}</div>
+      <div style="color: var(--text-secondary); font-size: 0.9rem;">Duration: ${exercise.duration} minutes</div>
+    `;
+    
+    // Toggle expand/collapse on click
+    collapsedHeader.style.cursor = 'pointer';
+    collapsedHeader.addEventListener('click', () => {
+      const isExpanded = expandedContent.style.display === 'block';
+      expandedContent.style.display = isExpanded ? 'none' : 'block';
+      const toggle = collapsedHeader.querySelector('.collapsed-toggle');
+      toggle.textContent = isExpanded ? '▼' : '▲';
+      exerciseCard.classList.toggle('expanded', !isExpanded);
+    });
+    
+    exerciseCard.appendChild(collapsedHeader);
+    exerciseCard.appendChild(expandedContent);
+    workoutExercisesDiv.appendChild(exerciseCard);
+    return;
+  }
+  
   const cardHeader = document.createElement('div');
   cardHeader.className = 'workout-exercise-header';
   
@@ -2420,10 +2457,7 @@ function renderCardioExercise(exercise, isCurrent) {
   
   const status = document.createElement('div');
   status.className = 'workout-exercise-status';
-  if (isCompleted) {
-    status.innerHTML = '✓ Completed';
-    status.style.color = 'var(--success)';
-  } else if (isCurrent) {
+  if (isCurrent) {
     status.innerHTML = '● In Progress';
     status.style.color = 'var(--accent)';
   } else {
@@ -2559,6 +2593,61 @@ function renderStrengthExercise(bundle, isCurrent) {
   const exerciseCard = document.createElement('div');
   exerciseCard.className = `workout-exercise-card ${allSetsCompleted ? 'completed' : ''} ${isCurrent && !allSetsCompleted ? 'current' : ''}`;
   
+  // If all sets completed, show collapsed view (expandable)
+  if (allSetsCompleted) {
+    exerciseCard.className = 'workout-exercise-card completed collapsed';
+    
+    const collapsedHeader = document.createElement('div');
+    collapsedHeader.className = 'workout-exercise-collapsed';
+    collapsedHeader.innerHTML = `
+      <span class="collapsed-check">✓</span>
+      <span class="collapsed-text">Exercise ${bundle.exerciseIndex + 1} completed: ${bundle.machine}</span>
+      <span class="collapsed-toggle">▼</span>
+    `;
+    
+    // Create expanded content showing all completed sets
+    const expandedContent = document.createElement('div');
+    expandedContent.className = 'workout-exercise-expanded';
+    expandedContent.style.display = 'none';
+    
+    const machineName = document.createElement('div');
+    machineName.className = 'workout-exercise-machine';
+    machineName.style.marginTop = 'var(--spacing-md)';
+    machineName.style.marginBottom = 'var(--spacing-md)';
+    machineName.textContent = bundle.machine;
+    expandedContent.appendChild(machineName);
+    
+    // Show all completed sets
+    const setsContainer = document.createElement('div');
+    setsContainer.className = 'workout-sets-container';
+    bundle.sets.forEach((s, i) => {
+      const setDiv = document.createElement('div');
+      setDiv.className = 'workout-set-item completed';
+      setDiv.style.marginBottom = 'var(--spacing-sm)';
+      setDiv.innerHTML = `
+        <span style="color: var(--success);">✓</span>
+        <span style="color: var(--text-secondary);">Set ${i + 1}: ${s.weight}kg × ${s.reps} reps</span>
+      `;
+      setsContainer.appendChild(setDiv);
+    });
+    expandedContent.appendChild(setsContainer);
+    
+    // Toggle expand/collapse on click
+    collapsedHeader.style.cursor = 'pointer';
+    collapsedHeader.addEventListener('click', () => {
+      const isExpanded = expandedContent.style.display === 'block';
+      expandedContent.style.display = isExpanded ? 'none' : 'block';
+      const toggle = collapsedHeader.querySelector('.collapsed-toggle');
+      toggle.textContent = isExpanded ? '▼' : '▲';
+      exerciseCard.classList.toggle('expanded', !isExpanded);
+    });
+    
+    exerciseCard.appendChild(collapsedHeader);
+    exerciseCard.appendChild(expandedContent);
+    workoutExercisesDiv.appendChild(exerciseCard);
+    return;
+  }
+  
   const cardHeader = document.createElement('div');
   cardHeader.className = 'workout-exercise-header';
   
@@ -2569,10 +2658,7 @@ function renderStrengthExercise(bundle, isCurrent) {
   const status = document.createElement('div');
   status.className = 'workout-exercise-status';
   const completedCount = bundle.sets.filter(s => completedExercises.has(s.globalIndex)).length;
-  if (allSetsCompleted) {
-    status.innerHTML = '✓ Completed';
-    status.style.color = 'var(--success)';
-  } else if (anySetsCompleted) {
+  if (anySetsCompleted) {
     status.innerHTML = `${completedCount}/${bundle.sets.length} Complete`;
     status.style.color = 'var(--accent)';
   } else if (isCurrent) {
