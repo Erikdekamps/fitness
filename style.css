@@ -155,6 +155,30 @@ main {
   padding: 0 var(--spacing-md);
 }
 
+.header-icon-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.header-icon-btn:hover {
+  color: var(--accent);
+  transform: scale(1.1);
+}
+
+.header-icon-btn:active {
+  transform: scale(0.95);
+}
+
 .header-spacer {
   width: 2.5rem;
   height: 2.5rem;
@@ -2936,12 +2960,12 @@ select:focus {
 }
 
 .nav-icon {
-  font-size: 1.5rem;
-  margin-bottom: var(--spacing-xs);
+  font-size: 1.3rem;
+  margin-bottom: 2px;
 }
 
 .nav-label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 500;
 }
 

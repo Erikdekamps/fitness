@@ -24,10 +24,10 @@ Comprehensive personal statistics and quick access hub:
   - 🔥 **Day Streak** - Consecutive training days
   - 📅 **Period Analysis** - Week/Month/Year breakdowns with charts
   - 📊 **Workout Frequency Chart** - Visual training patterns
-- **Quick Actions**:
+- **Quick Actions** (3 main buttons):
   - 📊 **History** - Calendar view of all workouts
   - ⏱️ **Timer** - Rest timer & stopwatch
-  - ⚙️ **Settings** - App preferences and data management
+  - ⚙️ **Settings** - App preferences, plans, exercises, and data management
 
 ### 💪 Quick Set Logging
 - **Smart number inputs** with `type="text" pattern="\d*"` for mobile keyboards
@@ -335,17 +335,19 @@ Comprehensive personal statistics and quick access hub:
 
 ### Customize Settings
 1. Go to Profile → **Settings**
-2. Choose category:
+2. Choose from 6 settings categories:
 
 **Plans**:
    - View and manage all workout plans
-   - Import pre-built example plans
+   - Import pre-built example plans (10 available)
    - Edit, duplicate, or delete plans
+   - Create new custom workout routines
 
 **Exercises**:
-   - Manage exercise library
-   - Add custom exercises
-   - Organize by muscle group
+   - Manage exercise library (100+ pre-loaded)
+   - Add custom exercises with muscle group and category
+   - Edit existing exercises (name, category, muscle group)
+   - Organize by muscle group with collapsible sections
 
 **Cardio**:
    - Manage cardio exercise list
@@ -353,20 +355,23 @@ Comprehensive personal statistics and quick access hub:
    - Used in workout plans and tracking
 
 **Default Values**:
-   - Adjust all workout defaults
-   - Use spinners to change values
-   - Set default timer duration
+   - Weight increment (for +/- buttons)
+   - Default weight for new exercises
+   - Default reps for new exercises
+   - Default timer duration (rest timer)
+   - Use spinners to adjust values
 
 **Appearance**:
-   - Select font size (click badge)
-   - Choose layout density
-   - Pick date/time formats
-   - Changes apply instantly
+   - Font size: 5 options (Tiny → Very Large)
+   - Layout density: 3 options (Narrow → Wide)
+   - Date format: US / EU / ISO
+   - Time format: 12-hour / 24-hour
+   - Changes apply instantly via badge selectors
 
 **Data Management**:
-   - **Export**: Download JSON backup
-   - **Import**: Restore from file
-   - **Reset**: Clear all data (with confirmation)
+   - **Export**: Download complete JSON backup
+   - **Import**: Restore from backup file
+   - **Reset**: Clear all data (double confirmation required)
 
 ### Backup and Restore
 **Create Backup**:

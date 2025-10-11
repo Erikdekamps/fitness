@@ -10,7 +10,11 @@
     <!-- Home Screen -->
   <div id="homeScreen" class="screen-hidden">
     <div class="header">
+      <div style="width: 2.5rem;"></div>
       <h1>💪 Fitness Tracker</h1>
+      <button type="button" class="header-icon-btn" data-nav="timer" title="Timer">
+        <span style="font-size: 1.5rem;">⏱️</span>
+      </button>
     </div>
     
     <div class="machine-container">
@@ -268,27 +272,6 @@
           <canvas id="periodChart" class="stat-chart"></canvas>
         </div>
       </div>
-      
-      <!-- Quick Actions -->
-      <div class="home-grid">
-        <button type="button" class="home-card" data-nav="history">
-          <div class="home-card-icon">📊</div>
-          <div class="home-card-title">History</div>
-          <div class="home-card-description">View all workouts</div>
-        </button>
-        
-        <button type="button" class="home-card" data-nav="timer">
-          <div class="home-card-icon">⏱️</div>
-          <div class="home-card-title">Timer</div>
-          <div class="home-card-description">Rest countdown</div>
-        </button>
-        
-        <button type="button" class="home-card" data-nav="settings">
-          <div class="home-card-icon">⚙️</div>
-          <div class="home-card-title">Settings</div>
-          <div class="home-card-description">Manage preferences</div>
-        </button>
-      </div>
     </div>
   </div>
   
@@ -325,6 +308,24 @@
     <div class="machine-container">
       <!-- Settings Menu List -->
       <div class="settings-menu">
+        <button type="button" class="settings-menu-item" data-setting-page="plans">
+          <span class="settings-menu-icon">📋</span>
+          <span class="settings-menu-text">Workout Plans</span>
+          <span class="settings-menu-arrow">›</span>
+        </button>
+        
+        <button type="button" class="settings-menu-item" data-setting-page="exercises">
+          <span class="settings-menu-icon">🏋️</span>
+          <span class="settings-menu-text">Exercises</span>
+          <span class="settings-menu-arrow">›</span>
+        </button>
+        
+        <button type="button" class="settings-menu-item" data-setting-page="cardio">
+          <span class="settings-menu-icon">🏃</span>
+          <span class="settings-menu-text">Cardio</span>
+          <span class="settings-menu-arrow">›</span>
+        </button>
+        
         <button type="button" class="settings-menu-item" data-setting-page="defaults">
           <span class="settings-menu-icon">🎯</span>
           <span class="settings-menu-text">Default Values</span>
@@ -659,7 +660,9 @@
     <div class="header">
       <div style="width: 2.5rem;"></div>
       <h1>⏱️ Timer</h1>
-      <div style="width: 2.5rem;"></div>
+      <button type="button" class="header-icon-btn" id="closeTimerBtn" title="Close">
+        <span style="font-size: 1.5rem;">✕</span>
+      </button>
     </div>
     
     <div class="timer-container">
@@ -717,9 +720,17 @@
       <div class="nav-icon">💪</div>
       <div class="nav-label">Workout</div>
     </button>
+    <button type="button" id="navHistory" class="nav-btn" title="History">
+      <div class="nav-icon">📅</div>
+      <div class="nav-label">History</div>
+    </button>
     <button type="button" id="navProfile" class="nav-btn" title="Profile">
-      <div class="nav-icon">👤</div>
-      <div class="nav-label">Profile</div>
+      <div class="nav-icon">📊</div>
+      <div class="nav-label">Stats</div>
+    </button>
+    <button type="button" id="navSettings" class="nav-btn" title="Settings">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-label">Settings</div>
     </button>
   </nav>
   

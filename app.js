@@ -47,7 +47,9 @@ const backFromDetailBtn = document.getElementById('backFromDetailBtn');
 const bottomNav = document.getElementById('bottomNav');
 const navHome = document.getElementById('navHome');
 const navWorkout = document.getElementById('navWorkout');
+const navHistory = document.getElementById('navHistory');
 const navProfile = document.getElementById('navProfile');
+const navSettings = document.getElementById('navSettings');
 
 // Machine management
 const addMachineBtn = document.getElementById('addMachineBtn');
@@ -1512,13 +1514,22 @@ function showScreen(screen) {
 // Update bottom navigation active state
 function updateNavActiveState(screen) {
   // Clear current active state
-  [navHome, navWorkout, navProfile].forEach(btn => btn.classList.remove('active'));
+  [navHome, navWorkout, navHistory, navProfile, navSettings].forEach(btn => btn.classList.remove('active'));
 
   // Screens that conceptually belong to the workout flow
   const workoutScreens = new Set(['tracker', 'activeWorkout', 'editPlan']);
   
-  // Screens that belong to profile (settings, history, timer, etc.)
-  const profileScreens = new Set(['profile', 'settings', 'settingsPlans', 'settingsExercises', 'settingsCardio', 'settingsDefaults', 'settingsAppearance', 'settingsData', 'machines', 'history', 'workoutDetail', 'timer']);
+  // Screens that belong to history
+  const historyScreens = new Set(['history', 'workoutDetail']);
+  
+  // Screens that belong to settings
+  const settingsScreens = new Set(['settings', 'settingsPlans', 'settingsExercises', 'settingsCardio', 'settingsDefaults', 'settingsAppearance', 'settingsData', 'machines']);
+  
+  // Profile screen - just stats dashboard
+  const profileScreens = new Set(['profile']);
+  
+  // Timer screen - doesn't highlight any nav
+  const standaloneScreens = new Set(['timer']);
 
   // Home screen
   if (screen === 'home') {
@@ -1531,8 +1542,18 @@ function updateNavActiveState(screen) {
     return;
   }
   
+  if (historyScreens.has(screen)) {
+    navHistory.classList.add('active');
+    return;
+  }
+  
   if (profileScreens.has(screen)) {
     navProfile.classList.add('active');
+    return;
+  }
+  
+  if (settingsScreens.has(screen)) {
+    navSettings.classList.add('active');
     return;
   }
 }
@@ -4572,8 +4593,17 @@ navWorkout.addEventListener('click', () => {
   }
 });
 
+navHistory.addEventListener('click', () => {
+  renderHistory();
+  showScreen('history');
+});
+
 navProfile.addEventListener('click', () => {
   showScreen('profile');
+});
+
+navSettings.addEventListener('click', () => {
+  showScreen('settings');
 });
 
 // Calendar navigation
@@ -4678,7 +4708,9 @@ document.querySelectorAll('.settings-menu-item').forEach(item => {
       if (page === 'plans') {
         renderPlansList();
       } else if (page === 'exercises') {
-        renderMachineList();
+        renderMachineList(machineListDivExercises);
+      } else if (page === 'cardio') {
+        renderCardioList();
       }
     }
   });
