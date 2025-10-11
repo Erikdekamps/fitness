@@ -3641,9 +3641,9 @@ if (calendarNextMonth) {
 
 // Home screen card navigation
 document.addEventListener('click', (e) => {
-  const homeCard = e.target.closest('.home-card');
-  if (homeCard && homeCard.dataset.nav) {
-    const target = homeCard.dataset.nav;
+  const navElement = e.target.closest('[data-nav]');
+  if (navElement && navElement.dataset.nav) {
+    const target = navElement.dataset.nav;
     
     // Handle special cases
     if (target === 'history') {
